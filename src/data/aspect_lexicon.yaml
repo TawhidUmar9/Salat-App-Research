@@ -1,0 +1,374 @@
+# Aspect Taxonomy — Seed Keywords & Regex Patterns
+# ==================================================
+# Externalized so it is reviewable and citable in the paper.
+#
+# See implementation_plan.md §5.1, §5.2 for full specification.
+#
+# 20 CSV-linked aspects + 7 review-only aspects = 27 total
+#
+# Format per aspect:
+#   aspect_name:
+#     csv_column: <name from CSV or null>
+#     rqs: [list of RQs this aspect serves]
+#     keywords:
+#       - keyword or phrase
+#     regex_patterns:
+#       - regex pattern (for transliterations, complex matches)
+
+# ─── CSV-linked aspects (§5.1) ──────────────────────────────────────────────────
+
+prayer_times_accuracy:
+  csv_column: "Prayer Times by Location"
+  rqs: [RQ2, RQ6]
+  keywords:
+    - prayer time
+    - wrong time
+    - accurate
+    - inaccurate
+    - fajr
+    - maghrib
+    - isha
+    - minutes off
+    - location
+  regex_patterns: []
+
+madhab:
+  csv_column: "Madhab Variations"
+  rqs: [RQ2]
+  keywords:
+    - hanafi
+    - shafi
+    - maliki
+    - hanbali
+    - madhab
+    - mazhab       # transliteration variant
+    - asr time
+  regex_patterns: []
+
+calc_method:
+  csv_column: "Various methods of calculation"
+  rqs: [RQ2]
+  keywords:
+    - calculation method
+    - isna
+    - mwl
+    - umm al-qura
+    - karachi
+    - egyptian
+    - angle
+  regex_patterns: []
+
+reminders_adhan:
+  csv_column: "Timely Reminders"  # + Waqt relative + Custom Sounds
+  rqs: [RQ2, RQ6]
+  keywords:
+    - azan
+    - adhan
+    - athan        # transliteration variant
+    - notification
+    - alarm
+    - reminder
+    - sound
+    - silent
+    - late
+  regex_patterns:
+    - "doesn'?t ring"
+
+forbidden_times:
+  csv_column: "Forbidden Times"
+  rqs: [RQ6b]
+  keywords:
+    - forbidden
+    - makruh
+    - sunrise
+    - zawal
+    - sunset
+    - haram time
+  regex_patterns: []
+
+nafl_times:
+  csv_column: "Nafl Prayer Times"
+  rqs: [RQ6b]
+  keywords:
+    - tahajjud
+    - ishraq
+    - duha
+    - chasht
+    - nafl
+    - sunnah prayer
+  regex_patterns: []
+
+goal_system:
+  csv_column: "Goal System and Other events"
+  rqs: [RQ1]
+  keywords:
+    - goal
+    - challenge
+    - target
+    - event
+    - badge
+    - reward
+  regex_patterns: []
+
+mosque_finder:
+  csv_column: "Mosque Finder"
+  rqs: [RQ3]
+  keywords:
+    - mosque
+    - masjid
+    - nearby
+    - jamaat
+    - congregation
+    - iqamah
+  regex_patterns: []
+
+guides:
+  csv_column: "Salah and/or Wudu Guides"
+  rqs: [RQ6]
+  keywords:
+    - how to pray
+    - wudu
+    - ablution
+    - guide
+    - learn salah
+    - step by step
+  regex_patterns: []
+
+adhkar:
+  csv_column: "Useful Adhkars"
+  rqs: [RQ6]
+  keywords:
+    - dhikr
+    - zikr         # transliteration variant
+    - adhkar
+    - tasbih
+    - dua
+    - morning evening
+  regex_patterns: []
+
+qibla:
+  csv_column: "Qibla Compass"
+  rqs: [RQ2]
+  keywords:
+    - qibla
+    - compass
+    - direction
+    - kaaba
+    - mecca
+    - pointing wrong
+  regex_patterns:
+    - "calibrat"   # matches calibrate, calibration, calibrating
+
+table_format:
+  csv_column: "Prayer times in Table format"
+  rqs: [RQ6b]
+  keywords:
+    - table
+    - monthly
+    - calendar view
+    - timetable
+    - schedule
+    - pdf
+  regex_patterns: []
+
+qasr_travel:
+  csv_column: "Auto Qasr mode"
+  rqs: [RQ3]
+  keywords:
+    - qasr
+    - travel
+    - shorten
+    - journey
+    - musafir
+    - abroad
+    - flight
+    - timezone
+  regex_patterns: []
+
+calendar_sync:
+  csv_column: "Connect to Google Calendar"
+  rqs: [RQ6b]
+  keywords:
+    - google calendar
+    - sync
+    - calendar event
+  regex_patterns: []
+
+monetization:
+  csv_column: "All Features for free"
+  rqs: [RQ5, RQ6]
+  keywords:
+    - premium
+    - subscription
+    - paid
+    - free
+    - paywall
+    - purchase
+    - expensive
+  regex_patterns: []
+
+prayer_tracker:
+  csv_column: "Prayer Tracker"
+  rqs: [RQ1]
+  keywords:
+    - track
+    - log
+    - record
+    - mark
+    - missed
+    - qada
+    - qaza         # transliteration variant
+    - habit
+  regex_patterns: []
+
+tracker_score:
+  csv_column: "Tracker Analysis / Score"
+  rqs: [RQ1]
+  keywords:
+    - streak
+    - score
+    - grade
+    - percentage
+    - statistics
+    - progress
+    - chart
+    - rank
+  regex_patterns: []
+
+women_period:
+  csv_column: "Women tracking"
+  rqs: [RQ4]
+  keywords:
+    - period
+    - menstruation
+    - haid
+    - cycle
+    - women
+    - sister
+    - exemption
+    - exclude
+  regex_patterns: []
+
+widgets:
+  csv_column: "Widgets"
+  rqs: [RQ5]
+  keywords:
+    - widget
+    - home screen
+    - lock screen
+    - always on
+  regex_patterns: []
+
+companion_hardware:
+  csv_column: "Has Companion Hardware"
+  rqs: [RQ5]
+  keywords:
+    - ring
+    - watch
+    - smartwatch
+    - wearable
+    - device
+    - band
+    - pair
+    - bluetooth
+  regex_patterns: []
+
+
+# ─── Review-only aspects (§5.2) ─────────────────────────────────────────────────
+
+ui_design:
+  csv_column: null
+  rqs: [RQ2]
+  keywords:
+    - interface
+    - design
+    - ui
+    - layout
+    - beautiful
+    - clean
+    - ugly
+    - theme
+    - dark mode
+    - easy to use
+  regex_patterns: []
+
+stability_bugs:
+  csv_column: null
+  rqs: [RQ2, RQ5]
+  keywords:
+    - crash
+    - bug
+    - freeze
+    - force close
+    - slow
+    - lag
+    - battery
+    - not working
+  regex_patterns: []
+
+ads_intrusive:
+  csv_column: null
+  rqs: [RQ5, RQ6]
+  keywords:
+    - ads
+    - advertisement
+    - popup
+    - full screen ad
+    - too many ads
+  regex_patterns: []
+
+privacy_data:
+  csv_column: null
+  rqs: [RQ4]
+  keywords:
+    - privacy
+    - data
+    - permission
+    - tracking
+    - spyware
+    - sold my data
+    - location access
+  regex_patterns: []
+
+quran_audio:
+  csv_column: null
+  rqs: [RQ6]
+  keywords:
+    - quran
+    - surah
+    - ayah
+    - recitation
+    - tafsir
+    - translation
+    - audio
+  regex_patterns: []
+
+complexity_bloat:
+  csv_column: null
+  rqs: [RQ5]
+  keywords:
+    - too many features
+    - cluttered
+    - complicated
+    - confusing
+    - bloated
+    - heavy
+    - simple
+    - minimal
+  regex_patterns: []
+
+spiritual_affect:
+  csv_column: null
+  rqs: [RQ1]
+  keywords:
+    - guilt
+    - guilty
+    - anxious
+    - pressure
+    - ashamed
+    - barakah
+    - closer to allah
+    - discipline
+  regex_patterns:
+    - "motivat"    # matches motivate, motivation, motivating
+    - "encourag"   # matches encourage, encouraged, encouraging

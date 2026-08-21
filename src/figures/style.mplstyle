@@ -1,0 +1,44 @@
+# Matplotlib style for paper figures
+# ====================================
+# Colorblind-safe, publication-quality defaults.
+# See implementation_plan.md §11 for specification.
+#
+# Usage:
+#   import matplotlib.pyplot as plt
+#   plt.style.use('figures/style.mplstyle')
+
+# ─── Figure ──────────────────────────────────────────────────────────────────────
+figure.figsize: 8, 5
+figure.dpi: 150
+figure.facecolor: white
+savefig.dpi: 300
+savefig.bbox: tight
+savefig.pad_inches: 0.1
+
+# ─── Font ────────────────────────────────────────────────────────────────────────
+font.family: sans-serif
+font.sans-serif: DejaVu Sans, Arial, Helvetica, sans-serif
+font.size: 11
+axes.titlesize: 13
+axes.labelsize: 12
+
+# ─── Axes ────────────────────────────────────────────────────────────────────────
+axes.spines.top: false
+axes.spines.right: false
+axes.grid: true
+axes.grid.which: major
+grid.alpha: 0.3
+grid.linewidth: 0.5
+
+# ─── Colorblind-safe palette (Wong 2011) ─────────────────────────────────────────
+# TODO: Define axes.prop_cycle with a colorblind-safe palette
+# Recommended: Wong (2011) palette or IBM Design palette
+# axes.prop_cycle: cycler('color', ['#0072B2', '#E69F00', '#009E73', '#CC79A7', '#D55E00', '#56B4E9', '#F0E442', '#000000'])
+
+# ─── Legend ──────────────────────────────────────────────────────────────────────
+legend.frameon: false
+legend.fontsize: 10
+
+# ─── Ticks ───────────────────────────────────────────────────────────────────────
+xtick.labelsize: 10
+ytick.labelsize: 10

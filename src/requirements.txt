@@ -1,0 +1,39 @@
+# Dependencies for Salah App Sentiment Analysis
+# See implementation_plan.md §14
+
+# ─── Core ────────────────────────────────────────────────────────────────────────
+pandas
+numpy
+pyarrow
+
+# ─── NLP / Sentiment ─────────────────────────────────────────────────────────────
+nltk                      # VADER
+transformers              # RoBERTa, BART-MNLI
+torch                     # PyTorch backend
+sentence-transformers     # Embeddings for BERTopic
+bertopic                  # Topic modelling
+umap-learn                # Dimensionality reduction (BERTopic dependency)
+hdbscan                   # Clustering (BERTopic dependency)
+pysbd                     # Sentence segmentation (robust to informal text)
+
+# ─── Language ─────────────────────────────────────────────────────────────────────
+fasttext                  # lid.176 language detection (replaces langdetect)
+deep-translator           # Translation for non-English reviews
+
+# ─── Stats / Modelling ───────────────────────────────────────────────────────────
+scipy
+scikit-learn
+statsmodels               # MixedLM, ordinal models
+ruptures                  # Changepoint detection (PELT)
+pingouin                  # Effect sizes, bootstrap CIs
+krippendorff              # Annotator agreement (Krippendorff's alpha)
+
+# ─── Visualization ───────────────────────────────────────────────────────────────
+matplotlib
+seaborn
+wordcloud
+
+# ─── Utility ──────────────────────────────────────────────────────────────────────
+tqdm
+jupyter
+pyyaml
