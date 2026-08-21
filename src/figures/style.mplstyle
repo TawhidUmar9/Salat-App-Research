@@ -30,10 +30,18 @@ axes.grid.which: major
 grid.alpha: 0.3
 grid.linewidth: 0.5
 
-# ─── Colorblind-safe palette (Wong 2011) ─────────────────────────────────────────
-# TODO: Define axes.prop_cycle with a colorblind-safe palette
-# Recommended: Wong (2011) palette or IBM Design palette
-# axes.prop_cycle: cycler('color', ['#0072B2', '#E69F00', '#009E73', '#CC79A7', '#D55E00', '#56B4E9', '#F0E442', '#000000'])
+# ─── Colorblind-safe palette (Wong 2011, Nature Methods 8:441) ───────────────────
+# Distinguishable under deuteranopia, protanopia and tritanopia.
+# 08_visualizations.py reuses these same hex values for its app color map.
+axes.prop_cycle: cycler('color', ['0072B2', 'E69F00', '009E73', 'CC79A7', 'D55E00', '56B4E9', 'F0E442', '000000'])
+
+# ─── Images ──────────────────────────────────────────────────────────────────────
+image.cmap: viridis
+axes.axisbelow: true
+
+# ─── PDF/PS output: embed real fonts rather than Type-3 bitmaps ──────────────────
+pdf.fonttype: 42
+ps.fonttype: 42
 
 # ─── Legend ──────────────────────────────────────────────────────────────────────
 legend.frameon: false

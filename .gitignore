@@ -1,0 +1,20 @@
+# Virtual environment
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Generated data — all reproducible by rerunning the pipeline
+src/data/*.parquet
+src/data/*.csv
+!src/data/aspect_lexicon.yaml
+src/data/_checkpoints/
+src/data/_models/
+
+# Generated figures
+src/figures/*.png
+src/figures/*.pdf
+
+# Keep the gold labels — they are hand-produced and NOT reproducible
+!src/data/gold_labels/*.csv

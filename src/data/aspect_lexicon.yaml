@@ -11,9 +11,20 @@
 #     csv_column: <name from CSV or null>
 #     rqs: [list of RQs this aspect serves]
 #     keywords:
-#       - keyword or phrase
+#       - keyword or phrase           # matched on word boundaries, case-insensitive
 #     regex_patterns:
-#       - regex pattern (for transliterations, complex matches)
+#       - regex pattern               # for transliterations and complex matches
+#
+# MATCHING SEMANTICS (see scripts/_common.py:compile_aspect_patterns):
+#   * keywords are wrapped in \b...\b, so "ads" does not fire inside "adhan"
+#   * internal spaces in a keyword become \s+ (tolerates "prayer  time")
+#   * regex_patterns are inserted verbatim — write them defensively
+#   * everything is combined into ONE alternation per aspect and applied to the
+#     lowercased sentence
+#
+# NON-ENGLISH SURFACE FORMS: ~30-40% of the corpus is Bengali/Arabic/Urdu and is
+# NOT machine-translated (see 02b's design note). Native-script patterns below
+# are what let those reviews reach the aspect taxonomy at all.
 
 # ─── CSV-linked aspects (§5.1) ──────────────────────────────────────────────────
 
@@ -22,57 +33,103 @@ prayer_times_accuracy:
   rqs: [RQ2, RQ6]
   keywords:
     - prayer time
+    - namaz time
+    - salah time
     - wrong time
     - accurate
     - inaccurate
     - fajr
+    - fajar          # transliteration variant
+    - dhuhr
+    - zuhr           # transliteration variant
+    - johor           # Bengali/Malay transliteration
+    - asr
     - maghrib
+    - magrib         # transliteration variant
     - isha
+    - esha           # transliteration variant
     - minutes off
     - location
-  regex_patterns: []
+    - timezone
+    - time zone
+  regex_patterns:
+    - "\\d+\\s*(?:min|minute|minutes|mins)\\s*(?:off|early|late|ahead|behind|difference)"
+    - "(?:time|times)\\s+(?:is|are|was|were)\\s+(?:wrong|incorrect|off|inaccurate)"
+    - "(?:wrong|incorrect|inaccurate)\\s+(?:prayer\\s+)?(?:time|times|timing)"
+    - "নামাজের?\\s*সময়"          # Bengali: prayer time
+    - "ওয়াক্ত"                   # Bengali: waqt / prayer period
+    - "وقت\\s*الصلا"              # Arabic: prayer time
 
 madhab:
   csv_column: "Madhab Variations"
   rqs: [RQ2]
   keywords:
     - hanafi
+    - hanafee        # transliteration variant
     - shafi
+    - shafii
     - maliki
     - hanbali
     - madhab
-    - mazhab       # transliteration variant
+    - mazhab         # transliteration variant
+    - mazhhab
+    - madhhab
+    - school of thought
     - asr time
-  regex_patterns: []
+  regex_patterns:
+    - "asr\\s+(?:time\\s+)?(?:is\\s+)?(?:wrong|different|early|late)"
+    - "মাযহাব|মাজহাব"             # Bengali: madhab
+    - "হানাফী|হানাফি"             # Bengali: Hanafi
+    - "مذهب"                      # Arabic: madhab
 
 calc_method:
   csv_column: "Various methods of calculation"
   rqs: [RQ2]
   keywords:
     - calculation method
+    - calculation
     - isna
     - mwl
+    - muslim world league
     - umm al-qura
+    - umm al qura
     - karachi
     - egyptian
     - angle
-  regex_patterns: []
+    - juristic
+    - convention
+  regex_patterns:
+    - "(?:fajr|isha)\\s+angle"
+    - "\\d+(?:\\.\\d+)?\\s*degree"
+    - "calculation\\s+(?:method|setting|option)s?"
 
 reminders_adhan:
-  csv_column: "Timely Reminders"  # + Waqt relative + Custom Sounds
+  csv_column: "Timely Reminders"  # + Waqt relative reminders + Custom Reminder Sounds
   rqs: [RQ2, RQ6]
   keywords:
     - azan
     - adhan
-    - athan        # transliteration variant
+    - athan          # transliteration variant
+    - azaan
+    - azan sound
     - notification
+    - notifications
     - alarm
     - reminder
+    - reminders
+    - alert
     - sound
     - silent
+    - ringtone
+    - muezzin
     - late
+    - vibrate
   regex_patterns:
-    - "doesn'?t ring"
+    - "doesn'?t\\s+(?:ring|sound|play|go\\s+off|notify)"
+    - "(?:no|not|never)\\s+(?:getting|receiving|any)\\s+notification"
+    - "notification.{0,20}(?:not\\s+working|stopped|delayed|late)"
+    - "আজান|আযান"                 # Bengali: adhan
+    - "أذان"                      # Arabic: adhan
 
 forbidden_times:
   csv_column: "Forbidden Times"
@@ -80,47 +137,86 @@ forbidden_times:
   keywords:
     - forbidden
     - makruh
+    - makrooh
     - sunrise
     - zawal
+    - zawaal
     - sunset
     - haram time
-  regex_patterns: []
+    - prohibited time
+    - nahi
+  regex_patterns:
+    - "forbidden\\s+(?:time|hour|period)s?"
+    - "(?:can'?t|cannot|should\\s+not)\\s+pray\\s+(?:at|during)"
+    - "নিষিদ্ধ\\s*সময়"            # Bengali: forbidden time
 
 nafl_times:
   csv_column: "Nafl Prayer Times"
   rqs: [RQ6b]
   keywords:
     - tahajjud
+    - tahajjod       # transliteration variant
     - ishraq
     - duha
     - chasht
+    - chast
     - nafl
+    - nafil
     - sunnah prayer
-  regex_patterns: []
+    - awwabin
+    - witr
+    - qiyam
+  regex_patterns:
+    - "(?:nafl|sunnah|optional)\\s+(?:prayer|salah|namaz)"
+    - "তাহাজ্জুদ|নফল"             # Bengali: tahajjud / nafl
 
 goal_system:
   csv_column: "Goal System and Other events"
   rqs: [RQ1]
   keywords:
     - goal
+    - goals
     - challenge
     - target
+    - milestone
     - event
     - badge
+    - badges
     - reward
-  regex_patterns: []
+    - rewards
+    - achievement
+  regex_patterns:
+    - "(?:daily|weekly|monthly)\\s+(?:goal|target|challenge)"
+    - "(?:earn|unlock)\\s+(?:a\\s+)?(?:badge|reward|point)"
+  # "goal"/"target" appear in generic motivational copy.
+  promise_keywords:
+    - badge
+    - badges
+    - achievement
+    - streak
+    - reward
+  promise_regex_patterns:
+    - "(?:daily|weekly|monthly)\\s+(?:goal|target|challenge)"
+    - "(?:earn|unlock)\\s+\\w{0,10}\\s?(?:badge|reward|achievement)"
 
 mosque_finder:
   csv_column: "Mosque Finder"
   rqs: [RQ3]
   keywords:
     - mosque
+    - mosques
     - masjid
+    - masjid finder
     - nearby
     - jamaat
+    - jamat
     - congregation
     - iqamah
-  regex_patterns: []
+    - iqama
+  regex_patterns:
+    - "(?:nearby|nearest|closest|find\\s+a)\\s+(?:mosque|masjid)"
+    - "মসজিদ"                     # Bengali: mosque
+    - "مسجد"                      # Arabic: mosque
 
 guides:
   csv_column: "Salah and/or Wudu Guides"
@@ -128,36 +224,86 @@ guides:
   keywords:
     - how to pray
     - wudu
+    - wudhu
+    - ozu             # Bengali transliteration
     - ablution
     - guide
+    - tutorial
     - learn salah
+    - learn to pray
     - step by step
-  regex_patterns: []
+    - instruction
+  regex_patterns:
+    - "how\\s+to\\s+(?:pray|perform|do)\\s+(?:salah|namaz|wudu|prayer)"
+    - "(?:teach|teaches|teaching|learn|learning)\\s+(?:me\\s+)?(?:to\\s+)?(?:pray|salah|namaz)"
+    - "অজু|ওযু"                   # Bengali: wudu
+  # bare "guide"/"learn" is ubiquitous marketing filler.
+  promise_keywords:
+    - wudu guide
+    - wudhu guide
+    - salah guide
+    - prayer guide
+    - ablution
+  promise_regex_patterns:
+    - "(?:how\\s+to|learn\\s+to|teaches?\\s+you\\s+to)\\s+(?:pray|perform\\s+(?:salah|wudu))"
+    - "step[- ]by[- ]step\\s+\\w{0,12}\\s?(?:prayer|salah|wudu|guide)"
 
 adhkar:
   csv_column: "Useful Adhkars"
   rqs: [RQ6]
   keywords:
     - dhikr
-    - zikr         # transliteration variant
+    - zikr           # transliteration variant
+    - zikir
     - adhkar
+    - azkar
     - tasbih
+    - tasbeeh
     - dua
+    - duas
+    - supplication
     - morning evening
-  regex_patterns: []
+    - istighfar
+  regex_patterns:
+    - "(?:morning|evening)\\s+(?:adhkar|azkar|dhikr|dua)"
+    - "দোয়া|জিকির"                # Bengali: dua / dhikr
+    - "أذكار|دعاء"                # Arabic: adhkar / dua
+  # "dua" appears in nearly every Islamic app's copy as generic content;
+  # require an explicit adhkar/tasbih offering.
+  promise_keywords:
+    - adhkar
+    - azkar
+    - tasbih
+    - tasbeeh
+    - dhikr counter
+    - zikr counter
+    - digital tasbih
+  promise_regex_patterns:
+    - "(?:morning|evening)\\s+(?:adhkar|azkar|dhikr)"
+    - "(?:dua|supplication)\\s+(?:library|collection|book)"
 
 qibla:
   csv_column: "Qibla Compass"
   rqs: [RQ2]
   keywords:
     - qibla
+    - qiblah
+    - kiblah         # transliteration variant
+    - quibla
     - compass
     - direction
     - kaaba
+    - kabah
     - mecca
-    - pointing wrong
+    - makkah
+    - calibrate
+    - calibration
   regex_patterns:
-    - "calibrat"   # matches calibrate, calibration, calibrating
+    - "qibla.{0,25}(?:wrong|off|incorrect|not\\s+accurate|inaccurate|spinning)"
+    - "compass.{0,25}(?:wrong|off|not\\s+working|spinning|inaccurate)"
+    - "pointing\\s+(?:the\\s+)?wrong\\s+(?:way|direction)"
+    - "কিবলা|ক্বিবলা"              # Bengali: qibla
+    - "قبلة"                      # Arabic: qibla
 
 table_format:
   csv_column: "Prayer times in Table format"
@@ -167,32 +313,67 @@ table_format:
     - monthly
     - calendar view
     - timetable
+    - time table
     - schedule
     - pdf
-  regex_patterns: []
+    - printable
+    - chart
+  regex_patterns:
+    - "(?:monthly|yearly|weekly)\\s+(?:time\\s*table|schedule|calendar|chart)"
+    - "(?:print|download|save|export)\\s+(?:the\\s+)?(?:time\\s*table|schedule|pdf)"
+    - "সময়সূচি|রুটিন"             # Bengali: schedule / routine
 
 qasr_travel:
   csv_column: "Auto Qasr mode"
   rqs: [RQ3]
   keywords:
     - qasr
+    - qasar          # transliteration variant
+    - kasr
     - travel
+    - travelling
+    - traveling
     - shorten
+    - shortened
     - journey
     - musafir
+    - musafer
+    - safar
     - abroad
     - flight
-    - timezone
-  regex_patterns: []
+    - trip
+  regex_patterns:
+    - "(?:shorten|shortened|shortening)\\s+(?:the\\s+)?(?:prayer|salah|namaz)"
+    - "(?:when|while|during)\\s+(?:i\\s+am\\s+|i'?m\\s+)?travel"
+    - "(?:qasr|qasar)\\s*(?:mode|prayer|option|setting)?"
+    - "সফর|কসর"                   # Bengali: travel / qasr
+  # Store copy says "spiritual journey" constantly; the review-side keywords
+  # journey/travel/trip fired on 13 apps that have no qasr feature at all.
+  # Require terms that only appear when the app genuinely claims qasr support.
+  promise_keywords:
+    - qasr
+    - qasar
+    - kasr
+    - musafir
+    - musafer
+  promise_regex_patterns:
+    - "shorten(?:ed|ing|s)?\\s+(?:the\\s+)?(?:prayer|salah|namaz)"
+    - "(?:travel|journey)\\s+mode"
+    - "auto[- ]?qasr"
 
 calendar_sync:
   csv_column: "Connect to Google Calendar"
   rqs: [RQ6b]
   keywords:
     - google calendar
-    - sync
+    - calendar sync
     - calendar event
-  regex_patterns: []
+    - sync
+    - ical
+    - outlook
+  regex_patterns:
+    - "(?:sync|export|add|connect).{0,20}calendar"
+    - "calendar.{0,20}(?:sync|integration|export)"
 
 monetization:
   csv_column: "All Features for free"
@@ -200,81 +381,185 @@ monetization:
   keywords:
     - premium
     - subscription
+    - subscribe
     - paid
     - free
     - paywall
     - purchase
     - expensive
-  regex_patterns: []
+    - price
+    - pricing
+    - trial
+    - upgrade
+    - pro version
+    - money
+    - refund
+  regex_patterns:
+    - "(?:have\\s+to|need\\s+to|must)\\s+(?:pay|purchase|subscribe|buy)"
+    - "behind\\s+(?:a\\s+)?paywall"
+    - "\\$\\d+|\\d+\\s*(?:usd|dollar|taka|tk|rupee|riyal)"
+    - "(?:in[- ]app\\s+)?purchase"
+    - "টাকা|ফ্রি"                 # Bengali: money / free
 
 prayer_tracker:
   csv_column: "Prayer Tracker"
   rqs: [RQ1]
   keywords:
     - track
+    - tracker
+    - tracking
     - log
+    - logging
     - record
     - mark
     - missed
     - qada
-    - qaza         # transliteration variant
+    - qaza           # transliteration variant
+    - qadha
     - habit
-  regex_patterns: []
+    - checklist
+  regex_patterns:
+    - "(?:track|log|record|mark)\\s+(?:my\\s+|the\\s+)?(?:prayer|salah|namaz)"
+    - "(?:missed|qada|qaza)\\s+(?:prayer|salah|namaz)"
+    - "prayer\\s+(?:tracker|log|journal|record)"
+    - "কাজা|ট্র্যাক"               # Bengali: qada / track
+  # bare "track"/"record" fires on "track your Quran progress" etc.
+  promise_keywords:
+    - prayer tracker
+    - salah tracker
+    - namaz tracker
+    - prayer log
+    - qada
+    - qaza
+  promise_regex_patterns:
+    - "track(?:s|ing|er)?\\s+(?:your\\s+|my\\s+|daily\\s+)?(?:prayer|salah|namaz)"
+    - "(?:missed|make[- ]?up)\\s+(?:prayer|salah|namaz)"
 
 tracker_score:
   csv_column: "Tracker Analysis / Score"
   rqs: [RQ1]
   keywords:
     - streak
+    - streaks
     - score
     - grade
+    - grading
     - percentage
     - statistics
+    - stats
     - progress
     - chart
     - rank
-  regex_patterns: []
+    - ranking
+    - analytics
+    - report
+  regex_patterns:
+    - "(?:lost|broke|breaking|losing|keep)\\s+(?:my\\s+)?streak"
+    - "\\d+\\s*day\\s+streak"
+    - "(?:prayer|salah)\\s+(?:score|grade|percentage|statistic)"
+    - "progress\\s+(?:chart|graph|report|bar)"
 
 women_period:
   csv_column: "Women tracking"
   rqs: [RQ4]
   keywords:
     - period
+    - periods
     - menstruation
+    - menstrual
     - haid
+    - haiz
+    - hayd
+    - nifas
     - cycle
     - women
+    - woman
     - sister
+    - sisters
     - exemption
+    - exempt
     - exclude
-  regex_patterns: []
+    - female
+  regex_patterns:
+    - "(?:on\\s+(?:my\\s+)?|during\\s+(?:my\\s+)?)period"
+    - "(?:menstrual|monthly)\\s+(?:cycle|period|days)"
+    - "(?:can'?t|cannot|don'?t|do\\s+not)\\s+pray.{0,30}(?:period|menstruat|haid)"
+    - "(?:exclude|skip|pause|exempt).{0,25}(?:period|menstruat|haid|cycle)"
+    - "(?:for\\s+)?(?:women|woman|sisters|girls)\\s+(?:who|that|option|feature|setting)"
+    - "হায়েজ|মাসিক"               # Bengali: menstruation
+  # "women"/"sister" appear in generic audience copy ("for brothers and sisters").
+  promise_keywords:
+    - menstruation
+    - menstrual
+    - haid
+    - haiz
+    - nifas
+    - period tracking
+    - period tracker
+  promise_regex_patterns:
+    - "(?:women|woman|female)'?s?\\s+(?:health|cycle|mode|feature|tracking)"
+    - "(?:exempt|exclude|skip|pause)\\w*\\s+\\w{0,12}\\s?(?:period|menstruat|haid)"
 
 widgets:
   csv_column: "Widgets"
   rqs: [RQ5]
   keywords:
     - widget
+    - widgets
     - home screen
+    - homescreen
     - lock screen
+    - lockscreen
     - always on
-  regex_patterns: []
+    - notification bar
+    - status bar
+  regex_patterns:
+    - "(?:home|lock)\\s*screen\\s+widget"
+    - "widget.{0,25}(?:not\\s+working|broken|missing|update|refresh)"
 
 companion_hardware:
   csv_column: "Has Companion Hardware"
   rqs: [RQ5]
   keywords:
     - ring
+    - smart ring
     - watch
     - smartwatch
+    - smart watch
     - wearable
     - device
     - band
     - pair
+    - pairing
     - bluetooth
-  regex_patterns: []
-
+    - wear os
+    - galaxy watch
+    - apple watch
+    - zikr ring
+    - tasbih ring
+  regex_patterns:
+    - "(?:smart\\s*)?(?:watch|ring|band).{0,25}(?:pair|connect|sync|support)"
+    - "(?:wear\\s*os|watchos|galaxy\\s+watch|apple\\s+watch|fitbit)"
+    - "(?:zikr|tasbih|tasbeeh)\\s+ring"
 
 # ─── Review-only aspects (§5.2) ─────────────────────────────────────────────────
+# No CSV column, but essential to the RQs. complexity_bloat and spiritual_affect
+# are the two the revised RQs require and v1 lacked — RQ5's bloat construct and
+# RQ1's love/hate tension are otherwise unmeasurable.
+  # "device" and "watch" appear in generic copy ("on any device", "watch videos").
+  promise_keywords:
+    - smartwatch
+    - smart watch
+    - wear os
+    - watchos
+    - apple watch
+    - galaxy watch
+    - wearable
+    - smart ring
+    - zikr ring
+    - tasbih ring
+  promise_regex_patterns:
+    - "(?:companion|paired)\\s+(?:device|watch|ring|band)"
 
 ui_design:
   csv_column: null
@@ -283,65 +568,134 @@ ui_design:
     - interface
     - design
     - ui
+    - ux
     - layout
     - beautiful
     - clean
     - ugly
     - theme
     - dark mode
+    - night mode
     - easy to use
-  regex_patterns: []
+    - user friendly
+    - intuitive
+    - font
+    - color
+    - colour
+    - aesthetic
+  regex_patterns:
+    - "(?:looks?|looking)\\s+(?:good|great|nice|beautiful|ugly|bad|clean|modern|outdated)"
+    - "(?:user[- ]?friendly|easy\\s+to\\s+(?:use|navigate)|hard\\s+to\\s+(?:use|navigate))"
+    - "(?:dark|night|light)\\s+mode"
+    - "(?:nice|good|great|bad|poor|terrible)\\s+(?:ui|ux|design|interface|layout)"
 
 stability_bugs:
   csv_column: null
   rqs: [RQ2, RQ5]
   keywords:
     - crash
+    - crashes
+    - crashing
     - bug
+    - bugs
+    - buggy
     - freeze
+    - freezes
+    - frozen
     - force close
     - slow
     - lag
+    - laggy
     - battery
+    - drain
     - not working
-  regex_patterns: []
+    - broken
+    - glitch
+    - error
+    - hang
+  regex_patterns:
+    - "(?:keeps?|always|constantly)\\s+(?:crash|crashing|closing|freezing|stopping)"
+    - "(?:force\\s+close|stopped\\s+working|not\\s+responding|won'?t\\s+open)"
+    - "battery\\s+(?:drain|draining|usage|consumption)"
+    - "(?:after|since)\\s+(?:the\\s+)?(?:update|upgrade).{0,30}(?:not\\s+work|broken|crash|bug)"
 
 ads_intrusive:
   csv_column: null
   rqs: [RQ5, RQ6]
   keywords:
+    - ad
     - ads
+    - advert
+    - adverts
     - advertisement
+    - advertisements
+    - advertising
     - popup
-    - full screen ad
-    - too many ads
-  regex_patterns: []
+    - pop up
+    - pop-up
+    - banner
+    - commercial
+  regex_patterns:
+    - "(?:too\\s+many|so\\s+many|lots?\\s+of|full\\s+of|filled\\s+with)\\s+ads?"
+    - "(?:full[- ]?screen|pop[- ]?up|video)\\s+ads?"
+    - "ads?\\s+(?:everywhere|every\\s+time|annoying|intrusive|constantly)"
+    - "বিজ্ঞাপন"                   # Bengali: advertisement
 
 privacy_data:
   csv_column: null
   rqs: [RQ4]
   keywords:
     - privacy
+    - private
     - data
     - permission
-    - tracking
+    - permissions
     - spyware
-    - sold my data
+    - surveillance
+    - gdpr
     - location access
-  regex_patterns: []
+    - sold
+    - selling
+    - third party
+    - security
+  # NOTE: bare "tracking" is deliberately NOT a keyword here. It collides with
+  # prayer tracking and period tracking ("doesn't have women period tracking"
+  # matched privacy_data before this was tightened). Surveillance-sense tracking
+  # is captured by the context-requiring patterns below.
+  regex_patterns:
+    - "track(?:s|ing|ed)?\\s+(?:me|us|my|our|your|user)"
+    - "(?:being|getting)\\s+track(?:ed|ing)"
+    - "(?:location|gps|activity|behaviou?r)\\s+track(?:ing|er)"
+    - "(?:sold|selling|sells|shared|sharing)\\s+(?:my\\s+|our\\s+|user\\s+)?data"
+    - "(?:data|privacy)\\s+(?:breach|leak|concern|policy|issue|scandal)"
+    - "(?:why|what)\\s+(?:does\\s+it|do\\s+they)\\s+need.{0,30}permission"
+    - "(?:location|contact|camera|microphone)\\s+(?:access|permission)"
+    - "military|army|us\\s+government"
 
 quran_audio:
   csv_column: null
   rqs: [RQ6]
   keywords:
     - quran
+    - koran
+    - qur'an
     - surah
+    - sura
     - ayah
+    - ayat
+    - verse
     - recitation
+    - reciter
+    - qari
     - tafsir
+    - tafseer
     - translation
+    - tajweed
     - audio
-  regex_patterns: []
+  regex_patterns:
+    - "(?:quran|qur'?an)\\s+(?:audio|recitation|translation|reading|player)"
+    - "কুরআন|কোরআন"               # Bengali: Quran
+    - "القرآن"                    # Arabic: Quran
 
 complexity_bloat:
   csv_column: null
@@ -349,13 +703,25 @@ complexity_bloat:
   keywords:
     - too many features
     - cluttered
+    - clutter
     - complicated
+    - complex
     - confusing
     - bloated
+    - bloat
     - heavy
     - simple
     - minimal
-  regex_patterns: []
+    - minimalist
+    - overwhelming
+    - unnecessary
+    - lightweight
+  regex_patterns:
+    - "too\\s+(?:many|much)\\s+(?:feature|option|setting|thing|stuff)"
+    - "(?:just|only)\\s+(?:want|need)s?\\s+(?:a\\s+)?simple"
+    - "(?:hard|difficult|confusing)\\s+to\\s+(?:navigate|find|use|understand)"
+    - "(?:app\\s+is\\s+)?(?:too\\s+)?(?:heavy|bloated|slow|large|big)"
+    - "does\\s+too\\s+much"
 
 spiritual_affect:
   csv_column: null
@@ -364,11 +730,29 @@ spiritual_affect:
     - guilt
     - guilty
     - anxious
+    - anxiety
     - pressure
     - ashamed
+    - shame
+    - stress
+    - stressed
+    - motivat
+    - motivated
+    - motivation
+    - encourag
+    - encouraged
     - barakah
-    - closer to allah
+    - baraka
     - discipline
+    - disciplined
+    - consistent
+    - consistency
+    - blessed
+    - peace
+    - spiritual
   regex_patterns:
-    - "motivat"    # matches motivate, motivation, motivating
-    - "encourag"   # matches encourage, encouraged, encouraging
+    - "(?:feel|feels|felt|feeling)\\s+(?:guilty|bad|ashamed|anxious|pressured|motivated|good|blessed)"
+    - "closer\\s+to\\s+(?:allah|god)"
+    - "(?:helped|helps|helping)\\s+me\\s+(?:pray|be\\s+consistent|stay\\s+on\\s+track|improve)"
+    - "(?:makes?|made)\\s+me\\s+(?:feel\\s+)?(?:guilty|bad|anxious|motivated)"
+    - "(?:changed|improved|transformed)\\s+my\\s+(?:life|prayer|salah|routine|habit)"

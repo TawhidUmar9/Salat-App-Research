@@ -1,27 +1,198 @@
-# Phase 6 — RQ6 Deep Dive: Full-Fledged Spiritual Companion
-# ============================================================
-# Are current apps enough to meet all Salah-related needs?
-# (6a delivery gap · 6b coverage gap)
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation: {extension: .py, format_name: percent}
+# ---
+
+# %% [markdown]
+# # RQ6 — Full-Fledged Spiritual Companion
 #
-# See implementation_plan.md §10, §9.6 for full specification.
+# *Are current apps enough to meet all Salah-related needs?*
 #
-# This file is a placeholder. Convert to Jupyter notebook (.ipynb) before use.
+# The **synthesis** RQ. It consumes RQ1–RQ5 and splits into:
 #
-# ─── Contents ────────────────────────────────────────────────────────────────────
+# ```
+# RQ6a  DELIVERY GAP   feature claimed (✓) → do users complain?   "it exists but it's broken"
+# RQ6b  COVERAGE GAP   feature absent  (✗) → do users request it? "it doesn't exist at all"
+# ```
 #
-# 1. RQ6a — Delivery gap matrix:
-#    - App × feature heatmap where promised = 1
-#    - Negative-sentiment rate + mention volume
-#    - "Broken promises" flagged: neg_rate > 40% AND n >= 30
+# The RQ6b ranking produced here is the **bridge to the Design Implications
+# section** (§16.2) — stated in general ecosystem terms, not tied to any one app.
+
+# %%
+from _nbinit import *  # noqa: F403
+
+plt, WONG = setup_plots()  # noqa: F405
+
+reviews = load_reviews()      # noqa: F405
+aspects = load_aspects()      # noqa: F405
+features = load_features()    # noqa: F405
+demand = load_demand()        # noqa: F405
+
+gap = pd.read_csv(DATA_DIR / "gap_matrix.csv")           # noqa: F405
+unmet = pd.read_csv(DATA_DIR / "unmet_needs_ranking.csv")  # noqa: F405
+print(f"gap matrix: {len(gap):,} (app, feature) cells")
+
+# %% [markdown]
+# ## 1. RQ6a — Delivery gap
 #
-# 2. RQ6b — Unmet-need ranking:
-#    - For each (app, feature) where promised = 0: demand rate
-#    - Ecosystem-level: which needs does NO app serve well?
-#    - Ranked by (demand volume × number of apps failing)
-#    - This ranked list → Falah design-implications section
+# Of the features an app claims, which do its users complain about?
+
+# %%
+promised = gap[gap["promised"].fillna(False)]
+print(f"Promised (app, feature) pairs: {len(promised):,}")
+print(f"With enough mentions to judge (n ≥ 30): {(promised['n_mentions'] >= 30).sum():,}")
+
+broken = promised[promised["broken_promise"].fillna(False)].sort_values("neg_rate", ascending=False)
+print(f"\nBROKEN PROMISES (>40% negative, n ≥ 30): {len(broken)}")
+display(broken[["app_name", "aspect", "n_mentions", "n_negative", "neg_rate"]].round(3))  # noqa: F821
+
+# %%
+print("Which features are most often broken, across apps?")
+by_feature = (
+    promised[promised["n_mentions"] >= 30]
+    .groupby("aspect")
+    .agg(apps_promising=("app_name", "nunique"),
+         apps_broken=("broken_promise", "sum"),
+         mean_neg_rate=("neg_rate", "mean"),
+         total_mentions=("n_mentions", "sum"))
+)
+by_feature["broken_share"] = by_feature["apps_broken"] / by_feature["apps_promising"]
+display(by_feature.sort_values("broken_share", ascending=False).round(3))  # noqa: F821
+
+# %%
+piv = promised.pivot_table(index="app_name", columns="aspect", values="neg_rate")
+n = promised.pivot_table(index="app_name", columns="aspect", values="n_mentions")
+piv = piv.where(n >= 10)
+
+fig, ax = plt.subplots(figsize=(14, 8))
+im = ax.imshow(piv.values, cmap="RdYlGn_r", vmin=0, vmax=1, aspect="auto")
+ax.set_xticks(range(len(piv.columns))); ax.set_xticklabels(piv.columns, rotation=90, fontsize=8)
+ax.set_yticks(range(len(piv.index)))
+ax.set_yticklabels([str(a)[:30] for a in piv.index], fontsize=8)
+for i in range(piv.shape[0]):
+    for j in range(piv.shape[1]):
+        v = piv.values[i, j]
+        if pd.notna(v) and v > 0.40:  # noqa: F405
+            ax.text(j, i, "✕", ha="center", va="center", color="white", fontsize=7)
+fig.colorbar(im, ax=ax, label="Negative rate on a promised feature", shrink=0.7)
+ax.set_title("RQ6a — delivery gap (✕ = broken promise)")
+ax.grid(False); fig.tight_layout()
+
+# %% [markdown]
+# ## 2. RQ6b — Coverage gap
 #
-# 3. Synthesis across RQ1–RQ5:
-#    - How do the individual RQ findings combine into
-#      the overall "are current apps enough?" answer?
+# Where the feature is absent, how loudly do users ask for it?
+
+# %%
+display(unmet.sort_values("unmet_score", ascending=False).round(2))  # noqa: F821
+
+# %%
+d = unmet.sort_values("unmet_score").tail(15)
+fig, ax = plt.subplots(figsize=(9, max(4, 0.4 * len(d))))
+y = np.arange(len(d))  # noqa: F405
+ax.hlines(y, 0, d["unmet_score"], color="grey", lw=1.2)
+ax.scatter(d["unmet_score"], y, s=80, color=WONG[4], zorder=3)
+ax.set_yticks(y); ax.set_yticklabels(d["aspect"], fontsize=9)
+ax.set_xlabel("Unmet-need score  (demand volume × apps lacking)")
+ax.set_title("RQ6b — ranked unmet needs across the ecosystem")
+fig.tight_layout()
+
+# %% [markdown]
+# ## 3. Synthesis across RQ1–RQ5
 #
-# 4. Export 10–15 verbatim quotes to data/quotes/rq6.csv
+# One row per RQ with its headline number, so the discussion section can be
+# written directly from this table.
+
+# %%
+def safe(fn, default="n/a"):
+    try:
+        return fn()
+    except Exception:
+        return default
+
+
+tracker_ids = set(aspects.loc[aspects["aspect"].isin(
+    ["prayer_tracker", "tracker_score", "goal_system"]), "reviewId"])
+acc_ids = set(aspects.loc[aspects["aspect"].isin(
+    ["prayer_times_accuracy", "qibla", "madhab", "calc_method"]), "reviewId"])
+
+synthesis = pd.DataFrame([  # noqa: F405
+    {"rq": "RQ1 gamification",
+     "evidence": f"{len(tracker_ids):,} tracker reviews",
+     "headline": safe(lambda: f"{aspects[aspects['aspect'].isin(['prayer_tracker','tracker_score']) ].pipe(lambda x: (x['sentiment_label']=='Negative').mean()):.1%} negative")},
+    {"rq": "RQ2 accuracy vs UI",
+     "evidence": f"{len(acc_ids):,} accuracy-aspect reviews",
+     "headline": safe(lambda: f"{aspects[aspects['aspect'].isin(['prayer_times_accuracy','qibla'])].pipe(lambda x: (x['sentiment_label']=='Negative').mean()):.1%} negative")},
+    {"rq": "RQ3 traveler",
+     "evidence": safe(lambda: f"{len(demand[demand['aspect']=='qasr_travel']):,} qasr demand signals"),
+     "headline": safe(lambda: f"{aspects[aspects['aspect']=='qasr_travel']['app_name'].nunique()} apps discussed")},
+    {"rq": "RQ4 femtech",
+     "evidence": safe(lambda: f"{aspects[aspects['aspect']=='women_period']['reviewId'].nunique():,} women-aspect reviews"),
+     "headline": safe(lambda: f"{len(features[(features['aspect']=='women_period') & (features['feature_present']>=1)])} apps have the feature")},
+    {"rq": "RQ5 bloat",
+     "evidence": safe(lambda: f"{features.groupby('app_name')['feature_present'].sum().mean():.1f} mean features/app"),
+     "headline": safe(lambda: f"{aspects[aspects['aspect']=='complexity_bloat']['reviewId'].nunique():,} bloat complaints")},
+])
+display(synthesis)  # noqa: F821
+
+# %% [markdown]
+# ## 4. The design-implications input
+#
+# **§16.2 decision**: the paper closes with a general Design Implications
+# section derived from this ranking and stated in ecosystem terms. No specific
+# app is named as the beneficiary.
+
+# %%
+top = unmet.sort_values("unmet_score", ascending=False).head(8)
+print("Ranked unmet needs — the basis for the Design Implications section:\n")
+for i, (_, r) in enumerate(top.iterrows(), 1):
+    print(f"{i}. {r['aspect']}")
+    print(f"     {r['demand_volume']:.0f} demand signals · {r['apps_lacking']:.0f} apps lack it "
+          f"· {r['negative_mentions']:.0f} negative mentions where present")
+
+    if len(demand):
+        ex = demand[(demand["aspect"] == r["aspect"]) & (demand["request_type"] == "request")]
+        for s in ex["evidence_sentence"].head(2):
+            print(f'     "{str(s)[:120]}"')
+    print()
+
+# %% [markdown]
+# ## 5. Combined gap view — is any need served *well* by anyone?
+
+# %%
+combined = (
+    gap.groupby("aspect")
+    .agg(apps_with=("promised", "sum"),
+         apps_total=("app_name", "nunique"),
+         mean_neg_rate=("neg_rate", "mean"),
+         total_mentions=("n_mentions", "sum"),
+         total_demand=("demand_signals", "sum"))
+)
+combined["coverage"] = combined["apps_with"] / combined["apps_total"]
+combined["served_well"] = (combined["coverage"] > 0.5) & (combined["mean_neg_rate"] < 0.30)
+display(combined.sort_values("coverage").round(3))  # noqa: F821
+
+print(f"\nNeeds served well by most of the ecosystem: "
+      f"{list(combined[combined['served_well']].index)}")
+print(f"Needs served by NO app or served badly: "
+      f"{list(combined[(combined['coverage'] < 0.25)].index)}")
+
+# %% [markdown]
+# ## 6. Quotes
+
+# %%
+if len(demand):
+    top_aspects = set(top["aspect"])
+    gap_ids = set(demand.loc[demand["aspect"].isin(top_aspects), "reviewId"])
+    sel = reviews[reviews["reviewId"].isin(gap_ids)].head(15)
+    export_quotes(sel, "rq6", n=15)  # noqa: F405
+
+# %% [markdown]
+# ## Answer to RQ6
+#
+# - 6a: ___ broken promises across ___ apps; most-broken feature = ___
+# - 6b: top unmet needs = ___, ___, ___
+# - Needs served well ecosystem-wide: ___
+#
+# → **Verdict**: Are current apps enough? _______

@@ -1,39 +1,63 @@
 # Dependencies for Salah App Sentiment Analysis
 # See implementation_plan.md §14
+#
+# Target: Python 3.12. Python 3.14 lacks working wheels for fasttext,
+# hdbscan/umap-learn (BERTopic) and torch — create the venv against 3.12:
+#
+#   uv venv --python 3.12
+#   uv pip install -r src/requirements.txt
+#
+# For CUDA, install torch from the matching index BEFORE this file:
+#   uv pip install torch --index-url https://download.pytorch.org/whl/cu124
 
 # ─── Core ────────────────────────────────────────────────────────────────────────
-pandas
-numpy
-pyarrow
+pandas>=2.2,<3.0            # 3.x changes copy-on-write semantics; pin to 2.x
+numpy>=1.26,<3.0
+pyarrow>=15.0               # parquet engine
 
 # ─── NLP / Sentiment ─────────────────────────────────────────────────────────────
-nltk                      # VADER
-transformers              # RoBERTa, BART-MNLI
-torch                     # PyTorch backend
-sentence-transformers     # Embeddings for BERTopic
-bertopic                  # Topic modelling
-umap-learn                # Dimensionality reduction (BERTopic dependency)
-hdbscan                   # Clustering (BERTopic dependency)
-pysbd                     # Sentence segmentation (robust to informal text)
+nltk>=3.8                   # VADER
+transformers>=4.40          # RoBERTa, XLM-RoBERTa, BART-MNLI
+                             # DELIBERATELY UNPINNED. An earlier version of this
+                             # file pinned <4.50 after XLM-R's tokenizer failed
+                             # with "Error parsing line b'\x0e' in
+                             # sentencepiece.bpe.model". That diagnosis was WRONG:
+                             # the real cause was a 0-byte model file left behind
+                             # by the huggingface_hub Xet bug (see HF_HUB_DISABLE_XET
+                             # in _common.py). 4.49 and 5.15 both verified working
+                             # end-to-end for 02b/03/03b once downloads are intact.
+                             # The pin also conflicts with bertopic, which needs 5.x.
+tiktoken>=0.7                # transitive tokenizer dep, not always auto-pulled
+protobuf>=4.0                # required by the XLM-R / bart-mnli sentencepiece tokenizers
+sentencepiece>=0.2           # required by the XLM-R / bart-mnli sentencepiece tokenizers
+torch>=2.2                  # PyTorch backend
+sentence-transformers>=3.0  # embeddings for BERTopic + the zero-shot prefilter
+bertopic>=0.16              # topic modelling
+umap-learn>=0.5             # dimensionality reduction (BERTopic dependency)
+hdbscan>=0.8.33             # clustering (BERTopic dependency)
+pysbd>=0.3.4                # sentence segmentation (robust to informal text)
 
 # ─── Language ─────────────────────────────────────────────────────────────────────
-fasttext                  # lid.176 language detection (replaces langdetect)
-deep-translator           # Translation for non-English reviews
+fasttext-wheel>=0.9.2       # lid.176 language detection; prebuilt (plain `fasttext`
+                            # needs a C++ toolchain and often fails to build)
+deep-translator>=1.11       # translation for the sampled quote/gold rows only
 
 # ─── Stats / Modelling ───────────────────────────────────────────────────────────
-scipy
-scikit-learn
-statsmodels               # MixedLM, ordinal models
-ruptures                  # Changepoint detection (PELT)
-pingouin                  # Effect sizes, bootstrap CIs
-krippendorff              # Annotator agreement (Krippendorff's alpha)
+scipy>=1.11
+scikit-learn>=1.4
+statsmodels>=0.14           # MixedLM, ordinal models, BH-FDR, WLS for the ITS
+ruptures>=1.1               # changepoint detection (PELT)
+pingouin>=0.5               # effect sizes, bootstrap CIs
+krippendorff>=0.6           # annotator agreement (Krippendorff's alpha)
+diptest>=0.7                # Hartigan's dip test for RQ1 bimodality (§9.2)
 
 # ─── Visualization ───────────────────────────────────────────────────────────────
-matplotlib
-seaborn
-wordcloud
+matplotlib>=3.8
+seaborn>=0.13
+wordcloud>=1.9
 
 # ─── Utility ──────────────────────────────────────────────────────────────────────
-tqdm
-jupyter
-pyyaml
+tqdm>=4.66
+jupyter>=1.0
+jupytext>=1.16              # pairs the notebooks/*.py scripts with .ipynb
+pyyaml>=6.0
