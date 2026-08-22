@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path.cwd().parent / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from _common import (  # noqa: E402
-    ASPECT_PATH, GOLD_DIR, SENTIMENT_PATH, log, stratified_sample,
+    ASPECT_PATH, GOLD_DIR, SENTIMENT_PATH, log, stratified_sample, write_gold_sheet,
 )
 
 pd.set_option("display.width", 160)
@@ -180,7 +180,7 @@ display(doc_sheet.groupby(["install_tier", "star_band"]).size().unstack(fill_val
 
 # %%
 GOLD_DIR.mkdir(parents=True, exist_ok=True)
-doc_sheet.to_csv(DOC_GOLD, index=False)
+write_gold_sheet(doc_sheet, DOC_GOLD, ["gold_label", "annotator", "notes"])
 print(f"Wrote {DOC_GOLD}")
 
 if N_ANNOTATORS == 2:
@@ -189,8 +189,10 @@ if N_ANNOTATORS == 2:
     half = len(rest) // 2
     for i, part in enumerate([rest.iloc[:half], rest.iloc[half:]], start=1):
         out = pd.concat([overlap.assign(is_overlap=True), part.assign(is_overlap=False)])
-        path = GOLD_DIR / f"doc_500_annotator{i}.csv"
-        out.to_csv(path, index=False)
+        path = write_gold_sheet(
+            out, GOLD_DIR / f"doc_500_annotator{i}.csv",
+            ["gold_label", "annotator", "notes"],
+        )
         print(f"Wrote {path}  ({len(out)} rows, {OVERLAP} shared)")
 
 # %% [markdown]
@@ -215,7 +217,11 @@ if ASPECT_PATH.exists():
     aspect_sheet["gold_is_request"] = ""        # ACTION: 1 / 0
     aspect_sheet["annotator"] = ""
 
-    aspect_sheet.to_csv(ASPECT_GOLD, index=False)
+    write_gold_sheet(
+        aspect_sheet, ASPECT_GOLD,
+        ["gold_aspect_correct", "gold_aspect_true", "gold_sentiment",
+         "gold_is_request", "annotator"],
+    )
     print(f"Wrote {ASPECT_GOLD}  ({len(aspect_sheet)} rows, "
           f"{aspect_sheet['predicted_aspect'].nunique()} aspects)")
 else:

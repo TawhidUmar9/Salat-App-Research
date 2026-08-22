@@ -37,7 +37,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import (  # noqa: E402
     ASPECT_PATH, DEMAND_PATH, GOLD_DIR, SENTIMENT_PATH,
     base_parser, compile_aspect_patterns, load_lexicon, log, maybe_sample,
-    require, section, set_seed, stratified_sample, summarize,
+    require, section, set_seed, stratified_sample, summarize, write_gold_sheet,
 )
 
 # ─── Pattern categories (§6.2) ──────────────────────────────────────────────────
@@ -260,8 +260,10 @@ def precision_check_sample(demand_df: pd.DataFrame, sample_size: int = 200) -> p
     sheet["correct_aspect"] = ""        # annotator fills if the aspect is wrong
     sheet["notes"] = ""
 
-    out_path = GOLD_DIR / "demand_precision_sample.csv"
-    sheet.to_csv(out_path, index=False)
+    out_path = write_gold_sheet(
+        sheet, GOLD_DIR / "demand_precision_sample.csv",
+        ["is_true_positive", "correct_aspect", "notes"],
+    )
     log(f"Wrote {len(sheet)} rows → {out_path}")
     log("ACTION: fill is_true_positive (1/0) and report precision per request_type in the paper.")
     return sheet

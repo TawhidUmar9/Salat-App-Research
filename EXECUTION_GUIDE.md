@@ -1,6 +1,6 @@
 # Execution Guide — Salah App Review Analysis
 
-**Status**: all pipeline code is written and the non-GPU stages are verified against real data. The GPU stages (02b, 03, 03b, 04) are verified on **CPU** as a correctness check; the environment on this laptop only has a 3050 with 4GB VRAM, so full-scale timing is still to be confirmed on the 5090. Environment and correctness bugs found during testing are documented in §0.1 and §9 — read §0.1 before installing anything on the 5090, it will save you the same debugging.
+**Status**: all pipeline code is written and verified against real data. Stages `01`–`03c` are now **confirmed working on the 5090** with real GPU timings (§9); `04`–`08` at full scale are still outstanding. Two things to know before you run anything: torch must come from the **`cu128`** index, not `cu124` (§0.1 — `cu124` has no `sm_120` kernels and fails *after* reporting `cuda.is_available() == True`), and `03b` must be run with **`--no-zero-shot`** (§5A — the NLI backstop inflates `feature_count` by 44% on the description-filled apps and corrupts RQ5's IV). Other environment and correctness bugs are documented in §0.1 and §9.0.
 
 ---
 
@@ -13,16 +13,18 @@
 > ```bash
 > # 1. environment
 > uv venv --python 3.12
-> UV_HTTP_TIMEOUT=900 uv pip install torch --index-url https://download.pytorch.org/whl/cu124
+> UV_HTTP_TIMEOUT=900 uv pip install torch --index-url https://download.pytorch.org/whl/cu128
 > uv pip install -r src/requirements.txt
 > .venv/bin/python -c "import torch;print(torch.cuda.get_device_name(0), torch.cuda.is_available())"
+> # then prove a kernel actually runs (is_available()==True is not enough, see §0.1):
+> .venv/bin/python -c "import torch; x=torch.randn(2000,2000,device='cuda'); torch.cuda.synchronize(); print('OK', (x@x).sum().item())"
 >
 > # 2. whole chain on a sample — every stage, real GPU
 > .venv/bin/python src/scripts/01_preprocess.py --sample 20000
 > .venv/bin/python src/scripts/02a_sentiment_vader.py
 > .venv/bin/python src/scripts/02b_sentiment_roberta.py
 > .venv/bin/python src/scripts/03_absa.py --zeroshot-max 20000
-> .venv/bin/python src/scripts/03b_promise_extraction.py
+> .venv/bin/python src/scripts/03b_promise_extraction.py --no-zero-shot
 > .venv/bin/python src/scripts/03c_demand_mining.py
 > .venv/bin/python src/scripts/04_topic_modeling.py
 > .venv/bin/python src/scripts/05_temporal.py
@@ -62,10 +64,10 @@ uv venv --python 3.12
 uv pip install -r src/requirements.txt
 ```
 
-**For the RTX 5090**, install the CUDA build of torch *before* the rest:
+**For the RTX 5090**, install the CUDA build of torch *before* the rest — and use the **`cu128`** index, not `cu124` (see §0.1, "sm_120 not compatible"):
 
 ```bash
-UV_HTTP_TIMEOUT=900 uv pip install torch --index-url https://download.pytorch.org/whl/cu124
+UV_HTTP_TIMEOUT=900 uv pip install torch --index-url https://download.pytorch.org/whl/cu128
 uv pip install -r src/requirements.txt
 ```
 
@@ -86,6 +88,18 @@ Verify:
 .venv/bin/python -c "import torch; print(torch.cuda.get_device_name(0), torch.cuda.is_available())"
 ```
 
+> `torch.cuda.is_available() == True` only means a CUDA device is visible — it
+> does **not** mean the installed build has kernels for that device's compute
+> capability. On the 5090 (`sm_120`), a `cu124` build reports `True` here and
+> then crashes on the first real op. Confirm a kernel actually runs:
+>
+> ```bash
+> .venv/bin/python -c "import torch; x=torch.randn(2000,2000,device='cuda'); torch.cuda.synchronize(); print('OK', (x@x).sum().item())"
+> ```
+>
+> If that raises `CUDA error: no kernel image is available for execution on
+> the device`, see §0.1 "sm_120 not compatible".
+
 Everything below assumes `.venv/bin/python`. (`source .venv/bin/activate` then plain `python` works too.)
 
 Downloaded automatically on first use — no manual steps:
@@ -105,6 +119,26 @@ A fresh `pip install -r requirements.txt` already handles these. Listed here so 
 | `transformers` (again) | `AutoModelForSequenceClassification.from_pretrained(..., dtype=...)` works for some model classes but `XLMRobertaForSequenceClassification.__init__()` on 4.49.0 rejects `dtype` as an unexpected kwarg — a per-model-class inconsistency in that library version. | `_nlp.py` uses `torch_dtype=` instead, which is accepted uniformly |
 | `huggingface_hub` | **Downloads that hang forever, alive but making no real progress.** HF migrated large files to a chunked "Xet" storage backend; `huggingface_hub` 0.36.2's Xet-reconstruction path pathologically stalls on this kind of large file — opens dozens of small connections to CDN edges, target blob never grows past 0 bytes. A direct `curl` to the same CDN sustains 5–16 MB/s, so this is not a network problem, it's specific to the Xet client path. | `_common.py` sets `HF_HUB_DISABLE_XET=1` at import time, forcing the plain-HTTP path. Applies automatically to every script — nothing to do |
 
+> **`cu124` torch build is not compatible with the RTX 5090 — confirmed on the real 5090 machine.** Installing per the old §0 instructions (`--index-url .../cu124`) succeeds and `torch.cuda.is_available()` returns `True`, but with this warning:
+>
+> ```text
+> UserWarning: NVIDIA GeForce RTX 5090 with CUDA capability sm_120 is not compatible
+> with the current PyTorch installation. The current PyTorch install supports CUDA
+> capabilities sm_50 sm_60 sm_70 sm_75 sm_80 sm_86 sm_90.
+> ```
+>
+> The 5090 is Blackwell (`sm_120`); the `cu124` wheels only ship kernels up to `sm_90`. `is_available()` just checks that a CUDA device is visible — it does not check kernel compatibility, so this warning is easy to miss and the failure surfaces later, mid-pipeline, as a hard crash on the first real tensor op (`CUDA error: no kernel image is available for execution on the device`) inside `02b`/`03`/`03b`/`04`. Fix: use the **`cu128`** index instead, which has `sm_120` kernels.
+>
+> **`uv venv` does not include a `pip` module** — `.venv/bin/python -m pip uninstall ...` fails with `No module named pip` (silently, if you don't check the exit code) rather than removing anything. Worse, `uv pip install torch --index-url ...cu128` *without first removing the old build* does not fix it either: `uv` sees a package named `torch` already installed, reports `Checked 1 package` and does nothing, regardless of which index it originally came from. Use `uv pip uninstall`, not `pip`, and force the reinstall:
+>
+> ```bash
+> uv pip uninstall torch torchvision torchaudio
+> UV_HTTP_TIMEOUT=900 uv pip install --reinstall torch --index-url https://download.pytorch.org/whl/cu128
+> .venv/bin/python -c "import torch; x=torch.randn(2000,2000,device='cuda'); torch.cuda.synchronize(); print('OK', (x@x).sum().item())"
+> ```
+>
+> If `cu128` ever turns out not to carry `sm_120` kernels either (it does as of early 2026), fall back to the nightly index: `--index-url https://download.pytorch.org/whl/nightly/cu128`. §0 and the pre-flight block above have already been updated to use `cu128`.
+
 If you ever see `ValueError: Error parsing line ... in .../sentencepiece.bpe.model`, **do not downgrade transformers** — that was the wrong fix. It means the cached model file is corrupt or truncated. Delete the cached repo and re-download with the Xet backend off:
 
 ```bash
@@ -122,7 +156,7 @@ If a `.incomplete` file exists but hasn't grown in 2 minutes while the process i
 
 ### 0.2 If a `torch` install stalls
 
-`uv pip install torch --index-url .../cu124` can hang mid-download — the process stays alive with an established connection but stops receiving bytes. It looks identical to "still downloading slowly." How to tell the difference:
+`uv pip install torch --index-url .../cu128` can hang mid-download — the process stays alive with an established connection but stops receiving bytes. It looks identical to "still downloading slowly." How to tell the difference:
 
 ```bash
 # Run twice, a few seconds apart. If the byte count is IDENTICAL both times
@@ -134,7 +168,7 @@ find "$(uv cache dir)" -newermt '-2 minutes' -type f | wc -l   # 0 = no recent w
 If stalled: kill it (`pkill -f 'uv pip install torch'`) and retry with a single connection stream, which is less prone to stalling than the default 4 parallel ones:
 
 ```bash
-UV_HTTP_TIMEOUT=900 UV_CONCURRENT_DOWNLOADS=1 uv pip install torch --index-url https://download.pytorch.org/whl/cu124
+UV_HTTP_TIMEOUT=900 UV_CONCURRENT_DOWNLOADS=1 uv pip install torch --index-url https://download.pytorch.org/whl/cu128
 ```
 
 **For a quick CPU-only correctness check** (e.g. to verify the code runs before committing to the big CUDA download, or on a machine without a GPU), the CPU wheel is ~25 MB and installs in seconds — this is how the GPU-stage scripts in this guide were verified without a working CUDA download:
@@ -203,7 +237,7 @@ That exercises every stage in ~15 minutes and surfaces problems before you commi
 .venv/bin/python src/scripts/02a_sentiment_vader.py
 .venv/bin/python src/scripts/02b_sentiment_roberta.py --resume
 .venv/bin/python src/scripts/03_absa.py --resume
-.venv/bin/python src/scripts/03b_promise_extraction.py
+.venv/bin/python src/scripts/03b_promise_extraction.py --no-zero-shot
 .venv/bin/python src/scripts/03c_demand_mining.py
 .venv/bin/python src/scripts/04_topic_modeling.py
 .venv/bin/python src/scripts/05_temporal.py
@@ -337,11 +371,28 @@ Still **0/23 filled** in `Salah App Analysis - Sheet1.csv`:
 
 6 apps × 22 features = 132 cells. The pipeline runs without this — `03b` fills those apps from store descriptions — but the hand annotation is the stronger IV and the κ validation reference.
 
-> **The description fallback measured worse than hoped, so this matters more than it looks.** Running `03b` against the 20 hand-annotated apps gives a **mean Cohen's κ of 0.257** — "fair" at best. Per-feature it ranges from κ=0.64 (`Has Companion Hardware`) down to κ=−0.10 (`All Features for free`, where the description says "free" for 8 apps the annotator marked 19). Under-detection dominates: `Madhab Variations` 12→2, `Various methods of calculation` 11→4, `Widgets` 12→6.
+> **The description fallback measured worse than hoped, so this matters more than it looks.** Running `03b --no-zero-shot` against the 20 hand-annotated apps gives a **mean Cohen's κ of 0.257** — "fair" at best. Per-feature it ranges from κ=0.64 (`Has Companion Hardware`) down to κ=−0.10 (`All Features for free`, where the description says "free" for 8 apps the annotator marked 19). Under-detection dominates: `Madhab Variations` 12→2, `Various methods of calculation` 11→4, `Widgets` 12→6.
 >
 > Practical consequence: for the 6 unannotated apps, `feature_count` is systematically **under**-counted. That biases RQ5's bloat analysis and inflates RQ6b's unmet-need scores for those apps. Hand-annotating removes the problem entirely for 18% of the corpus.
 >
 > Report the κ table (Figure 3) honestly as a measurement-validity finding — "store descriptions are an unreliable proxy for shipped features" is a legitimate, citable result, not a failure.
+
+#### 🔴 Always run `03b` with `--no-zero-shot`
+
+**The NLI backstop makes the description proxy strictly worse, and flips the bias from under- to over-counting.** Measured on the 5090 at 20K sample — the descriptions themselves don't depend on `--sample`, so these numbers are the real ones:
+
+| | lexicon only (`--no-zero-shot`) | + zero-shot (default) |
+|---|---|---|
+| Mean Cohen's κ | **0.257** | 0.202 |
+| `Various methods of calculation` (csv=11) | 4 — under | **14** — over, κ=−0.15 |
+| `Has Companion Hardware` (csv=1) | κ=**0.64** | 5, κ=0.27 |
+| `Connect to Google Calendar` (csv=1) | — | **16**, κ=0.03 |
+| `Useful Adhkars` (csv=6) | — | **18**, κ=0.09 |
+| `Salah and/or Wudu Guides` (csv=4) | — | **14**, κ=0.19 |
+
+`ZS_THRESHOLD` is already 0.85 and the code comment at `03b_promise_extraction.py:46` anticipates exactly this — store copy is written to sound like it offers everything, so NLI entailment against *"This app offers {}."* is near-vacuous for feature labels.
+
+**Why this corrupts RQ5 specifically.** With zero-shot on, the three highest `feature_count` apps in the whole corpus are all description-derived (Sadiq 16, iMuslim 16, Salatuk 14), and 4 of the top 8. Mean `feature_count` is **13.0 across the 6 description-filled apps vs 9.0 across the 20 hand-annotated** — a 44% inflation perfectly correlated with annotation source. `feature_count` is RQ5's independent variable, so that is a source artifact masquerading as a bloat finding. Lexicon-only leaves a smaller bias in the opposite direction; hand-annotating the 6 apps (above) removes it outright.
 
 **How the sheet is encoded** (the code follows this exactly): any non-empty cell = feature present; `✓` and a note string like `"Google Maps"` both count. Blank = absent. An app with *all* cells blank is treated as **unannotated (NaN), never as "has zero features"** — so partially filling a row would silently mark the rest absent. Fill a row completely or not at all.
 
@@ -349,18 +400,48 @@ Also delete the trailing empty `Aranna` row.
 
 ### 🔴 B. Gold-set labelling
 
+> **Run the full corpus BEFORE generating these sheets.** Every sheet is a
+> *sample drawn from whatever is currently in `src/data/`*. Generate them from a
+> `--sample 20000` run and you are labelling a sample of a sample — and
+> `aspect_300` in particular gets a far thinner pool for exactly the rare aspects
+> it exists to cover (`qasr_travel` has ~35 candidate sentences at 20K vs ~1,300
+> at full scale). The GPU stages take ~25 min (§9); the labelling takes days.
+> Order accordingly.
+
 ```bash
-.venv/bin/python src/scripts/03_absa.py --sample 20000   # needed for the aspect sheet
+# 1. full corpus first — models are cached, this is ~25 min unattended
+.venv/bin/python src/scripts/01_preprocess.py
+.venv/bin/python src/scripts/02a_sentiment_vader.py
+.venv/bin/python src/scripts/02b_sentiment_roberta.py --resume
+.venv/bin/python src/scripts/03_absa.py --resume
+.venv/bin/python src/scripts/03c_demand_mining.py
+
+# 2. then generate the sheets from full-corpus data
+uv pip install jupytext jupyter
 .venv/bin/jupytext --to notebook src/notebooks/02c_cross_validation.py
-# run it — section 3 writes the sheets
+.venv/bin/jupyter notebook    # run sections 1–3
 ```
 
-Produces:
-- `doc_500.csv` — 500 reviews stratified by install tier × star × language → label {Positive, Negative, Neutral, **Mixed**}
-- `aspect_300.csv` — 300 sentences stratified **by aspect** (proportional sampling would contain almost no `women_period` or `qasr_travel`) → label aspect correctness + sentiment + is_request
-- `doc_500_annotator1/2.csv` — split with a 100-row overlap for Krippendorff's α
+The notebook cannot be run as a plain script — it calls Jupyter's `display()`. For `aspect_300.csv` only, without Jupyter: `.venv/bin/python src/scripts/_gen_aspect_gold_standalone.py`.
 
-Then re-run section 4 of that notebook for the numbers that go into Methods and Figure 2, and section "Zero-shot threshold calibration" to pick the real `--zeroshot-threshold`.
+**Four things need hand-labelling, not two:**
+
+| Sheet | n | You fill | Feeds |
+|---|---|---|---|
+| `gold_labels/doc_500.csv` | 500 | `gold_label` ∈ {Positive, Negative, Neutral, **Mixed**} | Methods κ/P/R/F1, Figure 2 |
+| `gold_labels/doc_500_annotator1/2.csv` | 300 each, 100 shared | same | Krippendorff's α |
+| `gold_labels/aspect_300.csv` | 300 | `gold_aspect_correct`, `gold_sentiment`, `gold_is_request` | ABSA validation **+ the zero-shot threshold** |
+| `gold_labels/demand_precision_sample.csv` | 200 | `is_true_positive` (1/0) | §6.2 per-family precision — the regex patterns are noisy and the paper must report this |
+
+`doc_500` is stratified by install tier × star × language; `aspect_300` is stratified **by aspect** on purpose (proportional sampling would contain almost no `women_period` or `qasr_travel`); `demand_precision_sample` is stratified across the five pattern families.
+
+**`aspect_300` gates a second run of `03`.** The zero-shot threshold must be *calibrated* on it, not guessed — so the sequence is: run `03` at the default 0.75 → label `aspect_300` → run the notebook's "Zero-shot threshold calibration" section → **re-run `03_absa.py --zeroshot-threshold <calibrated>`** → then `03b` onward. Budget for `03` running twice; at ~17 min each that is cheap.
+
+Then run section 4 of the notebook for the numbers that go into Methods and Figure 2.
+
+> **Not a labelling sheet:** `quotes/rq1_tracker_negative_50.csv` is written by `06_models.py` — 50 tracker-negative reviews as raw material for RQ1's qualitative coding, not a validation set.
+
+**Your labels are backed up, not clobbered.** These sheets are regenerated by re-running their producing stage, so `_common.write_gold_sheet()` checks for filled ACTION columns first and copies the old file to `<stem>.backup-<timestamp>.csv` before overwriting, logging a `WARN`. It never blocks the write. If you see that warning, the regenerated sheet is a **new sample** — merge on `reviewId`, never by row position.
 
 ---
 
@@ -419,6 +500,10 @@ src/figures/fig01..fig14 .png + .pdf
 | `Failed to download distribution due to network timeout` | `uv`'s 30 s default is too short for the CUDA wheels. Prefix with `UV_HTTP_TIMEOUT=900` |
 | Install "succeeded" but `import torch` fails | You piped `uv` through `tail`/`head`, so the reported exit code was the pipe's. Re-run unpiped and check `import torch` directly |
 | `uv pip install torch` hangs, process alive but no progress | Stalled download, not slow. See §0.2 to confirm and fix |
+| `UserWarning: ... sm_120 is not compatible with the current PyTorch installation` (RTX 5090) | You installed the `cu124` build. Reinstall from the `cu128` index — see §0.1 "sm_120 not compatible" |
+| `CUDA error: no kernel image is available for execution on the device` | Same root cause as above — the installed torch build has no kernels for your GPU's compute capability. See §0.1 |
+| `.venv/bin/python -m pip ...` → `No module named pip` | `uv venv` doesn't ship pip. Use `uv pip <cmd>` (uninstall/install/list) instead |
+| Reinstalling torch with a different `--index-url` doesn't change anything (`Checked 1 package`) | `uv pip install torch` alone won't replace an already-installed `torch`. Run `uv pip uninstall torch torchvision torchaudio` first, or add `--reinstall` |
 | `Error parsing line b'\x0e' in .../sentencepiece.bpe.model` | `transformers` ≥4.50 bug with XLM-R/BART-MNLI tokenizers. See §0.1 |
 | `ModuleNotFoundError: No module named 'tiktoken'` | See §0.1 — already fixed in requirements.txt, re-run `pip install -r src/requirements.txt` if you hit this |
 | `requires the protobuf library but it was not found` | See §0.1 — same fix, `protobuf` + `sentencepiece` are now explicit deps |
@@ -433,7 +518,54 @@ src/figures/fig01..fig14 .png + .pdf
 
 ---
 
-## 9. Verified on this machine
+## 9. Verified on the RTX 5090 — measured timings
+
+Pre-flight (`--sample 20000`, `--zeroshot-max 20000`) ran end to end on the 5090 with `cu128` torch. Detected as `NVIDIA GeForce RTX 5090 (31.4 GB VRAM)`, auto batch size **512** for both `base` and `large` model classes, no OOM, no fallback.
+
+**The wall clock was almost entirely model downloads, not compute.** ~3.8 GB of HuggingFace weights at 1.5–3.6 MB/s ≈ 21 min; actual GPU compute across every stage was **under a minute**. Those weights are cached now, so the full run will not pay this again.
+
+| Stage | n (20K sample) | Measured throughput | Compute time | Extrapolated to full corpus |
+|---|---|---|---|---|
+| `01_preprocess` | 732,194 → 20,000 | — | 38 s (35 s of it the one-time fastText download) | ~2–4 min |
+| `02a_vader` (CPU) | 9,409 | 16,226 rev/s | 0.6 s | ~21 s |
+| `02b_roberta` en | 8,137 | 8,487 item/s | 1.0 s | ~40 s |
+| `02b_roberta` multi | 1,272 | 7,927 item/s | 0.2 s | ~6 s |
+| `03_absa` segmentation (CPU) | 9,409 → 17,099 sent | 4,617 rev/s | 2.0 s | ~75 s |
+| `03_absa` NLI | 44,595 pairs | 1,612 pair/s | 28 s | **~1.6M pairs ≈ 17 min** |
+| `03_absa` aspect sentiment | 6,988 unique | 17,249 item/s | 0.4 s | ~15 s |
+| `03b_promise` | 26 descriptions | — | 7 s | 7 s (fixed — independent of `--sample`) |
+| `03c_demand` | 9,409 | — | ~1 s | ~40 s |
+
+**Full-corpus GPU stages should total roughly 25 min**, dominated by `03`'s NLI pass. Budget hours only if `04_topic_modeling` is slow — BERTopic's UMAP + HDBSCAN are **CPU-bound and do not use the GPU**, and they scale worse than linearly on ~300K documents. That is the one stage whose full-scale cost is still unmeasured, and it is now the likely bottleneck of the whole pipeline, not the transformers.
+
+Correctness checks from the guide's pre-flight list:
+
+| Check | Result |
+|---|---|
+| Torch sees `sm_120` and runs real kernels | ✅ after switching to `cu128` (§0.1) |
+| `03_absa` lexicon hit rate ≈ 35% | ✅ **35.5%** — 8,312 pairs over 6,070 / 17,099 sentences |
+| Zero-shot prefilter working | ✅ 44,595 NLI pairs vs 240,813 unfiltered (**5.4× reduction**) |
+| Aspect coverage | ✅ all 27 aspects fire; rare ones present (`qasr_travel` 35, `women_period` 74, `madhab` 29) |
+| Request/complaint split | ✅ 757 (7.5%) flagged as requests, excluded from aspect sentiment |
+| `03b` mean κ | ✅ **0.257** with `--no-zero-shot` (0.202 with it on — see §5A) |
+| `03b` feature_count source bias | ✅ fixed — desc-derived apps mean **8.5** vs csv **9.0** (was 13.0 vs 9.0 with zero-shot on) |
+| **Check 1** — RQ2 predictors survive | ✅ `prayer_times_accuracy`, `qibla`, `ui_design` all estimated; no `RQ2 VERDICT UNAVAILABLE`. Only `madhab` (6 cases) and `calc_method` (15) dropped, both below the 25-case floor and expected to clear at full scale |
+| **Check 2** — coefficient magnitudes | ✅ max &#124;β&#124; = 1.28 stars (M1 `ads_intrusive`), all well under 2 |
+| **Check 2** — no `NaN` p-values | ❌ **M4 / `complaint_complexity_bloat` only** — see §9.2 below |
+| **Check 3** — lexicon hit rate | ✅ (above) |
+| `04`, `05`, `08` at full scale | ⏳ |
+
+### 9.2 Known degeneracies at 20K — expected to clear at full scale
+
+Two models fail at the sample size, both from sparsity rather than a code defect. **Re-check both after the full run**; if either persists, the fix is a specification change, not a bigger sample.
+
+**M4 / `complaint_complexity_bloat`** — `feature_count` and `ad_supported` return `SE = nan, p = nan`, and `log_installs` returns `SE = 2520.3` with a CI of `[-4939.8, +4939.8]`. That is the separation signature the pre-flight check warns about. Cause: the outcome's prevalence is **0.77% (~72 positive cases)**, and *all three predictors in the formula are app-level constants* fitted alongside a per-app random intercept ([06_models.py:518-522](src/scripts/06_models.py#L518-L522)) — the random intercept absorbs the same between-app variance the fixed effects need, and 26 groups × 72 positives cannot identify both. The identical specification succeeds on `complaint_stability_bugs` (prevalence 2.91%, ~274 positives, `SE = 0.0020`, `p = 0.0056`), which confirms it is prevalence-driven. At full scale `complexity_bloat` should reach ~2,600 positives, comfortably past where the other outcome already works.
+
+> If it still returns `nan` at full scale, drop the random intercept for M4 and use OLS with cluster-robust SEs by app. With every predictor app-level, the random intercept is competing with the fixed effects rather than helping.
+
+**M5 / `mosque_finder`** — `MixedLM failed to converge: Singular matrix`, on 80 mentions across 18 apps. Same story, same remedy.
+
+### 9.0 Verified earlier on the 3050 laptop (correctness only)
 
 This machine has a 3050 (4GB VRAM) and its `torch` CUDA download stalled repeatedly (§0.2), so the GPU stages below were verified for **correctness on the CPU build** — they run and produce sane output, but timings will not resemble the 5090. Sample sizes are small (300–3,000 rows) specifically to keep CPU runtime reasonable while checking the logic.
 
