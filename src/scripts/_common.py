@@ -467,10 +467,10 @@ FEATURE_COLUMNS = [
     "Nafl Prayer Times",
     "Waqt relative reminders",
     "Custom Reminder Sounds",
-    "Goal System and Other events",
+    "Goal System and Other events (streak)",
     "Mosque Finder",
     "Salah and/or Wudu Guides",
-    "Useful Adhkars",
+    "Salah Specific Adhkars",
     "Qibla Compass",
     "Prayer times in Table format",
     "Auto Qasr mode",
@@ -481,6 +481,11 @@ FEATURE_COLUMNS = [
     "Women tracking",
     "Widgets",
     "Has Companion Hardware",
+    # Added when the sheet was completed to 26/26. They carry no aspect mapping
+    # (no review-side lexicon entry corresponds to them), so they contribute to
+    # `feature_count` for RQ5 but not to the promise/delivery matching in 03b.
+    "Life Qaza Calculator",
+    "Habit builder and tracker",
 ]
 
 #: aspect name -> CSV feature column, per implementation_plan.md §5.1.
@@ -491,10 +496,10 @@ ASPECT_TO_FEATURE = {
     "reminders_adhan": "Timely Reminders",
     "forbidden_times": "Forbidden Times",
     "nafl_times": "Nafl Prayer Times",
-    "goal_system": "Goal System and Other events",
+    "goal_system": "Goal System and Other events (streak)",
     "mosque_finder": "Mosque Finder",
     "guides": "Salah and/or Wudu Guides",
-    "adhkar": "Useful Adhkars",
+    "adhkar": "Salah Specific Adhkars",
     "qibla": "Qibla Compass",
     "table_format": "Prayer times in Table format",
     "qasr_travel": "Auto Qasr mode",
@@ -550,17 +555,30 @@ ASPECT_DESCRIPTIONS = {
 }
 
 
+#: Cell values that mean "annotator checked, feature is absent" — as opposed to
+#: a blank (absence by omission) or any other text (a note, hence presence).
+ABSENT_MARKERS = frozenset({"x", "✗", "✘", "-", "–", "—", "n", "no", "0", "false"})
+
+
 def load_feature_csv() -> pd.DataFrame:
     """
     Parse the hand-annotation sheet.
 
     The sheet has three spacer rows above the header, and encodes presence as
     a tick ('✓') *or* a free-text note (e.g. 'Google Maps', 'Tahajjud').
-    Any non-empty cell therefore means "feature present".
 
-    Apps with no annotation at all (the 6 unannotated apps) are returned with
-    NaN across every feature — never 0 — so downstream joins can distinguish
-    "verified absent" from "not yet annotated".
+    Absence is encoded EITHER as an explicit marker ('x') OR as a blank cell.
+    Both are read as "verified absent"; a row is treated as annotated if it
+    holds any non-empty cell at all. Distinguishing these matters: an explicit
+    'x' means the annotator checked and found nothing, whereas a blank is only
+    absence-by-omission. Treating 'x' as presence — as this function did before
+    the sheet was completed with explicit markers — silently marks every feature
+    present for every app and collapses `feature_count` to a constant, which
+    destroys RQ5's independent variable without raising an error.
+
+    Apps with no annotation at all are returned with NaN across every feature —
+    never 0 — so downstream joins can distinguish "verified absent" from
+    "not yet annotated".
     """
     raw = pd.read_csv(CSV_PATH, header=3, encoding="utf-8-sig", dtype=str)
     raw = raw.dropna(how="all")
@@ -579,9 +597,20 @@ def load_feature_csv() -> pd.DataFrame:
         "summary_note": raw.get("General Review Summary"),
     })
 
-    binary = raw[present].notna() & (raw[present].apply(lambda s: s.str.strip() != ""))
+    vals = raw[present].apply(lambda s: s.fillna("").str.strip())
+    filled = vals != ""
+    absent = vals.apply(lambda s: s.str.lower().isin(ABSENT_MARKERS))
+    binary = filled & ~absent
     n_filled = binary.sum(axis=1)
-    annotated = n_filled > 0
+    annotated = filled.any(axis=1)
+
+    n_absent = int(absent.sum().sum())
+    log(f"Feature CSV encoding: {int(binary.sum().sum()):,} present, "
+        f"{n_absent:,} explicit-absent ('x'), "
+        f"{int((~filled).sum().sum()):,} blank.")
+    if n_absent == 0:
+        log("No explicit-absent markers found — absence is encoded as blanks only.",
+            level="WARN")
 
     for col in present:
         out[col] = np.where(annotated, binary[col].astype(float), np.nan)

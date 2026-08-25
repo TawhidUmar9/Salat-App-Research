@@ -356,26 +356,29 @@ Each RQ notebook ends with an **"Answer to RQ_"** cell with blanks to fill — t
 
 ## 5. Two things only you can do
 
-### 🔴 A. Annotate the 6 missing apps
+### ✅ A. Annotate the 6 missing apps — DONE
 
-Still **0/23 filled** in `Salah App Analysis - Sheet1.csv`:
+`Salah App Analysis - Sheet1.csv` is now **26/26 annotated, 0 unannotated**. The description fallback is no longer load-bearing for any app; `03b`'s κ table becomes a pure measurement-validity result rather than a dependency.
 
-| App | Reviews | Installs |
-|---|---|---|
-| Salatuk (Prayer time) | 111,232 | 50M+ |
-| Salaat First: Prayer Times | 8,895 | 10M+ |
-| নামাজের সময়সূচি — Prayer Time | 6,572 | 1M+ |
-| Prayer Times and Qibla | 4,546 | 1M+ |
-| Sadiq: Prayer, Quran, Qibla | 1,525 | 100K+ |
-| IslamApp: Prayer times & Athan | 577 | 1M+ |
+The completed sheet changed the schema in three ways the code has been updated to match:
 
-6 apps × 22 features = 132 cells. The pipeline runs without this — `03b` fills those apps from store descriptions — but the hand annotation is the stronger IV and the κ validation reference.
+| Change | Effect |
+|---|---|
+| Absence is now an explicit **`x`**, not a blank (302 `x`, 322 present, **0 blanks**) | `load_feature_csv()` reads `x` as absent via `ABSENT_MARKERS`. **This was a silent-corruption bug**: the old parser treated *any* non-empty cell as "present", so every `x` would have counted as a feature. Every app would have scored 24/24 and `feature_count` — RQ5's independent variable — would have been a constant with zero variance, with no error raised |
+| Two columns renamed — `Useful Adhkars` → `Salah Specific Adhkars`, `Goal System and Other events` → `… (streak)` | `FEATURE_COLUMNS` and `ASPECT_TO_FEATURE` updated; the `adhkar` and `goal_system` aspect mappings follow the new names |
+| Two features added — `Life Qaza Calculator`, `Habit builder and tracker` | `FEATURE_COLUMNS` is now 24 (20 aspect-mapped + 4 unmapped). Unmapped features count toward `feature_count` but take no part in `03b`'s promise matching |
 
-> **The description fallback measured worse than hoped, so this matters more than it looks.** Running `03b --no-zero-shot` against the 20 hand-annotated apps gives a **mean Cohen's κ of 0.257** — "fair" at best. Per-feature it ranges from κ=0.64 (`Has Companion Hardware`) down to κ=−0.10 (`All Features for free`, where the description says "free" for 8 apps the annotator marked 19). Under-detection dominates: `Madhab Variations` 12→2, `Various methods of calculation` 11→4, `Widgets` 12→6.
+Resulting `feature_count`: range **7–16**, mean 12.4, sd 2.3, 9 distinct values across 26 apps — genuine spread for M4. Package resolution stays 26/26 with zero collisions.
+
+The rare-feature constraints that shape RQ3/RQ4/RQ5 are unchanged, so those research questions keep their existing designs: `Auto Qasr mode` N=1, `Has Companion Hardware` N=1, `Women tracking` N=3. Two features are now present in **all 26** apps (`Prayer Times by Location`, `Timely Reminders`) — expect the documented κ=0 degeneracy on those (see §6), and report raw agreement instead.
+
+> **Everything downstream must be recomputed.** `feature_count` changed for all 26 apps, not just the 6: the column set grew from 22 to 24, and `x` cells that the old parser would have counted as *present* are now correctly counted as *absent*. Any `feature_count`, `gap_matrix`, or `unmet_needs_ranking` produced before this point is stale. Re-run from `01_preprocess.py`.
+
+> **The κ table is now a finding, not a dependency.** With 26/26 hand-annotated, no app's `feature_count` comes from a store description any more — `03b`'s agreement numbers exist purely to answer "how good a proxy would store copy have been?", and the answer is *poor*. Against the 20 apps annotated under the old schema it gave **mean Cohen's κ = 0.257**, ranging from κ=0.64 (`Has Companion Hardware`) to κ=−0.10 (`All Features for free`, where the description claims "free" for 8 apps the annotator marked 19). Under-detection dominated: `Madhab Variations` 12→2, `Various methods of calculation` 11→4, `Widgets` 12→6.
 >
-> Practical consequence: for the 6 unannotated apps, `feature_count` is systematically **under**-counted. That biases RQ5's bloat analysis and inflates RQ6b's unmet-need scores for those apps. Hand-annotating removes the problem entirely for 18% of the corpus.
+> **Those numbers are stale** — they predate the completed sheet, the renamed columns, and the two added features. Recompute them from the next `03b --no-zero-shot` run before citing anything in Figure 3.
 >
-> Report the κ table (Figure 3) honestly as a measurement-validity finding — "store descriptions are an unreliable proxy for shipped features" is a legitimate, citable result, not a failure.
+> Report it honestly as a measurement-validity result: *"store descriptions are an unreliable proxy for shipped features"* is legitimate and citable, and it is now a cleaner claim than before, because the comparison is against a complete hand annotation rather than a partial one.
 
 #### 🔴 Always run `03b` with `--no-zero-shot`
 
