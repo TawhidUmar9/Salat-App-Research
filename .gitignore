@@ -12,6 +12,12 @@ src/data/*.csv
 src/data/_checkpoints/
 src/data/_models/
 
+# Per-run provenance log (commit, GPU, batch size, library versions). Append-only
+# and machine-specific, so committing it from two machines only creates conflicts.
+# Ship the SERVER's copy with the artifact submission — it is the evidence for
+# how every reported number was produced.
+src/data/run_manifest.jsonl
+
 # Generated figures
 src/figures/*.png
 src/figures/*.pdf

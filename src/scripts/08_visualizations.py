@@ -203,6 +203,23 @@ def fig03_promise_source_agreement():
         [f"{str(f)[:34]}{'  (κ undefined)' if u else ''}"
          for f, u in zip(rep["feature"], undefined)], fontsize=8)
     ax.set_xlabel("Cohen's κ  (hand annotation vs. store description)")
+
+    # Annotate raw agreement on every bar. For near-universal features κ collapses
+    # toward 0 however well the raters agree — `Timely Reminders` scores κ=0.00 at
+    # 96% agreement — and a bare zero bar reads as total failure. Showing both
+    # numbers together makes that impossible to misread, and is the "report raw
+    # agreement alongside κ" rule from §6 made visible rather than left to prose.
+    if "agreement" in rep.columns:
+        agree = pd.to_numeric(rep["agreement"], errors="coerce").to_numpy(dtype=float)
+        for i, (k, ag) in enumerate(zip(kappa, agree)):
+            if not np.isfinite(ag):
+                continue
+            # Always sit to the right of the bar's rightmost extent — a negative
+            # bar ends at 0, so anchoring to k would push the label left across
+            # the axis and collide with the feature name.
+            x = max(0.0, k) if np.isfinite(k) else 0.0
+            ax.text(x + 0.02, i, f"{ag:.0%} agree", va="center", ha="left",
+                    fontsize=6.5, color="dimgrey")
     if undefined.any():
         ax.text(0.99, 0.01,
                 "hatched = κ undefined (feature present in every app; report raw agreement)",

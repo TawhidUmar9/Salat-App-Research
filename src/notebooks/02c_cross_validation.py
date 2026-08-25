@@ -28,8 +28,23 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, str(Path.cwd().parent / "scripts"))
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+# Locate src/scripts whether this runs as a script or inside a Jupyter kernel.
+# `__file__` is defined only in the former — referencing it directly in a
+# notebook raises NameError before any cell can run — and the working directory
+# differs depending on where Jupyter was started, so try the candidates in turn
+# and take the first that actually holds _common.py.
+_here = Path(globals()["__file__"]).resolve().parent if "__file__" in globals() else Path.cwd()
+for _cand in (_here.parent / "scripts", _here / "src" / "scripts",
+              Path.cwd().parent / "scripts", Path.cwd() / "src" / "scripts",
+              Path.cwd() / "scripts"):
+    if (_cand / "_common.py").is_file():
+        sys.path.insert(0, str(_cand))
+        break
+else:
+    raise ImportError(
+        "Cannot find src/scripts/_common.py. Start Jupyter from the repo root "
+        "or from src/notebooks/, or set the working directory with os.chdir()."
+    )
 
 from _common import (  # noqa: E402
     ASPECT_PATH, GOLD_DIR, SENTIMENT_PATH, log, stratified_sample, write_gold_sheet,

@@ -63,7 +63,8 @@ Each of these fails **silently** — wrong numbers, no crash.
 | `Feature CSV encoding: 322 present, 302 explicit-absent ('x')` | `x` parsing regressed — every `x` counted as a feature, `feature_count` is a constant (§5A) |
 | `26 apps — 26 annotated` | the completed sheet is not being read |
 | `Resolved to packages: 26/26` | an app failed to join; feature data mis-assigned |
-| `Lexicon hits: … (≈35%)` | near 0% means the lexicon did not load |
+| `Lexicon hits: … (≈30%)` | **30.2% measured at full corpus** (35.5% at 20K — the full corpus has more varied text). Near 0% means the lexicon did not load |
+| `03b` log shows **no** `Loading NLI model` and `Mean κ = 0.275` | `--no-zero-shot` was forgotten; κ comes out 0.202 and Figure 3 is wrong (§5A) |
 | no `DROPPED` for `prayer_times_accuracy` / `qibla` / `ui_design` | RQ2 not estimable |
 | no unexplained `CONVERGENCE WARNING` / `NOT ESTIMABLE` | a model did not converge; its coefficients are not reportable (§9.2) |
 
@@ -71,13 +72,37 @@ Also confirm `src/data/run_manifest.jsonl` exists — it records the commit, GPU
 
 ### Phase 3 — Generate the labelling sheets  ·  5 min
 
+**On the server** — the sheets are sampled from the pipeline's parquet outputs, which only exist there. One command, no Jupyter:
+
 ```bash
-uv pip install jupytext jupyter
-.venv/bin/jupytext --to notebook src/notebooks/02c_cross_validation.py
-.venv/bin/jupyter notebook          # run sections 1–3
+.venv/bin/python src/scripts/_gen_gold_sheets.py
 ```
 
-Must come **after** phase 1: the sheets are samples drawn from the pipeline's output, and rerunning the pipeline regenerates them. Labelling sheets built from a `--sample` run means labelling a sample of a sample.
+Then **copy the sheets down to a machine with a spreadsheet app** and label there:
+
+```bash
+# from the laptop
+scp -r ubuntu@<server>:~/Tonmoy/Salat-App-Research/src/data/gold_labels ./gold_labels
+```
+
+When labelling is done, put them back before phase 5:
+
+```bash
+scp ./gold_labels/*.csv ubuntu@<server>:~/Tonmoy/Salat-App-Research/src/data/gold_labels/
+```
+
+Must come **after** phase 1: rerunning the pipeline regenerates these sheets, and sheets built from a `--sample` run mean labelling a sample of a sample.
+
+> **Why a script instead of the notebook.** `02c_cross_validation.py` calls Jupyter's `display()`, so it cannot run as a plain script, and running Jupyter on a headless server needs an SSH tunnel. `_gen_gold_sheets.py` mirrors §3 of that notebook exactly — same stratification, same seeds, same columns — so the sheets are identical. **The notebook is still required later** for its section 4 (κ / P / R / F1 / α) and the threshold calibration, both of which read the *filled* sheets back. Set Jupyter up during phase 4 while labelling is underway:
+>
+> ```bash
+> # on the server
+> uv pip install jupytext jupyter
+> .venv/bin/jupytext --to notebook src/notebooks/02c_cross_validation.py
+> .venv/bin/jupyter notebook --no-browser --port 8888
+> # from the laptop, in another terminal
+> ssh -N -L 8888:localhost:8888 ubuntu@<server>
+> ```
 
 ### Phase 4 — Hand-label  ·  days, the critical path
 
@@ -445,7 +470,7 @@ The rare-feature constraints that shape RQ3/RQ4/RQ5 are unchanged, so those rese
 
 > **Everything downstream must be recomputed.** `feature_count` changed for all 26 apps, not just the 6: the column set grew from 22 to 24, and `x` cells that the old parser would have counted as *present* are now correctly counted as *absent*. Any `feature_count`, `gap_matrix`, or `unmet_needs_ranking` produced before this point is stale. Re-run from `01_preprocess.py`.
 
-> **The κ table is now a finding, not a dependency.** With 26/26 hand-annotated, no app's `feature_count` comes from a store description any more — `03b`'s agreement numbers exist purely to answer "how good a proxy would store copy have been?", and the answer is *poor*. Against the 20 apps annotated under the old schema it gave **mean Cohen's κ = 0.257**, ranging from κ=0.64 (`Has Companion Hardware`) to κ=−0.10 (`All Features for free`, where the description claims "free" for 8 apps the annotator marked 19). Under-detection dominated: `Madhab Variations` 12→2, `Various methods of calculation` 11→4, `Widgets` 12→6.
+> **The κ table is now a finding, not a dependency.** With 26/26 hand-annotated, no app's `feature_count` comes from a store description any more — `03b`'s agreement numbers exist purely to answer "how good a proxy would store copy have been?", and the answer is *poor*. Measured on the full 26-app sheet: **mean Cohen's κ = 0.275**, ranging from κ=0.62 (`Women tracking`) down to κ=−0.05 (`Connect to Google Calendar`). Under-detection dominates badly on exactly the features that distinguish apps: `Madhab Variations` 25→3 (15% agreement), `Various methods of calculation` 24→9, `All Features for free` 24→10, `Widgets` 19→10.
 >
 > **Those numbers are stale** — they predate the completed sheet, the renamed columns, and the two added features. Recompute them from the next `03b --no-zero-shot` run before citing anything in Figure 3.
 >
@@ -457,7 +482,7 @@ The rare-feature constraints that shape RQ3/RQ4/RQ5 are unchanged, so those rese
 
 | | lexicon only (`--no-zero-shot`) | + zero-shot (default) |
 |---|---|---|
-| Mean Cohen's κ | **0.257** | 0.202 |
+| Mean Cohen's κ | **0.275** | 0.202 |
 | `Various methods of calculation` (csv=11) | 4 — under | **14** — over, κ=−0.15 |
 | `Has Companion Hardware` (csv=1) | κ=**0.64** | 5, κ=0.27 |
 | `Connect to Google Calendar` (csv=1) | — | **16**, κ=0.03 |
@@ -553,7 +578,7 @@ Recorded here because reviewers will ask, and because they differ from the plan 
 | Unannotated apps are `NaN`, never `0` | Blank-vs-absent is unrecoverable from the sheet alone; treating blank rows as "no features" would have handed RQ5 six fake zero-feature apps. |
 | Requests excluded from aspect sentiment | "Wish it had a qibla" is demand, not dissatisfaction with an existing qibla. §5.3 calls scoring these as negative a paper-killing failure mode. |
 | Zero-shot uses an embedding prefilter | Full 27-label NLI over every unmatched sentence is intractable. Report `prefilter_recall()` — it bounds achievable recall and reviewers will ask. |
-| Promise extraction uses a **separate, stricter vocabulary** from review ABSA | Store copy is marketing prose, not user complaint. The review-side keyword `journey` matched *"embark on a spiritual journey"* in 13 listings and inflated `qasr_travel` from 1 promising app to 14 — which would have collapsed RQ3's unmet-need score and fabricated RQ6a broken promises. 7 ambiguous aspects now define `promise_keywords` in `aspect_lexicon.yaml`; the rest fall back to the review set. Mean κ improved 0.193 → 0.257. |
+| Promise extraction uses a **separate, stricter vocabulary** from review ABSA | Store copy is marketing prose, not user complaint. The review-side keyword `journey` matched *"embark on a spiritual journey"* in 13 listings and inflated `qasr_travel` from 1 promising app to 14 — which would have collapsed RQ3's unmet-need score and fabricated RQ6a broken promises. 7 ambiguous aspects now define `promise_keywords` in `aspect_lexicon.yaml`; the rest fall back to the review set. Mean κ improved 0.193 → 0.257 (20-app schema); 0.275 on the final 26-app sheet. |
 | κ = 0.00 on near-universal features is a degeneracy, not a failure | `Prayer Times by Location` and `Timely Reminders` are present in 20/20 apps. When one rater is constant, Cohen's κ is 0 (or undefined) no matter how high raw agreement is — both sit at 80–95% agreement. Report raw agreement alongside κ for these, or exclude them from the mean with a footnote. |
 | M4 uses a linear probability model | Logistic MixedLM over ~300K rows doesn't converge reliably in statsmodels; the LPM coefficient reads directly as a percentage-point change. |
 | BH-FDR, not Bonferroni | §9.7: with 22 features × multiple aspects Bonferroni guarantees a null. |
@@ -644,7 +669,7 @@ Correctness checks from the guide's pre-flight list:
 | Zero-shot prefilter working | ✅ 44,595 NLI pairs vs 240,813 unfiltered (**5.4× reduction**) |
 | Aspect coverage | ✅ all 27 aspects fire; rare ones present (`qasr_travel` 35, `women_period` 74, `madhab` 29) |
 | Request/complaint split | ✅ 757 (7.5%) flagged as requests, excluded from aspect sentiment |
-| `03b` mean κ | ✅ **0.257** with `--no-zero-shot` (0.202 with it on — see §5A) |
+| `03b` mean κ | ✅ **0.275** with `--no-zero-shot`, full 26-app sheet (0.202 with it on — see §5A) |
 | `03b` feature_count source bias | ✅ fixed — desc-derived apps mean **8.5** vs csv **9.0** (was 13.0 vs 9.0 with zero-shot on) |
 | **Check 1** — RQ2 predictors survive | ✅ `prayer_times_accuracy`, `qibla`, `ui_design` all estimated; no `RQ2 VERDICT UNAVAILABLE`. Only `madhab` (6 cases) and `calc_method` (15) dropped, both below the 25-case floor and expected to clear at full scale |
 | **Check 2** — coefficient magnitudes | ✅ max &#124;β&#124; = 1.28 stars (M1 `ads_intrusive`), all well under 2 |
