@@ -4,67 +4,132 @@
 
 ---
 
-## What to do right now
+## The runbook
 
-**Done:** environment on the 5090 (`cu128`), the 20K pre-flight across every stage, and the hand annotation — the sheet is 26/26 (§5A). **Next:** the full corpus, then the gold-set labelling.
+**This section is the single source of truth for what to run and when.** Everything else in this guide is reference material for when a phase goes wrong.
 
-### Step 1 — Full corpus, stages 01→03c  ·  ~30 min, unattended
+**Done:** 5090 environment on `cu128` · 20K pre-flight across every stage · hand annotation complete at 26/26 (§5A) · RQ5 reframe pre-specified (§5.5).
+
+| Phase | What | Wall clock | Blocks on |
+|---|---|---|---|
+| 0 | Sync code to the server | 2 min | — |
+| 1 | Full corpus, `01`→`03c` | ~30 min, unattended | — |
+| 2 | Verify the run | 5 min, eyes on the log | phase 1 |
+| 3 | Generate the labelling sheets | 5 min | phase 2 |
+| 4 | **Hand-label 1,000 rows** | **days — the critical path** | phase 3 + a second annotator |
+| 5 | Calibrate threshold, re-run `03` | ~20 min | phase 4 |
+| 6 | Final analysis + figures | ~1 h (04 dominates) | phase 5 |
+| 7 | Notebooks → paper text | days | phase 6 |
+
+---
+
+### Phase 0 — Sync code  ·  once
+
+On the laptop:
+
+```bash
+git add -A
+git commit -m "RQ5 reframe, M4 sensitivity, run manifest, x-as-absent parsing"
+git push
+```
+
+On the server:
+
+```bash
+cd ~/Tonmoy/Salat-App-Research
+git pull
+rm -rf src/data/_checkpoints        # fresh start: the only state that persists
+```
+
+### Phase 1 — Full corpus, `01`→`03c`  ·  ~30 min, unattended
 
 ```bash
 .venv/bin/python src/scripts/01_preprocess.py
 .venv/bin/python src/scripts/02a_sentiment_vader.py
-.venv/bin/python src/scripts/02b_sentiment_roberta.py --resume
-.venv/bin/python src/scripts/03_absa.py            --resume
+.venv/bin/python src/scripts/02b_sentiment_roberta.py --overwrite --batch-size 512
+.venv/bin/python src/scripts/03_absa.py                --overwrite --batch-size 512
 .venv/bin/python src/scripts/03b_promise_extraction.py --no-zero-shot
 .venv/bin/python src/scripts/03c_demand_mining.py
 ```
 
-Confirm in the log before moving on:
+`--batch-size 512` is pinned deliberately: auto-sizing reads whatever GPU is present, and batch shape can perturb bf16 reductions enough to flip a borderline zero-shot decision. Pinning it makes the run reproducible and gives Methods a number to quote.
 
-| Expect | Meaning if wrong |
+### Phase 2 — Verify  ·  do not skip
+
+Each of these fails **silently** — wrong numbers, no crash.
+
+| Expect in the log | If wrong |
 |---|---|
-| `Feature CSV encoding: … explicit-absent ('x') …` and `26 apps — 26 annotated` | The `x` parsing regressed — `feature_count` is corrupt (§5A) |
-| `Resolved to packages: 26/26` | An app failed to join; feature data is mis-assigned |
-| `Lexicon hits: … (≈35%)` | Near 0% means the lexicon did not load |
-| No `DROPPED` for `prayer_times_accuracy` / `qibla` / `ui_design` | RQ2 is not estimable |
+| `Feature CSV encoding: 322 present, 302 explicit-absent ('x')` | `x` parsing regressed — every `x` counted as a feature, `feature_count` is a constant (§5A) |
+| `26 apps — 26 annotated` | the completed sheet is not being read |
+| `Resolved to packages: 26/26` | an app failed to join; feature data mis-assigned |
+| `Lexicon hits: … (≈35%)` | near 0% means the lexicon did not load |
+| no `DROPPED` for `prayer_times_accuracy` / `qibla` / `ui_design` | RQ2 not estimable |
+| no unexplained `CONVERGENCE WARNING` / `NOT ESTIMABLE` | a model did not converge; its coefficients are not reportable (§9.2) |
 
-### Step 2 — Generate the labelling sheets  ·  minutes
+Also confirm `src/data/run_manifest.jsonl` exists — it records the commit, GPU, batch size, and library versions behind every number. That file is your artifact-review evidence.
+
+### Phase 3 — Generate the labelling sheets  ·  5 min
 
 ```bash
 uv pip install jupytext jupyter
 .venv/bin/jupytext --to notebook src/notebooks/02c_cross_validation.py
-.venv/bin/jupyter notebook    # run sections 1–3
+.venv/bin/jupyter notebook          # run sections 1–3
 ```
 
-### Step 3 — Label by hand  ·  the long pole, days
+Must come **after** phase 1: the sheets are samples drawn from the pipeline's output, and rerunning the pipeline regenerates them. Labelling sheets built from a `--sample` run means labelling a sample of a sample.
 
-`doc_500.csv` (+ the two annotator splits), `aspect_300.csv`, `demand_precision_sample.csv`. See §5B for what each column means. Nothing else can proceed past step 4 without `aspect_300`.
+### Phase 4 — Hand-label  ·  days, the critical path
 
-### Step 4 — Calibrate the threshold, then re-run 03  ·  ~20 min
+**1,000 rows across three sheets, all in `src/data/gold_labels/`.**
 
-Run the notebook's "Zero-shot threshold calibration" section against the filled `aspect_300.csv`, then:
+| Sheet | Rows | Fill these columns | What it buys the paper |
+|---|---|---|---|
+| `doc_500.csv` | 500 | `gold_label` ∈ {Positive, Negative, Neutral, **Mixed**} | sentiment κ / precision / recall / F1 → Methods + Figure 2 |
+| `aspect_300.csv` | 300 | `gold_aspect_correct` (1/0), `gold_aspect_true` (if 0), `gold_sentiment`, `gold_is_request` (1/0) | ABSA validity **and** the zero-shot threshold |
+| `demand_precision_sample.csv` | 200 | `is_true_positive` (1/0), `correct_aspect` if wrong | per-family precision of the demand regexes (§6.2) |
+
+**You need a second annotator.** `doc_500_annotator1.csv` and `doc_500_annotator2.csv` split the 500 with a **100-row overlap** purely so Krippendorff's α can be computed. One person labelling both files produces no α, and a CHI paper making qualitative claims without an inter-rater reliability figure will be challenged on it. Line up the second coder before you start, or decide now that you will report agreement on a smaller double-coded subset and say so explicitly.
+
+Practical notes:
+
+- **Mixed is a real label, not a fallback.** "Great app, qibla is broken" is Mixed, not Neutral. The whole reason for ABSA is that these exist.
+- `aspect_300` is stratified **by aspect**, so ~11 rows each — you will see rare aspects (`qasr_travel`, `women_period`) far more often than their corpus frequency. That is deliberate; do not "correct" for it.
+- Label `is_request` carefully: "wish it had qasr mode" is a **request**, not a negative qibla judgement. This distinction is load-bearing for RQ3 and RQ6.
+- Your labels are safe from a re-run — `write_gold_sheet()` backs up any filled sheet to `<stem>.backup-<timestamp>.csv` before overwriting, and logs a WARN. If you see that warning, the new sheet is a **new sample**: merge on `reviewId`, never by row order.
+
+### Phase 5 — Calibrate, then recompute `03`  ·  ~20 min
+
+Run the notebook's **"Zero-shot threshold calibration"** section against the filled `aspect_300.csv`; it prints precision at each candidate threshold. Pick one, then:
 
 ```bash
-.venv/bin/python src/scripts/03_absa.py --zeroshot-threshold <calibrated>
+.venv/bin/python src/scripts/03_absa.py --overwrite --batch-size 512 \
+      --zeroshot-threshold <the calibrated value>
 ```
 
-`--resume` is safe here: the checkpoint fingerprints the threshold and clears stale shards by itself if it changed (§0.3). Leaving it off costs one extra NLI pass, nothing more.
+`03` runs twice by design: once at the default 0.75 to produce the sentences you label, once at your calibrated value. Also run section 4 of that notebook now for the κ / P / R / F1 / α numbers that go into Methods and Figure 2.
 
-### Step 5 — Final analysis and figures  ·  04 is the slow one
+### Phase 6 — Final analysis and figures  ·  ~1 h
 
 ```bash
-.venv/bin/python src/scripts/03c_demand_mining.py
+.venv/bin/python src/scripts/03c_demand_mining.py     # input changed with the threshold
 .venv/bin/python src/scripts/04_topic_modeling.py
 .venv/bin/python src/scripts/05_temporal.py
 .venv/bin/python src/scripts/06_models.py
 .venv/bin/python src/scripts/08_visualizations.py
 ```
 
-Re-run `03c` first — its input changed when the threshold did. `04` is CPU-bound (UMAP/HDBSCAN, no GPU) and is the one stage whose full-scale cost is unmeasured.
+`04` is the slow, unmeasured one — UMAP/HDBSCAN are CPU-bound and never GPU-accelerated. It warns above 150K documents; if it is killed, re-run with `--sample N` and **state the subsample size in the paper**.
 
-### Step 6 — Notebooks → paper
+Watch for in `06`: the RQ5 reframe block (`§9.4 RQ5 reframed`), the M4 cluster-robust sensitivity fit, and the FDR accounting with its full denominator.
 
-`06_cross_app_analysis.py` first, then `07_rq1..rq6`. Each ends in an "Answer to RQ_" cell that becomes a paragraph. Fill `manual_label` in `topic_info.csv` via `04_topic_exploration.py` before the RQ notebooks lean on topic names.
+### Phase 7 — Notebooks → paper
+
+1. `04_topic_exploration.py` — read representative docs, fill `manual_label` in `topic_info.csv` **and** `topic_info_rq5_bloat.csv`. Do this before any RQ notebook leans on topic names.
+2. `06_cross_app_analysis.py` — ecosystem descriptives and a model review. Read this before the RQ notebooks.
+3. `07_rq1..rq6` — each ends in an **"Answer to RQ_"** cell that becomes a paragraph of the paper.
+
+For RQ5 specifically, the answer has three parts, in this order: the null on `feature_count` (both fits), the pre-specified co-occurrence test, then the `rq5_bloat` sub-topics as qualitative texture. See §5.5 — including the sentence to write if the co-occurrence test comes back null.
 
 ---
 
@@ -242,39 +307,14 @@ Batch size is auto-derived from detected VRAM, and **halves and retries automati
                      07_rq1..rq6 notebooks → 08_visualizations
 ```
 
-### Recommended: dry run first
+**For the commands to actually run, use [the runbook](#the-runbook)** — it is phase-ordered and current. This section documents the dependency graph only.
 
-```bash
-.venv/bin/python src/scripts/01_preprocess.py       --sample 20000
-.venv/bin/python src/scripts/02a_sentiment_vader.py
-.venv/bin/python src/scripts/02b_sentiment_roberta.py
-.venv/bin/python src/scripts/03_absa.py             --no-zero-shot --fast-split
-.venv/bin/python src/scripts/03b_promise_extraction.py --no-zero-shot
-.venv/bin/python src/scripts/03c_demand_mining.py
-.venv/bin/python src/scripts/04_topic_modeling.py
-.venv/bin/python src/scripts/05_temporal.py
-.venv/bin/python src/scripts/06_models.py
-.venv/bin/python src/scripts/08_visualizations.py
-```
+The dry run that used to live here has served its purpose: the 20K pre-flight is done and its results are in §9. Re-running a sample is now only useful for debugging a specific stage, in which case pass `--sample N` to that stage alone.
 
-That exercises every stage in ~15 minutes and surfaces problems before you commit hours of GPU time.
+Two constraints the graph does not show:
 
-### Full run
-
-```bash
-.venv/bin/python src/scripts/01_preprocess.py
-.venv/bin/python src/scripts/02a_sentiment_vader.py
-.venv/bin/python src/scripts/02b_sentiment_roberta.py --resume
-.venv/bin/python src/scripts/03_absa.py --resume
-.venv/bin/python src/scripts/03b_promise_extraction.py --no-zero-shot
-.venv/bin/python src/scripts/03c_demand_mining.py
-.venv/bin/python src/scripts/04_topic_modeling.py
-.venv/bin/python src/scripts/05_temporal.py
-.venv/bin/python src/scripts/06_models.py
-.venv/bin/python src/scripts/08_visualizations.py
-```
-
-Do **not** run 02a and 02b in parallel on one GPU — they will contend for VRAM. 02a is CPU-only and takes about a minute.
+- Do **not** run 02a and 02b in parallel on one GPU — they contend for VRAM. 02a is CPU-only and takes about a minute anyway.
+- `03_absa` appears twice in the runbook (phases 1 and 5). That is the threshold-calibration loop, not a mistake: the first pass produces the sentences you label, the second uses the value calibrated from them.
 
 ---
 
@@ -383,7 +423,9 @@ Each RQ notebook ends with an **"Answer to RQ_"** cell with blanks to fill — t
 
 ---
 
-## 5. Two things only you can do
+## 5. The manual work — one of two done
+
+Reference detail for phase 4 of the runbook. **A is complete**; **B is the critical path**.
 
 ### ✅ A. Annotate the 6 missing apps — DONE
 
