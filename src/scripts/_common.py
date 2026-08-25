@@ -11,6 +11,7 @@ analysis-specific — it is plumbing.
 from __future__ import annotations
 
 import argparse
+import atexit
 import json
 import os
 import re
@@ -177,6 +178,9 @@ def get_device(preference: str = "auto") -> tuple[str, float]:
         props = torch.cuda.get_device_properties(0)
         gb = props.total_memory / 1024**3
         log(f"Device: cuda — {props.name} ({gb:.1f} GB VRAM)")
+        record_run_fact("device", "cuda")
+        record_run_fact("gpu", props.name)
+        record_run_fact("vram_gb", round(gb, 1))
         return "cuda", gb
     if preference in ("mps", "auto") and getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
         log("Device: mps (Apple Silicon)")
@@ -210,6 +214,10 @@ def auto_batch_size(memory_gb: float, model_class: str = "base", *, requested: i
     bs = int(usable / _MODEL_FOOTPRINT[model_class])
     bs = max(4, min(512, 1 << (bs.bit_length() - 1)))  # clamp + round down to power of 2
     log(f"Auto batch size for '{model_class}' on {memory_gb:.1f} GB → {bs}")
+    # Auto-sizing means the batch depends on whatever GPU is present, and batch
+    # shape can perturb bf16 reductions enough to flip a borderline zero-shot
+    # decision. Record it so Methods can state the value actually used.
+    record_run_fact(f"batch_size_{model_class}", bs)
     return bs
 
 
@@ -308,17 +316,53 @@ class Checkpoint:
     Each shard is a parquet file under data/_checkpoints/<name>/. A run with
     --resume skips shards that already exist; a crash therefore costs at most
     one shard of work.
+
+    `config` fingerprints the settings that determine *what* gets computed. It
+    is stored beside the shards and re-checked on resume: if it has changed, the
+    shards are stale and are cleared automatically rather than being mixed with
+    freshly computed ones.
+
+    That invalidation is not cosmetic. Shards are keyed by *position* in the
+    deduplicated work list, so changing something like --zeroshot-threshold
+    changes which items fall in which shard. Resuming across that boundary makes
+    cached shard N describe different rows than new shard N, and items missing
+    from the cache silently merge to NaN instead of being scored — wrong numbers,
+    no error.
     """
 
-    def __init__(self, name: str, *, resume: bool = False, overwrite: bool = False):
+    def __init__(self, name: str, *, resume: bool = False, overwrite: bool = False,
+                 config: dict | None = None):
         self.dir = CKPT_DIR / name
         self.name = name
+        self.config = config
+        cfg_path = self.dir / "_config.json"
+
         if overwrite and self.dir.exists():
             for f in self.dir.glob("*.parquet"):
                 f.unlink()
             log(f"Checkpoint '{name}': cleared.")
+
+        if resume and config is not None and cfg_path.exists():
+            try:
+                prior = json.loads(cfg_path.read_text())
+            except Exception:
+                prior = None
+            if prior != config:
+                changed = sorted(
+                    k for k in set(config) | set(prior or {})
+                    if (prior or {}).get(k) != config.get(k)
+                )
+                log(f"Checkpoint '{name}': settings changed since the cached run "
+                    f"({', '.join(changed)}) — discarding stale shards.", level="WARN")
+                for k in changed:
+                    log(f"    {k}: {(prior or {}).get(k)!r} -> {config.get(k)!r}", level="WARN")
+                for f in self.dir.glob("*.parquet"):
+                    f.unlink()
+
         self.dir.mkdir(parents=True, exist_ok=True)
         self.resume = resume
+        if config is not None:
+            cfg_path.write_text(json.dumps(config, sort_keys=True, default=str))
 
     def has(self, shard: str | int) -> bool:
         return self.resume and (self.dir / f"{shard}.parquet").exists()
@@ -706,6 +750,69 @@ def compile_aspect_patterns(
 
 
 # ─── Misc ───────────────────────────────────────────────────────────────────────
+
+# ─── Reproducibility manifest ───────────────────────────────────────────────────
+#
+# Every run appends one JSON line to data/run_manifest.jsonl recording the exact
+# command, the resolved git commit, the device and batch size actually used, and
+# the versions of every library that can move a number. CHI artifact review asks
+# how a figure was produced; "we ran the script" is not an answer when the batch
+# size is auto-derived from whatever GPU happened to be present.
+#
+# Registered via atexit so no per-script wiring is needed and a crashed run still
+# leaves a record of what it was attempting.
+
+_RUN_FACTS: dict = {"started": time.strftime("%Y-%m-%dT%H:%M:%S")}
+_RUN_T0 = time.time()
+
+
+def record_run_fact(key: str, value) -> None:
+    """Note something the manifest should remember about this run."""
+    _RUN_FACTS[key] = value
+
+
+def _library_versions() -> dict:
+    out = {"python": sys.version.split()[0]}
+    for mod in ("torch", "transformers", "pandas", "numpy", "statsmodels",
+                "sklearn", "bertopic", "hdbscan", "umap", "pysbd", "ruptures"):
+        try:
+            out[mod] = __import__(mod).__version__
+        except Exception:  # not installed, or exposes no __version__
+            pass
+    return out
+
+
+def _git_state() -> dict:
+    import subprocess
+    def _run(*a):
+        try:
+            return subprocess.run(a, cwd=PROJECT_ROOT, capture_output=True, text=True,
+                                  timeout=5).stdout.strip()
+        except Exception:
+            return ""
+    sha = _run("git", "rev-parse", "HEAD")
+    dirty = bool(_run("git", "status", "--porcelain"))
+    return {"commit": sha or "unknown", "dirty_working_tree": dirty}
+
+
+def _write_run_manifest() -> None:
+    try:
+        entry = {
+            **_RUN_FACTS,
+            "script": Path(sys.argv[0]).name,
+            "command": " ".join(sys.argv),
+            "duration_sec": round(time.time() - _RUN_T0, 1),
+            "git": _git_state(),
+            "versions": _library_versions(),
+        }
+        with (DATA_DIR / "run_manifest.jsonl").open("a") as fh:
+            fh.write(json.dumps(entry, default=str) + "\n")
+    except Exception:  # a manifest must never be the reason a run fails
+        pass
+
+
+atexit.register(_write_run_manifest)
+
 
 def require(path: Path, produced_by: str) -> Path:
     """Fail fast with an actionable message when an upstream stage has not run."""

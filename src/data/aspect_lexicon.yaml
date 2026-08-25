@@ -171,7 +171,7 @@ nafl_times:
     - "তাহাজ্জুদ|নফল"             # Bengali: tahajjud / nafl
 
 goal_system:
-  csv_column: "Goal System and Other events"
+  csv_column: "Goal System and Other events (streak)"
   rqs: [RQ1]
   keywords:
     - goal
@@ -249,7 +249,7 @@ guides:
     - "step[- ]by[- ]step\\s+\\w{0,12}\\s?(?:prayer|salah|wudu|guide)"
 
 adhkar:
-  csv_column: "Useful Adhkars"
+  csv_column: "Salah Specific Adhkars"
   rqs: [RQ6]
   keywords:
     - dhikr

@@ -449,7 +449,18 @@ def main() -> None:
     tagged = handle_requests_and_negation(tagged, sentences)
 
     sent_batch = auto_batch_size(vram, "base", requested=args.batch_size)
-    ckpt = Checkpoint("absa", resume=args.resume, overwrite=args.overwrite)
+    # Fingerprint everything that changes WHICH sentences get scored — a changed
+    # threshold reshuffles shard membership, so stale shards must not be reused.
+    ckpt = Checkpoint(
+        "absa", resume=args.resume, overwrite=args.overwrite,
+        config={
+            "sample": args.sample,
+            "no_zero_shot": args.no_zero_shot,
+            "zeroshot_threshold": args.zeroshot_threshold,
+            "zeroshot_topk": args.zeroshot_topk,
+            "zeroshot_max": args.zeroshot_max,
+        },
+    )
     scored = per_aspect_sentiment(
         tagged, device=device, batch_size=sent_batch, fp32=args.fp32, ckpt=ckpt,
     )

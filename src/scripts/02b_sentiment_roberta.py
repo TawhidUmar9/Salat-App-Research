@@ -216,7 +216,8 @@ def main() -> None:
 
     device, vram = get_device(args.device)
     batch_size = auto_batch_size(vram, "base", requested=args.batch_size)
-    ckpt = Checkpoint("roberta", resume=args.resume, overwrite=args.overwrite)
+    ckpt = Checkpoint("roberta", resume=args.resume, overwrite=args.overwrite,
+                      config={"sample": args.sample})
 
     scored = run_roberta_sentiment(
         df_text, device=device, batch_size=batch_size, fp32=args.fp32,

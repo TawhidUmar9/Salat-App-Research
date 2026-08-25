@@ -29,7 +29,8 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import (  # noqa: E402
     ASPECT_PATH, DATA_DIR, SENTIMENT_PATH, TOPICS_PATH,
-    base_parser, get_device, log, maybe_sample, require, section, set_seed, summarize,
+    base_parser, get_device, log, maybe_sample, record_run_fact, require, section,
+    set_seed, summarize,
 )
 
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
@@ -109,6 +110,18 @@ def build_topic_model(docs: list[str], *, device: str, extra_stopwords: list[str
         min_topic_size = max(50, int(len(docs) * 0.001))
     log(f"{len(docs):,} documents; min_topic_size={min_topic_size}; nr_topics={nr_topics}")
 
+    # UMAP + HDBSCAN run on CPU and are the pipeline's memory ceiling: UMAP's
+    # k-NN graph is superlinear in document count, so this stage — not the
+    # transformers — is what fails first at corpus scale. Say so before spending
+    # the embedding time, and record the size actually fitted so the paper can
+    # state it if a subsample was used.
+    record_run_fact("topic_model_docs", len(docs))
+    record_run_fact("topic_model_min_topic_size", min_topic_size)
+    if len(docs) > 150_000:
+        log(f"{len(docs):,} documents is large for UMAP/HDBSCAN (CPU-bound, "
+            f"superlinear memory). If this is killed or thrashes, re-run with "
+            f"--sample N and REPORT the subsample size in the paper.", level="WARN")
+
     model_name = EMBEDDING_MODEL_MULTI if multilingual else EMBEDDING_MODEL
     embedder = SentenceTransformer(model_name, device=device)
     log(f"Embedding with {model_name} on {device}...")
@@ -184,7 +197,7 @@ def run_subtopic_models(df: pd.DataFrame, *, device: str, extra_stopwords: list[
     into one "tracker" topic. Fitting within the tracker subset is what makes
     RQ1's love/hate split visible.
     """
-    section("§7  Sub-topic models (RQ1 tracker, RQ4 women/privacy)")
+    section("§7  Sub-topic models (RQ1 tracker, RQ4 women/privacy, RQ5 bloat)")
 
     if not ASPECT_PATH.exists():
         log("aspect_sentiments.parquet not found — skipping sub-topic models.", level="WARN")
@@ -194,6 +207,11 @@ def run_subtopic_models(df: pd.DataFrame, *, device: str, extra_stopwords: list[
     subsets = {
         "rq1_tracker": ["prayer_tracker", "tracker_score", "goal_system"],
         "rq4_women_privacy": ["women_period", "privacy_data"],
+        # RQ5 reframed: feature_count does not predict bloat complaints, so the
+        # question becomes what those complaints are actually ABOUT. Fitted on
+        # complexity_bloat alone — deliberately NOT pooled with ui_design, which
+        # would assume the surfacing conclusion instead of testing for it.
+        "rq5_bloat": ["complexity_bloat"],
     }
 
     results = {}

@@ -179,14 +179,34 @@ def fig03_promise_source_agreement():
     if rep is None:
         return
 
+    rep = rep.copy()
+    rep["cohens_kappa"] = pd.to_numeric(rep["cohens_kappa"], errors="coerce")
     rep = rep.sort_values("cohens_kappa", na_position="first")
+
+    # κ is UNDEFINED (not zero) when a feature is present in every app: with one
+    # rater constant, Cohen's κ has no meaningful value however high raw
+    # agreement is. Plotting those as zero bars would read as "total failure"
+    # for features sitting at 95-100% agreement. Draw them as hatched outlines
+    # spanning the axis instead, and say so.
+    undefined = rep["cohens_kappa"].isna().to_numpy()
+    kappa = rep["cohens_kappa"].to_numpy(dtype=float)
+
     fig, ax = plt.subplots(figsize=(9, 7))
     colors = [WONG[2] if k > 0.6 else WONG[1] if k > 0.4 else WONG[4]
-              for k in rep["cohens_kappa"].fillna(-1)]
-    ax.barh(range(len(rep)), rep["cohens_kappa"].fillna(0), color=colors)
+              for k in np.nan_to_num(kappa, nan=-1.0)]
+    ax.barh(range(len(rep)), np.nan_to_num(kappa, nan=0.0), color=colors)
+    if undefined.any():
+        ax.barh(np.where(undefined)[0], 1.0, color="none",
+                edgecolor="grey", hatch="///", linewidth=0.8)
     ax.set_yticks(range(len(rep)))
-    ax.set_yticklabels([str(f)[:34] for f in rep["feature"]], fontsize=8)
+    ax.set_yticklabels(
+        [f"{str(f)[:34]}{'  (κ undefined)' if u else ''}"
+         for f, u in zip(rep["feature"], undefined)], fontsize=8)
     ax.set_xlabel("Cohen's κ  (hand annotation vs. store description)")
+    if undefined.any():
+        ax.text(0.99, 0.01,
+                "hatched = κ undefined (feature present in every app; report raw agreement)",
+                transform=ax.transAxes, fontsize=7, ha="right", va="bottom", color="grey")
     for x, lab in [(0.4, "fair"), (0.6, "moderate"), (0.8, "substantial")]:
         ax.axvline(x, color="grey", ls=":", lw=1)
         ax.text(x, len(rep) - 0.4, lab, fontsize=7, ha="center", color="grey")

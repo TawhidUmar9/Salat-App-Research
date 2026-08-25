@@ -6,50 +6,65 @@
 
 ## What to do right now
 
-> **Pre-flight on the 5090 — do this before the full run.** It exercises every
-> CUDA path and gives you real timings to extrapolate from, for ~20 minutes
-> instead of discovering a problem six hours in.
->
-> ```bash
-> # 1. environment
-> uv venv --python 3.12
-> UV_HTTP_TIMEOUT=900 uv pip install torch --index-url https://download.pytorch.org/whl/cu128
-> uv pip install -r src/requirements.txt
-> .venv/bin/python -c "import torch;print(torch.cuda.get_device_name(0), torch.cuda.is_available())"
-> # then prove a kernel actually runs (is_available()==True is not enough, see §0.1):
-> .venv/bin/python -c "import torch; x=torch.randn(2000,2000,device='cuda'); torch.cuda.synchronize(); print('OK', (x@x).sum().item())"
->
-> # 2. whole chain on a sample — every stage, real GPU
-> .venv/bin/python src/scripts/01_preprocess.py --sample 20000
-> .venv/bin/python src/scripts/02a_sentiment_vader.py
-> .venv/bin/python src/scripts/02b_sentiment_roberta.py
-> .venv/bin/python src/scripts/03_absa.py --zeroshot-max 20000
-> .venv/bin/python src/scripts/03b_promise_extraction.py --no-zero-shot
-> .venv/bin/python src/scripts/03c_demand_mining.py
-> .venv/bin/python src/scripts/04_topic_modeling.py
-> .venv/bin/python src/scripts/05_temporal.py
-> .venv/bin/python src/scripts/06_models.py
-> .venv/bin/python src/scripts/08_visualizations.py
-> ```
->
-> **Three things to check before scaling up**, because each one silently
-> produces wrong numbers rather than crashing:
->
-> 1. `06_models.py` must NOT log `DROPPED '<predictor>'` for the aspects RQ2
->    depends on (`prayer_times_accuracy`, `qibla`, `ui_design`). If it does at
->    20K, it will still be sparse — but it should clear easily at full scale.
->    A `RQ2 VERDICT UNAVAILABLE` warning means the analysis did not run.
-> 2. No coefficient in `model_results.csv` should exceed ~2 stars in magnitude,
->    and `p_value` must never be `NaN`. Both indicate separation.
-> 3. `03_absa.py` should report a **non-trivial lexicon hit rate** (~35% of
->    sentences) — if it collapses toward 0%, the lexicon did not load.
->
-> Then remove `--sample` / `--zeroshot-max` and re-run with `--resume`.
+**Done:** environment on the 5090 (`cu128`), the 20K pre-flight across every stage, and the hand annotation — the sheet is 26/26 (§5A). **Next:** the full corpus, then the gold-set labelling.
 
+### Step 1 — Full corpus, stages 01→03c  ·  ~30 min, unattended
 
-1. **On the 5090 machine**: follow §0 setup, using the CUDA torch index and the `UV_HTTP_TIMEOUT` workaround. Budget 20–40 min for the CUDA wheel download alone.
-2. **In parallel, not blocking the above**: knock out the two manual action items in §5 — the 6 missing app annotations and the gold-set labelling. Neither needs a GPU.
-3. Once torch is confirmed (`import torch; torch.cuda.is_available()` → `True`), run the dry run in §2 with `--sample 20000` to get real GPU timings before committing to the full 732K-row run.
+```bash
+.venv/bin/python src/scripts/01_preprocess.py
+.venv/bin/python src/scripts/02a_sentiment_vader.py
+.venv/bin/python src/scripts/02b_sentiment_roberta.py --resume
+.venv/bin/python src/scripts/03_absa.py            --resume
+.venv/bin/python src/scripts/03b_promise_extraction.py --no-zero-shot
+.venv/bin/python src/scripts/03c_demand_mining.py
+```
+
+Confirm in the log before moving on:
+
+| Expect | Meaning if wrong |
+|---|---|
+| `Feature CSV encoding: … explicit-absent ('x') …` and `26 apps — 26 annotated` | The `x` parsing regressed — `feature_count` is corrupt (§5A) |
+| `Resolved to packages: 26/26` | An app failed to join; feature data is mis-assigned |
+| `Lexicon hits: … (≈35%)` | Near 0% means the lexicon did not load |
+| No `DROPPED` for `prayer_times_accuracy` / `qibla` / `ui_design` | RQ2 is not estimable |
+
+### Step 2 — Generate the labelling sheets  ·  minutes
+
+```bash
+uv pip install jupytext jupyter
+.venv/bin/jupytext --to notebook src/notebooks/02c_cross_validation.py
+.venv/bin/jupyter notebook    # run sections 1–3
+```
+
+### Step 3 — Label by hand  ·  the long pole, days
+
+`doc_500.csv` (+ the two annotator splits), `aspect_300.csv`, `demand_precision_sample.csv`. See §5B for what each column means. Nothing else can proceed past step 4 without `aspect_300`.
+
+### Step 4 — Calibrate the threshold, then re-run 03  ·  ~20 min
+
+Run the notebook's "Zero-shot threshold calibration" section against the filled `aspect_300.csv`, then:
+
+```bash
+.venv/bin/python src/scripts/03_absa.py --zeroshot-threshold <calibrated>
+```
+
+`--resume` is safe here: the checkpoint fingerprints the threshold and clears stale shards by itself if it changed (§0.3). Leaving it off costs one extra NLI pass, nothing more.
+
+### Step 5 — Final analysis and figures  ·  04 is the slow one
+
+```bash
+.venv/bin/python src/scripts/03c_demand_mining.py
+.venv/bin/python src/scripts/04_topic_modeling.py
+.venv/bin/python src/scripts/05_temporal.py
+.venv/bin/python src/scripts/06_models.py
+.venv/bin/python src/scripts/08_visualizations.py
+```
+
+Re-run `03c` first — its input changed when the threshold did. `04` is CPU-bound (UMAP/HDBSCAN, no GPU) and is the one stage whose full-scale cost is unmeasured.
+
+### Step 6 — Notebooks → paper
+
+`06_cross_app_analysis.py` first, then `07_rq1..rq6`. Each ends in an "Answer to RQ_" cell that becomes a paragraph. Fill `manual_label` in `topic_info.csv` via `04_topic_exploration.py` before the RQ notebooks lean on topic names.
 
 ---
 
@@ -178,6 +193,20 @@ uv pip install torch --index-url https://download.pytorch.org/whl/cpu
 ```
 
 Swap to the CUDA index later for real runs; `_common.get_device()` auto-detects whichever is installed, no code changes needed either way.
+
+### 0.3 `--resume` invalidates itself when settings change
+
+Checkpoint shards are keyed by **position** in the deduplicated work list, not by content. So changing anything that alters *which* items get computed — `--zeroshot-threshold`, `--zeroshot-topk`, `--zeroshot-max`, `--no-zero-shot`, `--sample` — makes cached shard *N* describe different rows than a freshly computed shard *N* would. Resuming across that boundary used to merge the two by sentence text, leaving every newly-included sentence with a **`NaN` sentiment that silently dropped out** of the results.
+
+`Checkpoint` now writes a `_config.json` alongside the shards and re-checks it on `--resume`. If the fingerprint differs it names the changed setting and clears the stale shards automatically:
+
+```text
+WARN  Checkpoint 'absa': settings changed since the cached run
+      (zeroshot_threshold) — discarding stale shards.
+WARN      zeroshot_threshold: 0.75 -> 0.62
+```
+
+That warning is expected and correct after calibration (step 4) — it means the run is recomputing rather than reusing results from the old threshold. `--resume` is therefore always safe to leave on; it degrades to a full recompute exactly when it must.
 
 ---
 
@@ -445,6 +474,29 @@ Then run section 4 of the notebook for the numbers that go into Methods and Figu
 > **Not a labelling sheet:** `quotes/rq1_tracker_negative_50.csv` is written by `06_models.py` — 50 tracker-negative reviews as raw material for RQ1's qualitative coding, not a validation set.
 
 **Your labels are backed up, not clobbered.** These sheets are regenerated by re-running their producing stage, so `_common.write_gold_sheet()` checks for filled ACTION columns first and copies the old file to `<stem>.backup-<timestamp>.csv` before overwriting, logging a `WARN`. It never blocks the write. If you see that warning, the regenerated sheet is a **new sample** — merge on `reviewId`, never by row position.
+
+---
+
+## 5.5 RQ5 reframe — committed 2026-08-26, BEFORE the full-corpus run
+
+**This is a pre-specification. Its whole value is the date.** The 20K pre-flight showed `feature_count` does *not* predict bloat complaints, and if anything points the other way (β=−0.0056 on `stability_bugs`, p=0.0056; app-level ρ=+0.44 sentiment, ρ=+0.49 rating, with `log_installs` controlled). The framing below was fixed at that point and must not be revised after seeing full-corpus numbers — revising it then is HARKing, and it is the first thing a CHI reviewer probes when a null becomes a finding.
+
+**Old RQ5:** *do apps with more features attract more bloat complaints?* → answered **no**.
+
+**Reframed RQ5:** *bloat complaints are real but are not about feature count — they are about how features are surfaced.*
+
+The pipeline now produces both halves of that argument:
+
+| Evidence | Where | Status |
+|---|---|---|
+| `feature_count` → bloat complaints | M4 MixedLM + cluster-robust OLS sensitivity | **confirmatory**, expected null — report the null with both fits |
+| bloat × `ui_design` co-occurrence | `_bloat_surfacing()`, Fisher exact on one pre-specified 2×2 | **confirmatory**, one test, enters the BH-FDR family |
+| lift of the other 25 aspects within bloat reviews | same function | **exploratory**, logged and deliberately NOT tested |
+| what bloat complaints actually say | `04` sub-topic model `rq5_bloat` → `topic_info_rq5_bloat.csv` | qualitative, fitted on `complexity_bloat` only |
+
+`ui_design` is the single confirmatory pair, chosen in advance. The sub-topic model is fitted on `complexity_bloat` **alone**, deliberately not pooled with `ui_design` — pooling would build the surfacing conclusion into the input instead of testing for it.
+
+**If the co-occurrence test comes back null**, the honest paper says so: bloat complaints are unrelated to both feature count *and* interface complaints, and the reframe failed. Write that sentence now so the temptation to fish later is gone.
 
 ---
 

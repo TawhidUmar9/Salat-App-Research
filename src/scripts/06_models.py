@@ -56,10 +56,18 @@ _RESULTS: list[dict] = []
 
 
 def _record(model: str, rq: str, term: str, estimate: float, se: float,
-            pvalue: float, n: int, note: str = "") -> None:
-    """Collect one coefficient for the pooled BH correction in §9.7."""
+            pvalue: float, n: int, note: str = "", family: str = "primary") -> None:
+    """
+    Collect one coefficient for the pooled BH correction in §9.7.
+
+    `family` decides whether the coefficient joins the multiple-comparisons
+    family. Only "primary" does. Robustness and sensitivity refits describe the
+    same hypothesis as their primary model, so counting them again would inflate
+    the family and weaken every primary result for no inferential gain — they
+    are still written to model_results.csv, just with q_value left NaN.
+    """
     _RESULTS.append({
-        "model": model, "rq": rq, "term": term,
+        "model": model, "rq": rq, "term": term, "family": family,
         "estimate": estimate, "std_error": se,
         "ci_low": estimate - 1.96 * se if pd.notna(se) else np.nan,
         "ci_high": estimate + 1.96 * se if pd.notna(se) else np.nan,
@@ -103,21 +111,172 @@ def _drop_sparse_predictors(
 
 
 def _fit_mixedlm(formula: str, data: pd.DataFrame, group: str = "app_name"):
-    """Fit a MixedLM, returning None (with a logged reason) rather than raising."""
+    """
+    Fit a MixedLM, returning None (with a logged reason) rather than raising.
+
+    Convergence warnings are *recorded and surfaced*, not suppressed. statsmodels
+    routinely returns a fitted object alongside a ConvergenceWarning ("MLE may be
+    on the boundary", "Gradient optimization failed"); silencing those makes an
+    unconverged fit indistinguishable from a clean one, and its coefficients
+    would go into the paper looking authoritative. A NaN standard error is the
+    same story — it means the term is not estimable, which must be reported as
+    such rather than read as a null effect (§9.7).
+    """
     import statsmodels.formula.api as smf
 
     try:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
             model = smf.mixedlm(formula, data=data, groups=data[group])
-            return model.fit(method="lbfgs", maxiter=200)
+            res = model.fit(method="lbfgs", maxiter=200)
     except Exception as exc:  # noqa: BLE001
-        log(f"MixedLM failed to converge: {exc}", level="WARN")
+        log(f"MixedLM failed to fit: {exc}", level="WARN")
+        log(f"  formula: {formula}  (report as NOT ESTIMABLE, not as a null result)",
+            level="WARN")
         return None
+
+    flagged = {
+        str(w.message).split("\n")[0]
+        for w in caught
+        if any(k in str(w.message).lower()
+               for k in ("converg", "singular", "boundary", "hessian", "gradient"))
+    }
+    for msg in sorted(flagged):
+        log(f"CONVERGENCE WARNING — {msg}", level="WARN")
+
+    n_nan_se = int(res.bse.isna().sum()) if hasattr(res, "bse") else 0
+    if n_nan_se:
+        log(f"NOT ESTIMABLE: {n_nan_se} coefficient(s) have NaN standard errors "
+            f"(separation / collinearity). Report as not-estimable, never as null.",
+            level="WARN")
+        log(f"  formula: {formula}", level="WARN")
+
+    return res
+
+
+#: RQ5's reframed hypothesis, fixed BEFORE the full-corpus run (§6, "RQ5 reframe").
+#: If bloat is about how features are surfaced rather than how many exist, then
+#: bloat complaints should travel with interface/navigation complaints even while
+#: being unrelated to feature_count. `ui_design` is the confirmatory pair; the
+#: rest of the lift table is exploratory context, deliberately untested.
+BLOAT_SURFACING_PAIR = ("complaint_complexity_bloat", "complaint_ui_design")
+
+
+def _bloat_surfacing(design: pd.DataFrame) -> None:
+    """
+    RQ5 reframed — is bloat about surfacing rather than count?
+
+    Two things, kept firmly apart:
+
+    1. CONFIRMATORY. A single pre-specified 2x2 test of whether bloat and
+       ui_design complaints co-occur above chance. One test, entered into the
+       BH-FDR family like any other primary coefficient.
+    2. EXPLORATORY. Lift of every other aspect within bloat reviews, logged for
+       interpretation and explicitly NOT tested — 27 aspects fished for
+       significance is exactly the practice BH is meant to discipline.
+    """
+    section("§9.4  RQ5 reframed — is bloat about surfacing, not count?")
+
+    bloat_col, ui_col = BLOAT_SURFACING_PAIR
+    missing = [c for c in BLOAT_SURFACING_PAIR if c not in design.columns]
+    if missing:
+        log(f"{missing} absent from the design matrix — skipping.", level="WARN")
+        return
+
+    b = design[bloat_col].astype(bool)
+    u = design[ui_col].astype(bool)
+    n = len(design)
+    n_bloat = int(b.sum())
+    log(f"Reviews mentioning bloat: {n_bloat:,} / {n:,} ({n_bloat / n:.2%})")
+    if n_bloat < MIN_PREDICTOR_POSITIVES:
+        log(f"Only {n_bloat} bloat reviews — NOT ESTIMABLE, report count only.",
+            level="WARN")
+        return
+
+    table = np.array([[int((b & u).sum()), int((b & ~u).sum())],
+                      [int((~b & u).sum()), int((~b & ~u).sum())]])
+    p_ui_given_bloat = table[0, 0] / max(1, table[0].sum())
+    p_ui_base = int(u.sum()) / n
+    lift = p_ui_given_bloat / p_ui_base if p_ui_base else np.nan
+
+    from scipy.stats import fisher_exact
+    odds, p = fisher_exact(table)
+    log(f"CONFIRMATORY  bloat x ui_design:")
+    log(f"    P(ui | bloat) = {p_ui_given_bloat:.2%}   base P(ui) = {p_ui_base:.2%}"
+        f"   lift = {lift:.2f}x")
+    log(f"    Fisher exact OR = {odds:.2f}, p = {p:.2g}   (n={n:,})")
+    log(f"    {'SUPPORTS' if (odds > 1 and p < 0.05) else 'DOES NOT SUPPORT'} "
+        f"the surfacing account.")
+    _record("M4-reframe", "RQ5", "bloat_x_ui_design_cooccurrence",
+            float(np.log(odds)) if odds > 0 and np.isfinite(odds) else np.nan,
+            np.nan, float(p), n,
+            note=f"Fisher exact log-OR; P(ui|bloat)={p_ui_given_bloat:.3f} "
+                 f"base={p_ui_base:.3f} lift={lift:.2f}")
+
+    others = [c for c in design.columns
+              if c.startswith("complaint_") and c not in BLOAT_SURFACING_PAIR]
+    rows = []
+    for c in others:
+        v = design[c].astype(bool)
+        base = v.mean()
+        if base <= 0:
+            continue
+        rows.append((c.replace("complaint_", ""), int((b & v).sum()),
+                     (b & v).sum() / n_bloat, base, (b & v).sum() / n_bloat / base))
+    rows.sort(key=lambda r: -r[4])
+    log("")
+    log("EXPLORATORY — aspect lift within bloat reviews (NOT tested, context only):")
+    log(f"    {'aspect':<26}{'n':>7}{'P|bloat':>10}{'base':>9}{'lift':>8}")
+    for name, cnt, p_in, base, lf in rows[:10]:
+        log(f"    {name:<26}{cnt:>7}{p_in:>9.2%}{base:>9.2%}{lf:>7.2f}x")
+
+
+def _cluster_robust_ols(formula: str, data: pd.DataFrame, outcome: str,
+                        terms: list[str], group: str = "app_name") -> None:
+    """
+    OLS with cluster-robust (CR1) standard errors, clustered on `group`.
+
+    Companion to the MixedLM for models whose predictors are all group-level
+    constants. The point estimates match OLS; only the SEs change, and they stay
+    finite where the mixed model's can go NaN. Logged as a sensitivity analysis
+    so the paper can report both without either being a post-hoc rescue.
+    """
+    import statsmodels.formula.api as smf
+
+    try:
+        with warnings.catch_warnings(record=True):
+            warnings.simplefilter("always")
+            res = smf.ols(formula, data=data).fit(
+                cov_type="cluster", cov_kwds={"groups": data[group]},
+            )
+    except Exception as exc:  # noqa: BLE001
+        log(f"  cluster-robust OLS failed: {exc}", level="WARN")
+        return
+
+    n_clusters = data[group].nunique()
+    log(f"  sensitivity — OLS, SEs clustered on {group} ({n_clusters} clusters):")
+    if n_clusters < 30:
+        log(f"    NOTE: {n_clusters} clusters is few for cluster-robust inference; "
+            f"SEs are anti-conservative. Report as sensitivity, not as the headline.",
+            level="WARN")
+    for t in terms:
+        if t not in res.params.index:
+            continue
+        b, se, p = res.params[t], res.bse[t], res.pvalues[t]
+        log(f"    {t[:30]:30s} β={b:>+9.4f}  SE={se:.4f}  "
+            f"[{b - 1.96 * se:+.4f},{b + 1.96 * se:+.4f}]  p={p:.4f}")
+        _record("M4-sens", "RQ5", f"{outcome}:{t}", b, se, p, len(data),
+                note=f"OLS cluster-robust on {group} ({n_clusters} clusters)",
+                family="sensitivity")
 
 
 def _log_coefs(res, model: str, rq: str, n: int, terms: list[str] | None = None) -> None:
     if res is None:
+        # Leave a visible trace: a model that never fitted must not simply be
+        # absent from the log and from model_results.csv, or a reader cannot
+        # tell "not estimable" from "never attempted".
+        log(f"{model} / {rq}: NO RESULT — model did not fit (n={n:,}). "
+            f"Report as not-estimable.", level="WARN")
         return
     params, bse, pvals = res.params, res.bse, res.pvalues
     show = terms or [t for t in params.index if t not in ("Intercept", "Group Var")]
@@ -522,6 +681,21 @@ def model_m4_rq5_bloat_hardware(design: pd.DataFrame, feature_df: pd.DataFrame,
         res = _fit_mixedlm(formula, sub)
         _log_coefs(res, "M4", "RQ5", len(sub), ["feature_count", "log_installs", "ad_supported"])
 
+        # Pre-registered sensitivity analysis, always run — not a fallback.  # noqa: E501
+        #
+        # Every predictor here is an app-level constant, so the per-app random
+        # intercept competes with them for the same between-app variance. With
+        # 26 groups and a rare outcome that is close to unidentified, and the
+        # MixedLM can return NaN standard errors (see _fit_mixedlm). OLS with
+        # SEs clustered on app is the standard remedy: it makes no random-effect
+        # assumption and still respects the fact that reviews are nested in apps.
+        # Reporting both is what lets RQ5 survive review whichever way the
+        # mixed model behaves.
+        _cluster_robust_ols(formula, sub, outcome,
+                            ["feature_count", "log_installs", "ad_supported"])
+
+    _bloat_surfacing(design)
+
     # App-level exploratory correlation.
     app_level = (
         design.groupby("app_name", observed=True)
@@ -732,7 +906,12 @@ def multiple_comparisons_correction(results: pd.DataFrame) -> pd.DataFrame:
 
     if results.empty:
         return results
-    valid = results["p_value"].notna()
+    if "family" not in results.columns:
+        results["family"] = "primary"
+    primary = results["family"] == "primary"
+    estimable = results["p_value"].notna()
+    valid = primary & estimable
+
     results["q_value"] = np.nan
     try:
         from statsmodels.stats.multitest import multipletests
@@ -743,8 +922,24 @@ def multiple_comparisons_correction(results: pd.DataFrame) -> pd.DataFrame:
         return results
 
     results["significant_q05"] = results["q_value"] < 0.05
-    log(f"{int(valid.sum())} tests corrected; "
-        f"{int(results['significant_q05'].sum())} survive q < 0.05.")
+
+    # Report the full denominator. "17 of 22 survive" is uninterpretable without
+    # knowing how many coefficients existed and why the rest were left out — and
+    # a reviewer will read a silently shrunken family as p-hacking.
+    n_total = len(results)
+    n_sens = int((~primary).sum())
+    n_nonest = int((primary & ~estimable).sum())
+    log(f"Coefficients recorded: {n_total}")
+    log(f"  in the correction family (primary, estimable): {int(valid.sum())}")
+    log(f"  excluded — sensitivity/robustness refits:      {n_sens}")
+    log(f"  excluded — NOT ESTIMABLE (NaN p, separation):  {n_nonest}")
+    if n_nonest:
+        for _, r in results[primary & ~estimable].iterrows():
+            log(f"      {r['model']} / {r['term']}", level="WARN")
+        log("  Report these as not-estimable in the paper — NOT as null results.",
+            level="WARN")
+    log(f"Survive BH-FDR q < 0.05: {int(results['significant_q05'].sum())} "
+        f"of {int(valid.sum())}")
     log("Report effect sizes with CIs as the headline; q-values alongside (§9.7).")
     return results
 
