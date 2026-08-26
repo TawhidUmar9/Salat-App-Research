@@ -23,10 +23,19 @@ for f, n_exp in EXPECT.items():
         BAD = r"error\s*5\d\d|that.s an error|<html|server error|try again in \d+ seconds"
         poisoned = int(d["content_en"].str.contains(BAD, case=False, na=False).sum())
         tr = f"content_en {int(got.sum())}/{int(need.sum())}"
+        # A poisoned value is a hard stop: an annotator would read it as the
+        # review. A blank is not — ANNOTATION_GUIDE tells annotators to skip
+        # untranslated rows and mark them, so a few are expected and fine.
+        # Only a large shortfall means the translation pass genuinely failed.
         if poisoned:
             tr += f"  POISONED {poisoned}"; ok = False
-        elif int(got.sum()) < int(need.sum()):
-            tr += "  (incomplete)"; ok = False
+        else:
+            miss = int(need.sum()) - int(got.sum())
+            cover = int(got.sum()) / max(1, int(need.sum()))
+            if miss >= 5 and cover < 0.95:
+                tr += f"  {miss} blank — RETRY"; ok = False
+            elif miss:
+                tr += f"  {miss} blank (ok, mark \'cannot read\')"
     else:
         tr = "no content_en"
     flag = "" if (rows_ok and blank) else "   <-- CHECK"
