@@ -31,6 +31,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 import time
 from pathlib import Path
@@ -39,6 +40,46 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import GOLD_DIR, log, section  # noqa: E402
+
+#: Google Translate answers a throttled request with an HTML error page, and
+#: deep-translator returns that page BODY as if it were the translation — no
+#: exception is raised. A first run at 0.12 s between calls wrote error pages
+#: into 412 of 546 rows and reported complete success. Every response is now
+#: checked against this before it is accepted.
+BAD_RESPONSE = re.compile(
+    r"error\s*5\d\d|that.s an error|<html|server error|"
+    r"try again in \d+ seconds|request timed out|service unavailable",
+    re.IGNORECASE,
+)
+
+#: Retry schedule for a rejected or failed call, in seconds.
+BACKOFF = (2.0, 5.0, 12.0)
+
+
+def looks_translated(src: str, out: str) -> bool:
+    """Reject empty strings, error pages, and untouched source text."""
+    out = (out or "").strip()
+    if not out or BAD_RESPONSE.search(out):
+        return False
+    # A response identical to a non-ASCII source means nothing was translated.
+    if out == src.strip() and re.search(r"[^\x00-\x7F]", src):
+        return False
+    return True
+
+
+def translate_one(translator, text: str, sleep: float) -> str | None:
+    """One row, with validation and backoff. None means give up for now."""
+    for attempt, wait in enumerate((0.0, *BACKOFF)):
+        if wait:
+            time.sleep(wait)
+        try:
+            out = translator.translate(text[:4500])
+        except Exception:
+            continue
+        if looks_translated(text, out):
+            return out.strip()
+    return None
+
 
 #: sheet -> column holding the text a human must read
 SHEETS = {
@@ -66,8 +107,8 @@ def main() -> None:
     p.add_argument("--dry-run", action="store_true",
                    help="Report how many rows would be translated, make no calls.")
     p.add_argument("--only", metavar="FILE", help="Translate just one sheet.")
-    p.add_argument("--sleep", type=float, default=0.12,
-                   help="Pause between calls, to stay under rate limits.")
+    p.add_argument("--sleep", type=float, default=1.0,
+                   help="Pause between calls. Below ~0.5s Google throttles and returns error pages instead of translations.")
     args = p.parse_args()
 
     targets = {args.only: SHEETS[args.only]} if args.only else SHEETS
@@ -106,13 +147,22 @@ def main() -> None:
             top = df.loc[mask, "lang"].value_counts().head(6)
             log("  " + "  ".join(f"{k}={v}" for k, v in top.items()))
 
-        # Refuse to clobber translations already present and reviewed.
+        # Keep good translations; re-do poisoned ones. An earlier run wrote
+        # Google error pages into content_en, so "already present" is not the
+        # same as "already done".
         if "content_en" in df.columns:
-            already = df["content_en"].astype(str).str.strip().ne("").sum()
-            if already:
-                log(f"  {already} rows already carry content_en — leaving those alone.")
-                mask &= df["content_en"].astype(str).str.strip().eq("")
-                n = int(mask.sum())
+            cur = df["content_en"].astype(str)
+            poisoned = cur.str.strip().ne("") & cur.str.contains(BAD_RESPONSE, na=False)
+            good = cur.str.strip().ne("") & ~poisoned
+            if int(poisoned.sum()):
+                log(f"  {int(poisoned.sum())} rows hold an error page, not a "
+                    f"translation — clearing them for retry.", level="WARN")
+                df.loc[poisoned, "content_en"] = ""
+            if int(good.sum()):
+                log(f"  {int(good.sum())} rows already translated — leaving those alone.")
+            mask &= df["content_en"].astype(str).str.strip().eq("")
+            n = int(mask.sum())
+            log(f"  {n} rows to translate this pass")
 
         if args.dry_run or n == 0:
             continue
@@ -124,22 +174,27 @@ def main() -> None:
         failed = 0
         for i, row_i in enumerate(idx, start=1):
             src = str(df.at[row_i, text_col])
-            try:
-                df.at[row_i, "content_en"] = translator.translate(src[:4500]) or ""
-            except Exception as exc:  # one bad row must not lose the whole sheet
+            out = translate_one(translator, src, args.sleep)
+            if out is None:
                 failed += 1
-                df.at[row_i, "content_en"] = ""
-                if failed <= 3:
-                    log(f"  row {row_i}: {type(exc).__name__}: {exc}", level="WARN")
+                df.at[row_i, "content_en"] = ""     # blank, never a poisoned value
+            else:
+                df.at[row_i, "content_en"] = out
             if i % 25 == 0:
-                log(f"  {i}/{len(idx)}")
+                log(f"  {i}/{len(idx)}  ({failed} failed so far)")
+            # Save as we go: a throttled run that dies at row 400 should not
+            # throw away the 399 translations it already earned.
+            if i % 50 == 0:
+                df.to_csv(path, index=False)
             time.sleep(args.sleep)
 
         df.to_csv(path, index=False)
-        log(f"Wrote content_en for {len(idx) - failed}/{len(idx)} rows → {path}")
+        good = len(idx) - failed
+        log(f"Wrote content_en for {good}/{len(idx)} rows → {path}")
         if failed:
-            log(f"{failed} row(s) failed and were left blank — re-run to retry.",
-                level="WARN")
+            log(f"{failed} row(s) could not be translated and were left BLANK "
+                f"(never a partial or error value). Re-run to retry just those; "
+                f"raise --sleep if the failure rate is high.", level="WARN")
 
     if args.dry_run:
         section("Dry run")
