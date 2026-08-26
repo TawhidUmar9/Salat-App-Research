@@ -40,6 +40,21 @@ two `annotator` files are the split of it that people actually work on.
 `reviewId` — must stay exactly as it is. Labels are merged back by `reviewId`,
 so if that column is altered the work cannot be recovered.
 
+### Order of work
+
+**Lead: do `aspect_300.csv` first.** It is the only sheet that blocks anything —
+its labels set the zero-shot threshold, which gates re-running the aspect
+extraction, which gates every remaining analysis stage. `doc_500` and
+`demand_precision_sample` produce numbers for the Methods section and hold up
+nothing downstream.
+
+**Second annotator: start as soon as you get the file.** Krippendorff's α needs
+both annotators' shared rows, so this is the other thing everything waits on.
+
+Before either of you starts, spend ten minutes together agreeing the edge cases
+in [section 4](#edge-cases-decided-in-advance). Ten minutes now prevents two
+conscientious people drifting apart across 600 rows.
+
 ---
 
 ## 2. Getting the files
@@ -58,18 +73,42 @@ scp -r ubuntu@<server>:~/Tonmoy/Salat-App-Research/src/data/gold_labels ./gold_l
 other file. Do not ask for `doc_500_annotator1.csv`; seeing it would invalidate
 the reliability measurement (see [section 8](#8-the-shared-rows--inter-rater-reliability)).
 
-**Optional but recommended — add English translations first.** Roughly half of
-each `doc_500` file is not in English. Run this once, before distributing, and
-every non-English row gains a `content_en` column:
+### English translations — already done
+
+Roughly half of each `doc_500` file is not in English, so every non-English row
+carries a **`content_en`** column with a machine translation. Use it. Its limits
+are in [section 7](#7-reviews-you-cannot-read).
+
+A small number of rows are still blank there — mostly gibberish or text Google
+could not identify. That is expected; treat them as unreadable.
+
+**Lead only — to top up the remaining blanks:**
 
 ```bash
 uv pip install deep-translator
-.venv/bin/python src/scripts/_translate_gold_rows.py --dry-run   # counts only, no network
-.venv/bin/python src/scripts/_translate_gold_rows.py             # ~546 rows
+.venv/bin/python src/scripts/_translate_gold_rows.py --dry-run   # counts, no network
+.venv/bin/python src/scripts/_translate_gold_rows.py --sleep 2.0
 ```
 
-It sends review text to Google Translate, so it is opt-in and never runs as part
-of the pipeline. Details in [section 7](#7-reviews-you-cannot-read).
+It only touches rows that are blank or previously failed; good translations are
+left alone. Raise `--sleep` if the failure count climbs — Google throttles, and
+below about 0.5 s it starts returning error pages instead of translations.
+
+### Check the sheets before anyone starts
+
+```bash
+.venv/bin/python src/scripts/_verify_gold_sheets.py
+```
+
+This must print **`ALL CHECKS PASSED`** before labelling begins. It verifies row
+counts, that the source text is undamaged, that no label column has been filled
+by accident, that translations are real English rather than error pages or
+untranslated echoes, and that the 100 shared rows are identical across both
+annotator files with no leakage between the private halves.
+
+> Why this gate exists: the first translation run silently wrote Google error
+> pages (`Error 500 (Server Error)...`) into 412 of 546 rows and reported
+> success. Nothing about the files looked wrong. Run the check.
 
 ---
 
@@ -267,21 +306,33 @@ is deliberately over-represented relative to the corpus.
 | `aspect_300.csv` | 15 of 300 (5%) | mixed |
 | `demand_precision_sample.csv` | 3 of 200 (2%) | mixed |
 
+Note that this is **deliberately unrepresentative**: the corpus is 82% English,
+but `doc_500` is stratified by language band so the non-English half gets
+validated too. Do not be alarmed by how much of it you cannot read directly.
+
 **Do not guess.** A label on text you cannot read is worse than no label,
 because it adds noise to the very number meant to show our method is
 trustworthy.
 
-**If a `content_en` column is present**, it holds an English machine
-translation — use it, but treat it as a rough guide. Machine translation
-flattens sentiment, so when a translation reads ambiguously, prefer a blank over
-a guess. These translations are a **reading aid only** and never enter the
-analysis; the pipeline scores non-English text natively with a multilingual
-model for exactly this reason.
+**Use the `content_en` column.** Every non-English row that could be translated
+has one. Treat it as a rough guide, not gospel: machine translation flattens
+sentiment, and the difference between `Positive` and `Mixed` often lives exactly
+in the nuance it flattens. When a translation reads ambiguously, prefer a blank
+over a guess.
 
-**If there is no translation and you cannot read the language:**
+These translations are a **reading aid only**. They never enter the analysis —
+the pipeline scores non-English text natively with a multilingual model, for
+precisely this reason.
+
+**Where `content_en` is blank**, Google could not translate the row: usually
+gibberish, keyboard mashing, or a script it failed to identify. If you cannot
+read the original either:
 
 1. Leave `gold_label` **blank**
 2. Write `cannot read` in `notes`
+
+Do not translate it yourself with another tool mid-task — that makes your rows
+inconsistent with everyone else's.
 
 We report precisely which languages the gold set covers. "Validated on English
 and Bengali, n = X" is a normal, defensible thing for a paper to say. Silent
