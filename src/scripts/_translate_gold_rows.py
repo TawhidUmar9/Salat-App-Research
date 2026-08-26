@@ -56,13 +56,25 @@ BAD_RESPONSE = re.compile(
 BACKOFF = (2.0, 5.0, 12.0)
 
 
+def latin_ratio(text: str) -> float:
+    """Share of letters that are ASCII, ignoring digits, spaces and punctuation."""
+    letters = re.sub(r"[\s\d\W_]+", "", str(text), flags=re.UNICODE)
+    if not letters:
+        return 1.0
+    return sum(1 for ch in letters if ord(ch) < 128) / len(letters)
+
+
 def looks_translated(src: str, out: str) -> bool:
-    """Reject empty strings, error pages, and untouched source text."""
+    """Reject empty strings, error pages, and text that was never translated."""
     out = (out or "").strip()
     if not out or BAD_RESPONSE.search(out):
         return False
-    # A response identical to a non-ASCII source means nothing was translated.
-    if out == src.strip() and re.search(r"[^\x00-\x7F]", src):
+    # Google returns the input unchanged when it cannot detect or handle the
+    # language — often for gibberish, or a script it gives up on. An exact-match
+    # test is not enough: the reply can differ in whitespace yet still be the
+    # original Arabic. Judge the OUTPUT instead — an English translation is
+    # overwhelmingly Latin script, whatever the source was.
+    if latin_ratio(out) < 0.5:
         return False
     return True
 
@@ -152,11 +164,15 @@ def main() -> None:
         # same as "already done".
         if "content_en" in df.columns:
             cur = df["content_en"].astype(str)
-            poisoned = cur.str.strip().ne("") & cur.str.contains(BAD_RESPONSE, na=False)
-            good = cur.str.strip().ne("") & ~poisoned
+            filled = cur.str.strip().ne("")
+            poisoned = filled & (
+                cur.str.contains(BAD_RESPONSE, na=False)
+                | cur.apply(lambda s: latin_ratio(s) < 0.5)
+            )
+            good = filled & ~poisoned
             if int(poisoned.sum()):
-                log(f"  {int(poisoned.sum())} rows hold an error page, not a "
-                    f"translation — clearing them for retry.", level="WARN")
+                log(f"  {int(poisoned.sum())} rows hold an error page or "
+                    f"untranslated text — clearing them for retry.", level="WARN")
                 df.loc[poisoned, "content_en"] = ""
             if int(good.sum()):
                 log(f"  {int(good.sum())} rows already translated — leaving those alone.")

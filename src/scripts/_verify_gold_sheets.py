@@ -21,7 +21,12 @@ for f, n_exp in EXPECT.items():
         need &= d[txt].str.strip().ne("")
         got  = need & d["content_en"].str.strip().ne("")
         BAD = r"error\s*5\d\d|that.s an error|<html|server error|try again in \d+ seconds"
-        poisoned = int(d["content_en"].str.contains(BAD, case=False, na=False).sum())
+        def _latin(s):
+            L = re.sub(r"[\s\d\W_]+", "", str(s), flags=re.UNICODE)
+            return 1.0 if not L else sum(1 for c in L if ord(c) < 128) / len(L)
+        filled_en = d["content_en"].str.strip().ne("")
+        poisoned = int((filled_en & (d["content_en"].str.contains(BAD, case=False, na=False)
+                                     | d["content_en"].apply(lambda s: _latin(s) < 0.5))).sum())
         tr = f"content_en {int(got.sum())}/{int(need.sum())}"
         # A poisoned value is a hard stop: an annotator would read it as the
         # review. A blank is not — ANNOTATION_GUIDE tells annotators to skip
