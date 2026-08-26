@@ -197,7 +197,7 @@ d3735d1b-5a33-483b-8f0e-8b5410f49776,Athan: Prayer Times & Al Quran,qibla,Ma Sha
 1fed791f-8272-4970-82d0-ea4063d644fc,Muslim Pro: Quran Athan Prayer,qibla,Kebla direction doesn't work properly except that everything is good.,Neutral,lexicon,False,4,,,,,,
 a533f1aa-b52a-47d9-bc4b-1864a6ff31bb,Muslim Pro: Quran Athan Prayer,qibla,"I also read quran, see the direction of qibla which has made my life easier.",Positive,lexicon,False,5,,,,,,
 2dd3b21e-83d2-4320-a6aa-a39876b214c8,Muslim Pro: Quran Athan Prayer,qibla,"Good for learners... compass could be better though, sometimes it doesn't work",Negative,lexicon,False,5,,,,,,
-1f49f7da-df09-4418-8e08-2ccd263b37a2,"Muslims Day-Prayer, Quran, Dua",quran_audio,"হাফিজি কোরআন, নামাযের ফরজ,ওয়াজিব থাকলে ভালো হতো",Neutral,lexicon,False,5,,,,,,
+1f49f7da-df09-4418-8e08-2ccd263b37a2,"Muslims Day-Prayer, Quran, Dua",quran_audio,"হাফিজি কোরআন, নামাযের ফরজ,ওয়াজিব থাকলে ভালো হতো",Neutral,lexicon,False,5,,,,,,"It would be better if Hafiji had Quran, obligatory and wajib of prayer"
 124535eb-5b9b-48cb-af08-64e850dbc48c,Athan: Prayer Times & Al Quran,quran_audio,Bht accha app h mashallah,Negative,zero-shot,False,5,,,,,,
 ce5f6f35-2b53-4e63-a6a2-ab7e76ad07ea,Athan: Prayer Times & Al Quran,quran_audio,"Perfect app for prayer timing, daily prayers and quran reading as well as for understanding.",Positive,lexicon,False,5,,,,,,
 8837274a-f99b-4aac-a7df-78e3e08b0d16,Muslim Pro: Quran Athan Prayer,quran_audio,...ma sha allah.,Positive,zero-shot,False,5,,,,,,

@@ -79,17 +79,45 @@ def looks_translated(src: str, out: str) -> bool:
     return True
 
 
-def translate_one(translator, text: str, sleep: float) -> str | None:
-    """One row, with validation and backoff. None means give up for now."""
-    for attempt, wait in enumerate((0.0, *BACKOFF)):
-        if wait:
-            time.sleep(wait)
+def get_translator(cache: dict, source: str):
+    """One GoogleTranslator per source language, built lazily and reused."""
+    if source not in cache:
         try:
-            out = translator.translate(text[:4500])
+            from deep_translator import GoogleTranslator
+            cache[source] = GoogleTranslator(source=source, target="en")
         except Exception:
+            cache[source] = None      # unsupported code — skip this candidate
+    return cache[source]
+
+
+def translate_one(cache: dict, text: str, lang: str, sleep: float) -> str | None:
+    """
+    One row, with validation and backoff. None means give up for now.
+
+    The detected source language is tried BEFORE "auto". Google's auto-detection
+    silently fails on colloquial Arabic — it echoes the input back rather than
+    erroring — while an explicit source="ar" translates the same string fine.
+    Since fastText already told us the language in 01_preprocess, use it.
+    """
+    candidates = [c for c in (lang, "auto") if c and c != "en"]
+    if not candidates:
+        candidates = ["auto"]
+
+    for source in candidates:
+        translator = get_translator(cache, source)
+        if translator is None:
             continue
-        if looks_translated(text, out):
-            return out.strip()
+        for wait in (0.0, *BACKOFF):
+            if wait:
+                time.sleep(wait)
+            try:
+                out = translator.translate(text[:4500])
+            except Exception:
+                # TranslationNotFound and friends: this source will not work,
+                # so stop retrying it and let the next candidate have a go.
+                break
+            if looks_translated(text, out):
+                return out.strip()
     return None
 
 
@@ -113,6 +141,59 @@ def needs_translation(df: pd.DataFrame, text_col: str) -> pd.Series:
     return mask & df[text_col].astype(str).str.strip().ne("")
 
 
+#: The three document sheets are all views of the same 500 reviews, so a row's
+#: translation must not depend on which file it is read from.
+DOC_SHEETS = ("doc_500.csv", "doc_500_annotator1.csv", "doc_500_annotator2.csv")
+
+
+def sync_doc_translations() -> None:
+    """
+    Give the same reviewId the same content_en in every document sheet.
+
+    Each sheet is translated independently, so a row that Google handles on one
+    attempt and refuses on the next ends up translated in one file and blank in
+    another. On the 100 shared rows that is actively harmful: one annotator can
+    read the review and label it while the other must mark it 'cannot read', so
+    the pair is lost from Krippendorff's alpha through an artefact of retry luck
+    rather than genuine disagreement.
+
+    Resolution is best-of — any real translation wins over a blank.
+    """
+    section("Syncing translations across the document sheets")
+
+    frames = {}
+    for name in DOC_SHEETS:
+        p = GOLD_DIR / name
+        if p.exists():
+            frames[name] = pd.read_csv(p, dtype=str, keep_default_na=False)
+    if len(frames) < 2:
+        log("fewer than two document sheets present — nothing to sync.")
+        return
+
+    best: dict[str, str] = {}
+    for df in frames.values():
+        if "content_en" not in df.columns:
+            continue
+        for rid, en in zip(df["reviewId"], df["content_en"]):
+            en = str(en).strip()
+            if en and not best.get(rid):
+                best[rid] = en
+
+    total = 0
+    for name, df in frames.items():
+        if "content_en" not in df.columns:
+            df["content_en"] = ""
+        filled = df["reviewId"].map(best).fillna("")
+        gap = df["content_en"].astype(str).str.strip().eq("") & filled.ne("")
+        n = int(gap.sum())
+        if n:
+            df.loc[gap, "content_en"] = filled[gap]
+            df.to_csv(GOLD_DIR / name, index=False)
+            total += n
+            log(f"  {name}: filled {n} row(s) from a sibling sheet")
+    log(f"{total} row(s) synchronised." if total else "Already consistent.")
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -125,17 +206,16 @@ def main() -> None:
 
     targets = {args.only: SHEETS[args.only]} if args.only else SHEETS
 
-    translator = None
+    tcache: dict = {}
     if not args.dry_run:
         try:
-            from deep_translator import GoogleTranslator
+            import deep_translator  # noqa: F401
         except ImportError:
             raise SystemExit(
                 "deep-translator is not installed.\n"
                 "  uv pip install deep-translator\n"
                 "Or re-run with --dry-run to see the row counts first."
             )
-        translator = GoogleTranslator(source="auto", target="en")
 
     grand_total = 0
     for name, text_col in targets.items():
@@ -190,7 +270,8 @@ def main() -> None:
         failed = 0
         for i, row_i in enumerate(idx, start=1):
             src = str(df.at[row_i, text_col])
-            out = translate_one(translator, src, args.sleep)
+            row_lang = str(df.at[row_i, "lang"]) if "lang" in df.columns else ""
+            out = translate_one(tcache, src, row_lang, args.sleep)
             if out is None:
                 failed += 1
                 df.at[row_i, "content_en"] = ""     # blank, never a poisoned value
@@ -211,6 +292,9 @@ def main() -> None:
             log(f"{failed} row(s) could not be translated and were left BLANK "
                 f"(never a partial or error value). Re-run to retry just those; "
                 f"raise --sleep if the failure rate is high.", level="WARN")
+
+    if not args.dry_run:
+        sync_doc_translations()
 
     if args.dry_run:
         section("Dry run")
