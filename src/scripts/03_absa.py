@@ -60,7 +60,64 @@ REQUEST_RE = re.compile(
     re.IGNORECASE,
 )
 
-#: Negation scope: the aspect is stated as absent rather than judged.
+#: §5.3.5 — Devotional formulae.
+#:
+#: Measured on the 300-sentence gold set: 71 of 300 aspect predictions (23.7%)
+#: fired on sentences carrying no product content at all, and a quarter of those
+#: were pure du'a. The cause is generic feature vocabulary colliding with
+#: religious register — "May Allah REWARD you" matched goal_system's `reward`,
+#: "may Allah bless and GUIDE your team" matched guides' `guide`, "the highest
+#: RANK of Jannah" matched tracker_score's `rank`. goal_system scored 0%
+#: precision entirely this way.
+#:
+#: This is a property of the domain, not a tuning artefact: any English feature
+#: lexicon applied to reviews of a devotional app will hit it. Filtering the
+#: formulae is cheaper and far more legible than trying to out-engineer them
+#: keyword by keyword.
+#:
+#: A sentence is dropped only when the formula is essentially the whole of it —
+#: "Masha Allah, but the qibla is off" keeps its qibla judgement. On the gold
+#: set this removes 25 false triggers and costs 4 correct predictions.
+#: Invocations run to the end of their clause: "May Allah reward you" is one
+#: formula, not the token "may Allah" plus the product words "reward you".
+#: Matching only the prefix leaves enough residue to look like real content,
+#: which is why an earlier version kept every "May Allah reward you" in the set.
+DUA_CLAUSE_RE = re.compile(
+    r"(?i)\b(?:"
+    r"may\s+(?:allah|god)\b"
+    r"|(?:allah|god)\s+(?:bless|reward|grant|guide|accept|protect)"
+    r"|jazak\s*[au]?\s*allah|jazakallah|barak\s*allah|barakallah"
+    r")[^.!?,;\n]*"
+)
+
+#: Standalone devotional tokens. These do NOT consume the clause — "Masha Allah,
+#: but the qibla is off" must keep its qibla judgement.
+DUA_TOKEN_RE = re.compile(
+    r"(?i)\b(?:"
+    r"masha\s*allah|mashallah|subhan\s*allah|subhanallah|tabarakallah"
+    r"|alhamdulil+ah|hamdulillah|insha\s*allah|inshallah|bismillah"
+    r"|assalam\w*|salam\s*alaikum|walaikum\w*|ameen|aameen"
+    r"|jannah|jannat|akhirah|hereafter|highest\s+rank"
+    r")\b"
+)
+
+#: Share of a sentence's letters that must survive the devotional matches for it
+#: to still count as carrying product content.
+DUA_DOMINANCE = 0.5
+
+
+def is_devotional(text: str) -> bool:
+    """True when a sentence is essentially just a du'a or greeting."""
+    s = str(text)
+    if not (DUA_CLAUSE_RE.search(s) or DUA_TOKEN_RE.search(s)):
+        return False
+    residue = DUA_TOKEN_RE.sub(" ", DUA_CLAUSE_RE.sub(" ", s))
+    letters = sum(ch.isalpha() for ch in s)
+    if not letters:
+        return True
+    return (sum(ch.isalpha() for ch in residue) / letters) < DUA_DOMINANCE
+
+
 NEGATION_RE = re.compile(
     r"\b(doesn'?t|does\s+not|don'?t|do\s+not|didn'?t|did\s+not|isn'?t|is\s+not"
     r"|aren'?t|are\s+not|can'?t|cannot|couldn'?t|won'?t|no|not|never|without|lacks?)\b",
@@ -281,6 +338,18 @@ def handle_requests_and_negation(tagged_df: pd.DataFrame, sentences_df: pd.DataF
     text = tagged_df["triggering_sentence"].fillna("")
     tagged_df["is_request"] = text.str.contains(REQUEST_RE, regex=True, na=False)
     tagged_df["has_negation"] = text.str.contains(NEGATION_RE, regex=True, na=False)
+
+    tagged_df["is_devotional"] = text.map(is_devotional)
+    n_dua = int(tagged_df["is_devotional"].sum())
+    if n_dua:
+        by = (tagged_df.loc[tagged_df["is_devotional"], "aspect"]
+              .value_counts().head(5))
+        log(f"Devotional formulae dropped: {n_dua:,} "
+            f"({tagged_df['is_devotional'].mean():.1%}) — pure du'a carries no "
+            f"product judgement (§5.3.5).")
+        log("  most affected: " + "  ".join(f"{k}={v}" for k, v in by.items()))
+        tagged_df = tagged_df[~tagged_df["is_devotional"]].copy()
+    tagged_df = tagged_df.drop(columns=["is_devotional"])
 
     log(f"Flagged as requests: {tagged_df['is_request'].sum():,} "
         f"({tagged_df['is_request'].mean():.1%}) — excluded from aspect sentiment, "

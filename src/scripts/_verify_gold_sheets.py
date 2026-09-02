@@ -14,7 +14,12 @@ for f, n_exp in EXPECT.items():
     txt = next(c for c in ("content_clean","triggering_sentence","evidence_sentence") if c in d.columns)
     rows_ok = len(d) == n_exp
     src_ok  = d[txt].apply(lambda s: bool(re.search(r"[^\x00-\x7F]", str(s)))).sum()
-    blank   = all((d[c].astype(str).str.strip()=="").all() for c in ACTION if c in d.columns)
+    # Before labelling these must be empty; afterwards they must be filled. Report
+    # the state rather than demanding one, so the same check serves both phases.
+    key = next((c for c in ("gold_label","gold_aspect_correct","is_true_positive")
+                if c in d.columns), None)
+    n_lab = int((d[key].astype(str).str.strip()!="").sum()) if key else 0
+    blank = n_lab == 0
     if "content_en" in d.columns:
         need = (d["lang"].ne("en") if "lang" in d.columns
                 else d[txt].str.contains(r"[^\x00-\x7F]", regex=True, na=False))
@@ -43,10 +48,11 @@ for f, n_exp in EXPECT.items():
                 tr += f"  {miss} blank (ok, mark \'cannot read\')"
     else:
         tr = "no content_en"
-    flag = "" if (rows_ok and blank) else "   <-- CHECK"
-    if not (rows_ok and blank): ok = False
+    state = "unlabelled" if blank else f"labelled {n_lab}/{len(d)}"
+    flag = "" if rows_ok else "   <-- CHECK"
+    if not rows_ok: ok = False
     print(f"  {f:31s} rows {len(d):>4}/{n_exp}  src-nonascii {src_ok:>3}  "
-          f"labels {'blank' if blank else 'PRESENT'}  {tr}{flag}")
+          f"{state}  {tr}{flag}")
 if not (D/"doc_500_annotator1.csv").exists() or not (D/"doc_500_annotator2.csv").exists():
     print("\n  Annotator files missing — run _gen_gold_sheets.py first.")
     sys.exit(1)

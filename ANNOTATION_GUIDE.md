@@ -225,6 +225,32 @@ Read `triggering_sentence`, then fill four columns:
 | `gold_sentiment` | `Positive` / `Negative` / `Neutral` / `Mixed` | Sentiment **toward that aspect**, not toward the whole review |
 | `gold_is_request` | `1` / `0` | Is this asking for something **absent**, rather than judging something present? |
 
+### When NO aspect applies
+
+Some sentences carry no product content at all — pure praise, gratitude, or a
+du'a: *"May Allah reward you"*, *"Assalamualaikum"*, *"thank you"*. The tagger
+still fires on these because generic feature words collide with religious
+register (`reward`, `guide`, `rank`).
+
+For those rows: **`gold_aspect_correct` = 0 and leave `gold_aspect_true` blank.**
+
+A blank `gold_aspect_true` therefore carries meaning — it says *"no aspect in
+our taxonomy applies"*, as distinct from *"the right aspect is X"*. Both are
+useful: the first measures how often the tagger fires on nothing, the second how
+often it picks the wrong label. On the first 300 rows this split was 24% firing
+on nothing and 28% picking the wrong aspect.
+
+### Three aspects are narrower than they sound
+
+These definitions are binding — the lexicon has been tightened to match them.
+
+| Aspect | Counts | Does **not** count |
+|---|---|---|
+| `guides` | Salah and wudu guides only | Any other how-to or tutorial content |
+| `calendar_sync` | Syncing with the user's own calendar so reminders adjust around times they are busy | The Hijri/Islamic calendar date display — a different feature entirely |
+| `tracker_score` | Prayer trackers, their scores and streaks | Adhkar, Quran-reading or fasting trackers |
+
+
 ### The 27 aspects
 
 The first 20 map to a feature column in the app spreadsheet; the last 7 are

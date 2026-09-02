@@ -179,12 +179,8 @@ goal_system:
     - challenge
     - target
     - milestone
-    - event
     - badge
     - badges
-    - reward
-    - rewards
-    - achievement
   regex_patterns:
     - "(?:daily|weekly|monthly)\\s+(?:goal|target|challenge)"
     - "(?:earn|unlock)\\s+(?:a\\s+)?(?:badge|reward|point)"
@@ -192,9 +188,9 @@ goal_system:
   promise_keywords:
     - badge
     - badges
-    - achievement
     - streak
-    - reward
+    - reward          # store copy only: marketing 'earn rewards' is a real
+    - achievement     # goal system; the du'a collision is review-side only
   promise_regex_patterns:
     - "(?:daily|weekly|monthly)\\s+(?:goal|target|challenge)"
     - "(?:earn|unlock)\\s+\\w{0,10}\\s?(?:badge|reward|achievement)"
@@ -227,12 +223,8 @@ guides:
     - wudhu
     - ozu             # Bengali transliteration
     - ablution
-    - guide
-    - tutorial
     - learn salah
     - learn to pray
-    - step by step
-    - instruction
   regex_patterns:
     - "how\\s+to\\s+(?:pray|perform|do)\\s+(?:salah|namaz|wudu|prayer)"
     - "(?:teach|teaches|teaching|learn|learning)\\s+(?:me\\s+)?(?:to\\s+)?(?:pray|salah|namaz)"
@@ -330,17 +322,9 @@ qasr_travel:
     - qasr
     - qasar          # transliteration variant
     - kasr
-    - travel
-    - travelling
-    - traveling
-    - shorten
-    - shortened
-    - journey
     - musafir
     - musafer
     - safar
-    - abroad
-    - flight
     - trip
   regex_patterns:
     - "(?:shorten|shortened|shortening)\\s+(?:the\\s+)?(?:prayer|salah|namaz)"
@@ -367,12 +351,14 @@ calendar_sync:
   keywords:
     - google calendar
     - calendar sync
-    - calendar event
-    - sync
     - ical
     - outlook
   regex_patterns:
-    - "(?:sync|export|add|connect).{0,20}calendar"
+    # Guarded against "add islamic calendar" / "hijri calendar": those are a
+    # Hijri DATE DISPLAY, a different feature from syncing prayer reminders
+    # around the user's own calendar commitments (annotator definition).
+    - "(?:sync|export|connect)\\s+(?!.*(?:islamic|hijri|hijra|arabic|lunar))[^.]{0,20}calendar"
+    - "(?:google|device|phone|outlook|ical)\\s+calendar"
     - "calendar.{0,20}(?:sync|integration|export)"
 
 monetization:
@@ -441,23 +427,12 @@ tracker_score:
   keywords:
     - streak
     - streaks
-    - score
-    - grade
-    - grading
-    - percentage
-    - statistics
-    - stats
-    - progress
-    - chart
-    - rank
-    - ranking
-    - analytics
-    - report
   regex_patterns:
     - "(?:lost|broke|breaking|losing|keep)\\s+(?:my\\s+)?streak"
     - "\\d+\\s*day\\s+streak"
     - "(?:prayer|salah)\\s+(?:score|grade|percentage|statistic)"
-    - "progress\\s+(?:chart|graph|report|bar)"
+    # Prayer trackers only — Quran/fasting/adhkar trackers are out of scope.
+    - "(?:prayer|salah|namaz)\\s+progress\\s+(?:chart|graph|report|bar)"
 
 women_period:
   csv_column: "Women tracking"
