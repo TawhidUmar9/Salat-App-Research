@@ -491,8 +491,21 @@ def model_m2_rq1_gamification_valence(design: pd.DataFrame, aspect_df: pd.DataFr
         table = [[guilt, motiv], [base_guilt - guilt, base_motiv - motiv]]
         try:
             odds, p = fisher_exact(table)
-            log(f"    Fisher exact: OR={odds:.2f}, p={p:.4g} "
-                f"(guilt over-representation in tracker reviews)")
+            # Read the direction off the data. This line used to assert
+            # "guilt over-representation" unconditionally, which inverts the
+            # finding whenever OR < 1 — as it does here — and would have put
+            # the opposite of RQ1's result into the paper.
+            if odds > 1:
+                verdict = ("guilt OVER-represented in tracker reviews "
+                           "vs the corpus baseline")
+            elif odds < 1:
+                verdict = ("guilt UNDER-represented in tracker reviews — "
+                           "tracker talk is MORE motivational than the baseline, "
+                           "against the streak-anxiety hypothesis")
+            else:
+                verdict = "no difference from the corpus baseline"
+            log(f"    Fisher exact: OR={odds:.2f}, p={p:.4g}")
+            log(f"      → {verdict}")
             _record("M2-affect", "RQ1", "guilt_vs_motivation_OR", odds, np.nan, p,
                     guilt + motiv, "Fisher exact vs corpus baseline")
         except Exception as exc:  # noqa: BLE001
@@ -792,8 +805,15 @@ def model_m5_rq3_competitive_edge(design: pd.DataFrame, aspect_df: pd.DataFrame,
         d["has_mosque_finder"] = d["app_name"].isin(has_mf)
         log(f"mosque_finder mentions: {len(mf):,} across {mf['app_name'].nunique()} apps")
         if d["has_mosque_finder"].nunique() > 1:
-            res = _fit_mixedlm("sent_num ~ has_mosque_finder", d.dropna(subset=["sent_num"]))
+            sub_mf = d.dropna(subset=["sent_num"])
+            res = _fit_mixedlm("sent_num ~ has_mosque_finder", sub_mf)
             _log_coefs(res, "M5", "RQ3", len(d))
+            # has_mosque_finder is app-level, so it competes with the per-app
+            # random intercept exactly as tracker_tier and feature_count do.
+            # The mixed model returns a NaN standard error here; the clustered
+            # OLS still gives RQ3 an interval to report.
+            _cluster_robust_ols("sent_num ~ has_mosque_finder", sub_mf,
+                                "sent_num", ["has_mosque_finder[T.True]"])
 
     # Auto Qasr: demand evidence only.
     log("")
