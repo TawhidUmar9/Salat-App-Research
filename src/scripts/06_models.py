@@ -230,6 +230,95 @@ def _bloat_surfacing(design: pd.DataFrame) -> None:
     for name, cnt, p_in, base, lf in rows[:10]:
         log(f"    {name:<26}{cnt:>7}{p_in:>9.2%}{base:>9.2%}{lf:>7.2f}x")
 
+    _bloat_ui_same_sentence(design, table, p_ui_base, n)
+
+
+def _bloat_ui_same_sentence(design, table, p_ui_base: float, n: int) -> None:
+    """
+    Split the co-occurrence into definitional and genuine, and test the latter.
+
+    A review counts as co-occurring when it carries both complaints anywhere.
+    That supports the surfacing account only if the two came from DIFFERENT
+    sentences. When one sentence carries both — "cluttered UI", "confusing and
+    not intuitive" — the pair is a single utterance the two lexicons both match,
+    and counting it as evidence that two complaints travel together is close to
+    circular.
+
+    Both readings are defensible and the paper should state which it uses:
+
+      * conservative — different sentences only. A clean association between two
+        separately-observed complaints.
+      * substantive — the same-sentence cases ARE the finding: users lexicalise
+        bloat as an interface property rather than as a count of features.
+
+    What is not defensible is reporting the pooled figure without the split, so
+    this always prints both.
+    """
+    from scipy.stats import fisher_exact
+
+    if not ASPECT_PATH.exists():
+        log("  aspect_sentiments.parquet unavailable — cannot split the "
+            "co-occurrence by sentence.", level="WARN")
+        return
+
+    bloat_a, ui_a = "complexity_bloat", "ui_design"
+    asp = pd.read_parquet(
+        ASPECT_PATH,
+        columns=["reviewId", "aspect", "sentiment_label", "is_request",
+                 "triggering_sentence"],
+    )
+    # Match the design matrix exactly: negative, non-request.
+    comp = asp[(asp["sentiment_label"] == "Negative")
+               & (~asp["is_request"].fillna(False))
+               & (asp["aspect"].isin([bloat_a, ui_a]))]
+    if comp.empty:
+        return
+
+    per_review = comp.groupby("reviewId")["aspect"].agg(set)
+    both = set(per_review[per_review.map(lambda s: {bloat_a, ui_a} <= s)].index)
+    per_sent = (comp[comp["reviewId"].isin(both)]
+                .groupby(["reviewId", "triggering_sentence"])["aspect"].agg(set))
+    same_ids = {rid for (rid, _), a in per_sent.items() if {bloat_a, ui_a} <= a}
+
+    n_both, n_same = len(both), len(same_ids)
+    n_diff = n_both - n_same
+    if not n_both:
+        return
+
+    log("")
+    log("  Splitting the co-occurrence by sentence:")
+    log(f"    reviews with both complaints:               {n_both:,}")
+    log(f"    one sentence carried both (definitional):   {n_same:,} "
+        f"({n_same / n_both:.1%})")
+    log(f"    separate sentences (conservative evidence): {n_diff:,} "
+        f"({n_diff / n_both:.1%})")
+
+    # Re-test on the conservative subset: drop the definitional reviews entirely
+    # so they inflate neither cell.
+    b = design[BLOAT_SURFACING_PAIR[0]].astype(bool)
+    u = design[BLOAT_SURFACING_PAIR[1]].astype(bool)
+    keep = ~design["reviewId"].isin(same_ids)
+    bk, uk = b[keep], u[keep]
+    tbl = np.array([[int((bk & uk).sum()), int((bk & ~uk).sum())],
+                    [int((~bk & uk).sum()), int((~bk & ~uk).sum())]])
+    if tbl[0].sum() == 0:
+        log("    no bloat reviews left after the split — not estimable.", level="WARN")
+        return
+    odds_c, p_c = fisher_exact(tbl)
+    p_ui_given = tbl[0, 0] / tbl[0].sum()
+    lift_c = p_ui_given / p_ui_base if p_ui_base else np.nan
+    log(f"    CONSERVATIVE  lift = {lift_c:.2f}x   OR = {odds_c:.2f}   "
+        f"p = {p_c:.2g}   (n={int(keep.sum()):,})")
+    log(f"    {'STILL SUPPORTS' if (odds_c > 1 and p_c < 0.05) else 'DOES NOT SUPPORT'} "
+        f"the surfacing account on separately-observed complaints.")
+    _record("M4-reframe-conservative", "RQ5",
+            "bloat_x_ui_cooccurrence_different_sentences",
+            float(np.log(odds_c)) if odds_c > 0 and np.isfinite(odds_c) else np.nan,
+            np.nan, float(p_c), int(keep.sum()),
+            note=f"definitional same-sentence pairs removed ({n_same} reviews); "
+                 f"lift={lift_c:.2f}",
+            family="sensitivity")
+
 
 def _cluster_robust_ols(formula: str, data: pd.DataFrame, outcome: str,
                         terms: list[str], group: str = "app_name") -> None:

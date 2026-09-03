@@ -37,8 +37,11 @@ def main() -> None:
     asp = pd.read_parquet(ASPECT_PATH)
     section("RQ5 co-occurrence — measurement artefact check")
 
-    # Negative mentions only, matching how the design matrix builds complaint_*.
-    neg = asp[asp["sentiment_label"].astype(str).str.lower().eq("negative")]
+    # Match build_design_matrix exactly: negative AND non-request. An earlier
+    # version omitted the request filter and used a different denominator, which
+    # is why its lift disagreed with the one 06_models reports.
+    neg = asp[asp["sentiment_label"].astype(str).str.lower().eq("negative")
+              & (~asp["is_request"].fillna(False))]
     pair = neg[neg["aspect"].isin([BLOAT, UI])]
     if pair.empty:
         log("no negative bloat/ui rows found", level="WARN")

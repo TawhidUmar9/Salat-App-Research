@@ -694,7 +694,11 @@ complexity_bloat:
   regex_patterns:
     - "too\\s+(?:many|much)\\s+(?:feature|option|setting|thing|stuff)"
     - "(?:just|only)\\s+(?:want|need)s?\\s+(?:a\\s+)?simple"
-    - "(?:hard|difficult|confusing)\\s+to\\s+(?:navigate|find|use|understand)"
+    # Disjoint from ui_design by construction: RQ5 tests whether these two
+    # complaints CO-OCCUR, so they must not share a matching rule or the
+    # test is partly circular. Comprehension/finding -> bloat;
+    # use/navigation -> ui_design.
+    - "(?:hard|difficult|confusing)\\s+to\\s+(?:find|understand|figure)"
     - "(?:app\\s+is\\s+)?(?:too\\s+)?(?:heavy|bloated|slow|large|big)"
     - "does\\s+too\\s+much"
 
