@@ -237,22 +237,22 @@ def _bloat_ui_same_sentence(design, table, p_ui_base: float, n: int) -> None:
     """
     Split the co-occurrence into definitional and genuine, and test the latter.
 
-    A review counts as co-occurring when it carries both complaints anywhere.
-    That supports the surfacing account only if the two came from DIFFERENT
-    sentences. When one sentence carries both — "cluttered UI", "confusing and
-    not intuitive" — the pair is a single utterance the two lexicons both match,
-    and counting it as evidence that two complaints travel together is close to
-    circular.
+    Since the two lexicons were made disjoint (no shared keyword, no shared
+    regex), a single span can no longer trigger both tags. A sentence carrying
+    both therefore contains two distinct lexical items — "cluttered UI" is
+    `clutter` plus `ui` — which is genuine co-occurrence, not double-matching.
 
-    Both readings are defensible and the paper should state which it uses:
+    The split that remains is between one utterance and two:
 
-      * conservative — different sentences only. A clean association between two
-        separately-observed complaints.
-      * substantive — the same-sentence cases ARE the finding: users lexicalise
-        bloat as an interface property rather than as a count of features.
+      * same sentence — the user fuses the two in a single breath. On the
+        disjoint lexicons this is the STRONGER evidence for the surfacing
+        account: bloat is being predicated of the interface, not counted.
+      * different sentences — two separately-voiced complaints in one review.
+        The conservative reading, free of any dependence on how a single
+        sentence was segmented or tagged.
 
-    What is not defensible is reporting the pooled figure without the split, so
-    this always prints both.
+    Report both. The pooled figure alone invites the objection that the two
+    measures are entangled; the split answers it before it is raised.
     """
     from scipy.stats import fisher_exact
 
@@ -286,11 +286,12 @@ def _bloat_ui_same_sentence(design, table, p_ui_base: float, n: int) -> None:
         return
 
     log("")
-    log("  Splitting the co-occurrence by sentence:")
-    log(f"    reviews with both complaints:               {n_both:,}")
-    log(f"    one sentence carried both (definitional):   {n_same:,} "
+    log("  Splitting the co-occurrence by sentence "
+        "(lexicons are disjoint, so both tags need two distinct terms):")
+    log(f"    reviews with both complaints:                {n_both:,}")
+    log(f"    fused in ONE sentence  ('cluttered UI'):     {n_same:,} "
         f"({n_same / n_both:.1%})")
-    log(f"    separate sentences (conservative evidence): {n_diff:,} "
+    log(f"    voiced in SEPARATE sentences (conservative): {n_diff:,} "
         f"({n_diff / n_both:.1%})")
 
     # Re-test on the conservative subset: drop the definitional reviews entirely
@@ -315,7 +316,7 @@ def _bloat_ui_same_sentence(design, table, p_ui_base: float, n: int) -> None:
             "bloat_x_ui_cooccurrence_different_sentences",
             float(np.log(odds_c)) if odds_c > 0 and np.isfinite(odds_c) else np.nan,
             np.nan, float(p_c), int(keep.sum()),
-            note=f"definitional same-sentence pairs removed ({n_same} reviews); "
+            note=f"same-sentence pairs removed ({n_same} reviews); "
                  f"lift={lift_c:.2f}",
             family="sensitivity")
 
