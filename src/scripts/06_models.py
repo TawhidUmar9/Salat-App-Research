@@ -447,8 +447,20 @@ def model_m2_rq1_gamification_valence(design: pd.DataFrame, aspect_df: pd.DataFr
         log(f"    {t:20s} {n:>7,} reviews")
 
     if d["tracker_tier"].nunique() > 1:
-        res = _fit_mixedlm("sent_num ~ C(tracker_tier)", d.dropna(subset=["sent_num"]))
+        sub = d.dropna(subset=["sent_num"])
+        res = _fit_mixedlm("sent_num ~ C(tracker_tier)", sub)
         _log_coefs(res, "M2", "RQ1", len(d))
+
+        # Same structural problem as M4, and for the same reason: tracker_tier is
+        # a property of the APP (derived from its feature annotation), so it is
+        # constant within every random-intercept group. With 26 apps and a tier
+        # distribution as skewed as this one the mixed model separates outright —
+        # coefficients in the tens with standard errors in the millions. OLS with
+        # SEs clustered on app makes no random-effect assumption and still
+        # respects the nesting, so RQ1 has an estimate either way.
+        _cluster_robust_ols("sent_num ~ C(tracker_tier)", sub, "sent_num",
+                            [c for c in ("C(tracker_tier)[T.tracker_only]",
+                                         "C(tracker_tier)[T.tracker_plus_score]")])
     else:
         log("Only one tracker tier present — skipping the tier model.", level="WARN")
         res = None
