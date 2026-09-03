@@ -206,6 +206,63 @@ def label_topics(topic_model, docs: list[str]) -> pd.DataFrame:
     return out
 
 
+#: Seeds used for the stability pass. Fixed in advance so the set cannot be
+#: adjusted after seeing which one flatters a result.
+STABILITY_SEEDS = (42, 43, 44, 45, 46)
+
+
+def fit_stable_topic_model(docs, *, device, extra_stopwords, nr_topics,
+                           min_topic_size, seeds=STABILITY_SEEDS, **kw):
+    """
+    Fit at several seeds, report how stable the structure is, return the median.
+
+    UMAP is stochastic and HDBSCAN inherits that: on the 6,212 tracker reviews
+    one seed produced 11 topics and another produced 1. Reporting whichever came
+    out of a single arbitrary fit is not defensible, and quietly retrying seeds
+    until the structure looks useful is worse.
+
+    So: fit at a FIXED set of seeds, decided in advance; report the spread of
+    topic counts and the mean pairwise Adjusted Rand Index between runs; and
+    return the run whose topic count is the MEDIAN. The selection rule is a
+    property of the distribution, not of whether the resulting topics suit the
+    argument.
+
+    The ARI is worth reporting in Methods on its own: it says how much of the
+    topic structure is real signal rather than an artefact of one projection.
+    """
+    from sklearn.metrics import adjusted_rand_score
+
+    fits = []
+    for s in seeds:
+        model, topics, probs = build_topic_model(
+            docs, device=device, extra_stopwords=extra_stopwords,
+            nr_topics=nr_topics, min_topic_size=min_topic_size, seed=s, **kw)
+        n_t = len({t for t in topics if t != -1})
+        fits.append({"seed": s, "model": model, "topics": list(topics),
+                     "probs": probs, "n_topics": n_t})
+        log(f"  seed {s}: {n_t} topics")
+
+    counts = [f["n_topics"] for f in fits]
+    aris = [adjusted_rand_score(a["topics"], b["topics"])
+            for i, a in enumerate(fits) for b in fits[i + 1:]]
+    mean_ari = float(np.mean(aris)) if aris else float("nan")
+
+    log(f"  topic counts across {len(seeds)} seeds: {counts}  "
+        f"(min {min(counts)}, median {int(np.median(counts))}, max {max(counts)})")
+    log(f"  mean pairwise ARI: {mean_ari:.3f}  "
+        f"({'stable' if mean_ari >= 0.5 else 'UNSTABLE — report the spread'})")
+    record_run_fact("topic_stability_ari", round(mean_ari, 3))
+    record_run_fact("topic_counts_by_seed", counts)
+    if mean_ari < 0.5:
+        log("  Structure varies substantially between seeds. Report the ARI and "
+            "the count range alongside any topic claim.", level="WARN")
+
+    target = int(np.median(counts))
+    chosen = min(fits, key=lambda f: (abs(f["n_topics"] - target), f["seed"]))
+    log(f"  using seed {chosen['seed']} ({chosen['n_topics']} topics, the median).")
+    return chosen["model"], chosen["topics"], chosen["probs"], mean_ari
+
+
 def run_subtopic_models(df: pd.DataFrame, *, device: str, extra_stopwords: list[str],
                         seed: int = 42) -> dict:
     """
@@ -243,14 +300,15 @@ def run_subtopic_models(df: pd.DataFrame, *, device: str, extra_stopwords: list[
             results[name] = None
             continue
 
-        model, topics, _ = build_topic_model(
+        model, topics, _, ari = fit_stable_topic_model(
             sub["content_clean"].tolist(), device=device,
-            extra_stopwords=extra_stopwords, seed=seed,
+            extra_stopwords=extra_stopwords,
             nr_topics=min(12, max(4, len(sub) // 400)),
             min_topic_size=max(15, len(sub) // 100),
         )
         info = label_topics(model, sub["content_clean"].tolist())
         info["submodel"] = name
+        info["stability_ari"] = round(ari, 3)
         path = DATA_DIR / f"topic_info_{name}.csv"
         info.to_csv(path, index=False)
         log(f"Saved → {path}")
