@@ -93,7 +93,7 @@ def _app_name_stopwords(df: pd.DataFrame) -> list[str]:
 
 def build_topic_model(docs: list[str], *, device: str, extra_stopwords: list[str],
                       nr_topics: int | str = "auto", min_topic_size: int | None = None,
-                      multilingual: bool = False):
+                      multilingual: bool = False, seed: int = 42):
     """
     §7 — Fit BERTopic on C_en.
 
@@ -129,8 +129,26 @@ def build_topic_model(docs: list[str], *, device: str, extra_stopwords: list[str
         docs, batch_size=256, show_progress_bar=True, convert_to_numpy=True,
     )
 
+    # BERTopic's default UMAP is UNSEEDED, and UMAP is stochastic: two runs over
+    # the identical 276,422 documents produced 38 topics (30.6% unassigned) and
+    # then 74 topics (20.9%). A topic count that swings by 2x between runs cannot
+    # be reported, and every downstream label and quote would move with it.
+    #
+    # Seeding costs speed — UMAP falls back to single-threaded when random_state
+    # is set — but a reproducible model is not optional for a paper. The other
+    # parameters are UMAP's defaults, restated so the seed is not the only thing
+    # pinned.
+    from umap import UMAP
+    umap_model = UMAP(
+        n_neighbors=15, n_components=5, min_dist=0.0, metric="cosine",
+        random_state=seed,
+    )
+    log(f"UMAP seeded with random_state={seed} (single-threaded, slower but "
+        f"reproducible).")
+
     topic_model = BERTopic(
         embedding_model=embedder,
+        umap_model=umap_model,
         vectorizer_model=_make_vectorizer(extra_stopwords),
         min_topic_size=min_topic_size,
         nr_topics=nr_topics,
@@ -188,7 +206,8 @@ def label_topics(topic_model, docs: list[str]) -> pd.DataFrame:
     return out
 
 
-def run_subtopic_models(df: pd.DataFrame, *, device: str, extra_stopwords: list[str]) -> dict:
+def run_subtopic_models(df: pd.DataFrame, *, device: str, extra_stopwords: list[str],
+                        seed: int = 42) -> dict:
     """
     §7 — Sub-topic models within specific aspects.
 
@@ -226,7 +245,7 @@ def run_subtopic_models(df: pd.DataFrame, *, device: str, extra_stopwords: list[
 
         model, topics, _ = build_topic_model(
             sub["content_clean"].tolist(), device=device,
-            extra_stopwords=extra_stopwords,
+            extra_stopwords=extra_stopwords, seed=seed,
             nr_topics=min(12, max(4, len(sub) // 400)),
             min_topic_size=max(15, len(sub) // 100),
         )
@@ -308,7 +327,7 @@ def main() -> None:
     model, topics, probs = build_topic_model(
         df["content_clean"].tolist(), device=device, extra_stopwords=extra_stops,
         nr_topics=nr_topics, min_topic_size=args.min_topic_size,
-        multilingual=args.multilingual,
+        multilingual=args.multilingual, seed=args.seed,
     )
 
     label_topics(model, df["content_clean"].tolist())
@@ -322,7 +341,8 @@ def main() -> None:
     topic_prevalence(topics_df, df)
 
     if not args.skip_subtopics:
-        subs = run_subtopic_models(df, device=device, extra_stopwords=extra_stops)
+        subs = run_subtopic_models(df, device=device, extra_stopwords=extra_stops,
+                                   seed=args.seed)
         for name, sub_df in subs.items():
             if sub_df is None:
                 continue
