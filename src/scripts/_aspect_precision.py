@@ -36,7 +36,9 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import ASPECT_PATH, GOLD_DIR, log, require, section  # noqa: E402
+from _common import (  # noqa: E402
+    ASPECT_PATH, GOLD_DIR, compile_aspect_patterns, load_lexicon, log, require, section,
+)
 
 N_BOOT = 5000
 
@@ -46,16 +48,47 @@ def main() -> None:
     require(gold_path, "python src/scripts/_gen_gold_sheets.py")
     require(ASPECT_PATH, "python src/scripts/03_absa.py")
 
+    section("Aspect precision")
+
     g = pd.read_csv(gold_path, dtype=str, keep_default_na=False)
     g = g[g["gold_aspect_correct"].str.strip().isin(["0", "1"])].copy()
     g["ok"] = g["gold_aspect_correct"].str.strip() == "1"
     g["aspect"] = g["predicted_aspect"].str.strip()
 
+    # Restrict to rows the CURRENT configuration would still produce. The labels
+    # were made against the earlier setup (zero-shot on, broader lexicon), and
+    # every change since only removes matches, so the current predictions are a
+    # subset of the labelled ones. Filtering to that subset estimates the current
+    # config; NOT filtering measures the old one and quietly attributes its
+    # failures to the present lexicon.
+    n_before = len(g)
+    pats = compile_aspect_patterns(load_lexicon())
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "absa", Path(__file__).resolve().parent / "03_absa.py")
+    absa = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(absa)
+    except SystemExit:
+        pass
+
+    def survives(row) -> bool:
+        a = row["aspect"]
+        s = str(row["triggering_sentence"])
+        if str(row.get("match_method", "")).strip() == "zero-shot":
+            return False                      # backstop disabled
+        if absa.is_devotional(s):
+            return False                      # du'a filter
+        pat = pats.get(a)
+        return bool(pat.search(s)) if pat is not None else True
+
+    g["current"] = g.apply(survives, axis=1)
+    g = g[g["current"]].copy()
+    log(f"gold rows labelled: {n_before}   still produced by the current "
+        f"configuration: {len(g)}")
+
     asp = pd.read_parquet(ASPECT_PATH, columns=["aspect"])
     freq = asp["aspect"].value_counts()
-
-    section("Aspect precision")
-    log(f"gold rows: {len(g)}   aspects covered: {g['aspect'].nunique()}")
 
     per = g.groupby("aspect")["ok"].agg(["sum", "count", "mean"])
     per["corpus_n"] = per.index.map(freq).fillna(0).astype(int)
