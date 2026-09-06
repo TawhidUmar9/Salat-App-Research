@@ -164,9 +164,15 @@ def build_topic_model(docs: list[str], *, device: str, extra_stopwords: list[str
     return topic_model, topics, probs
 
 
-def label_topics(topic_model, docs: list[str]) -> pd.DataFrame:
+def label_topics(topic_model, docs: list[str], *,
+                 path: Path | None = None) -> pd.DataFrame:
     """
     §7 — Label topics from representative documents and tag them by RQ.
+
+    `path` is where the sheet is written; it defaults to the ecosystem model's
+    `topic_info.csv`. Sub-models MUST pass their own path — this function used
+    to hardcode the default, so every sub-model overwrote the ecosystem sheet
+    on its way past and the 40-topic list was lost at the end of each run.
 
     BERTopic's default c-TF-IDF names are keyword salads; the representative
     documents are what a human actually reads to name a topic, so both are
@@ -199,10 +205,10 @@ def label_topics(topic_model, docs: list[str]) -> pd.DataFrame:
     for _, r in out.head(30).iterrows():
         log(f"    {r['topic_id']:>4d} {r['size']:>7,}  {r['rq_tags']:10s} {r['top_words'][:70]}")
 
-    path = DATA_DIR / "topic_info.csv"
+    path = path or DATA_DIR / "topic_info.csv"
     out.to_csv(path, index=False)
     log(f"Saved → {path}")
-    log("ACTION: fill `manual_label` in topic_info.csv from the representative docs.")
+    log(f"ACTION: fill `manual_label` in {path.name} from the representative docs.")
     return out
 
 
@@ -306,10 +312,10 @@ def run_subtopic_models(df: pd.DataFrame, *, device: str, extra_stopwords: list[
             nr_topics=min(12, max(4, len(sub) // 400)),
             min_topic_size=max(15, len(sub) // 100),
         )
-        info = label_topics(model, sub["content_clean"].tolist())
+        path = DATA_DIR / f"topic_info_{name}.csv"
+        info = label_topics(model, sub["content_clean"].tolist(), path=path)
         info["submodel"] = name
         info["stability_ari"] = round(ari, 3)
-        path = DATA_DIR / f"topic_info_{name}.csv"
         info.to_csv(path, index=False)
         log(f"Saved → {path}")
         results[name] = pd.DataFrame({"reviewId": sub["reviewId"].values, "topic_id": topics})

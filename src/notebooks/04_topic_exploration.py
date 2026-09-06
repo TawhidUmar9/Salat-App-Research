@@ -109,7 +109,7 @@ fig.tight_layout()
 # ## 5. Sub-topic models (RQ1 tracker, RQ4 women/privacy)
 
 # %%
-for name in ["rq1_tracker", "rq4_women_privacy"]:
+for name in ["rq1_tracker", "rq4_women_privacy", "rq5_bloat"]:
     p = DATA_DIR / f"topic_info_{name}.csv"  # noqa: F405
     if p.exists():
         print(f"\n=== {name} ===")

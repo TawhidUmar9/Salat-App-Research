@@ -24,3 +24,8 @@ src/figures/*.pdf
 
 # Keep the gold labels — they are hand-produced and NOT reproducible
 !src/data/gold_labels/*.csv
+
+# Topic sheets stop being reproducible the moment they are hand-labelled —
+# same argument as the gold labels above. Track them so the labelling survives.
+!src/data/topic_info.csv
+!src/data/topic_info_*.csv

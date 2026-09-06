@@ -53,7 +53,35 @@ co-occurrence caveats.
 
 ---
 
-## 2. Label the topics — the big one
+## 2. Getting the files
+
+None of the working files are in the repo — `.gitignore` excludes
+`src/data/*.csv`, because everything there is reproducible from the pipeline.
+They live on the analysis server, same as the gold sheets:
+
+```bash
+scp '<user>@<server>:~/Tonmoy/Salat-App-Research/src/data/topic_info*.csv' src/data/
+scp '<user>@<server>:~/Tonmoy/Salat-App-Research/src/data/quotes/rq1_tracker_negative_50.csv' src/data/quotes/
+```
+
+Keep the single quotes — the `*` must expand on the server.
+
+The three sub-model sheets carry `representative_doc_1` and `_2`, so they can be
+labelled in a spreadsheet with nothing else installed. Only the 40-topic
+`topic_info.csv` really wants the notebook, which shows 15 documents per topic
+instead of 2. For that you also need the parquets:
+
+```bash
+scp '<user>@<server>:~/Tonmoy/Salat-App-Research/src/data/topics.parquet' src/data/
+scp '<user>@<server>:~/Tonmoy/Salat-App-Research/src/data/master_reviews_with_sentiment.parquet' src/data/
+```
+
+Labels are hand-made and not reproducible. Once a sheet is filled, copy it back
+to the server and commit it, the way the gold labels were handled.
+
+---
+
+## 3. Label the topics — the big one
 
 **Why this matters more than it sounds.** BERTopic gives you keyword salads like
 `simple, ads, big, read, translation`. A reader cannot use that. Your label is
@@ -128,11 +156,11 @@ bloat topics". Report the ARI and the 6–11 range in Methods.
 **`rq1_tracker` gave only 3 topics** (ARI 0.837, so that structure is stable —
 there just is not much there). One is Hindi/Urdu stopwords, one is privacy, and
 one is a single large `track, log, daily` cluster. That is too thin to carry
-RQ1. Lean on section 3 instead.
+RQ1. Lean on section 4 instead.
 
 ---
 
-## 3. Code the 50 tracker-negative reviews — RQ1's real evidence
+## 4. Code the 50 tracker-negative reviews — RQ1's real evidence
 
 `src/data/quotes/rq1_tracker_negative_50.csv`
 
@@ -151,8 +179,13 @@ what is actually wrong?*
 
 ### Protocol
 
-Add a `code` column and give each review a short phrase. Then group the phrases
-into themes. Do not start from a fixed list — let the categories come from the
+Add a **`theme_code`** column and give each review a short phrase. Then group
+the phrases into themes. The column must be named `theme_code` — that is what
+`07_rq1_gamification.py` reads.
+
+> ⚠️ **Do not re-run `07_rq1_gamification.py` after you start coding.** Its
+> section 6 rewrites this file with an empty `theme_code` column. Keep a copy
+> outside `src/data/` while you work. Do not start from a fixed list — let the categories come from the
 text, then consolidate.
 
 Watch for:
@@ -171,7 +204,7 @@ Aim for one sitting. 50 short reviews is about an hour.
 
 ---
 
-## 4. Run the RQ notebooks
+## 5. Run the RQ notebooks
 
 Only after topic labels are filled — the notebooks print your labels.
 
@@ -189,7 +222,7 @@ paragraph of the paper. Write it in full sentences, not notes.
 ### What each answer has to say
 
 **RQ1 — gamification.** Null on tier. Bimodal sentiment. Guilt under-represented
-against the hypothesis. Carry the qualitative codes from section 3.
+against the hypothesis. Carry the qualitative codes from section 4.
 
 **RQ2 — accuracy vs interface.** Accuracy −0.647 stars, interface −0.601.
 **Statistically indistinguishable.** Do not claim accuracy wins; the honest
@@ -213,7 +246,7 @@ women's tracking and mosque finder.
 
 ---
 
-## 5. Numbers you will need
+## 6. Numbers you will need
 
 | Measure | Value |
 |---|---|
@@ -248,16 +281,36 @@ women's tracking and mosque finder.
 
 ---
 
-## 6. Order of work
+## 7. Order of work
 
 1. Answer **Q1 and Q2** above — together, ten minutes
-2. Lead: label `topic_info_rq5_bloat.csv` (10 topics)
-3. Either: label `topic_info_rq4_women_privacy.csv` (10) and
+2. Pull the sheets (section 2)
+3. Lead: label `topic_info_rq5_bloat.csv` (10 topics)
+4. Either: label `topic_info_rq4_women_privacy.csv` (10) and
    `topic_info_rq1_tracker.csv` (3)
-4. Split `topic_info.csv` (40 topics) between you
-5. Lead: code the 50 tracker-negative reviews
-6. Run `06_cross_app_analysis`, then `07_rq1`…`07_rq6`
-7. Write
+5. On the server: regenerate `topic_info.csv` (see below), re-pull, split the
+   40 topics between you
+6. Lead: code the 50 tracker-negative reviews
+7. Run `06_cross_app_analysis`, then `07_rq1`…`07_rq6`
+8. Write
 
-Steps 2–5 can run in parallel between the two of you. Step 6 needs all labels in
+Steps 3–6 can run in parallel between the two of you. Step 7 needs all labels in
 place.
+
+### Regenerating `topic_info.csv`
+
+Runs before 2026-09-06 finished with the ecosystem sheet overwritten: every
+sub-model in `04_topic_modeling.py` wrote through the same hardcoded path, so
+`topic_info.csv` ended up holding the last sub-model (`rq5_bloat`) instead of
+the 40 ecosystem topics. The bug is fixed. To recover the sheet from an existing
+run — no refit, a couple of minutes:
+
+```bash
+# on the server, after pulling the fix
+.venv/bin/python src/scripts/_regen_topic_info.py
+```
+
+It rebuilds keywords from the saved BERTopic model and sizes and representative
+documents from `topics.parquet`, and refuses to run if the sheet already has
+labels in it. Nothing else in the pipeline is affected — the overwrite only ever
+touched this one file, and the sub-model sheets were always correct.
