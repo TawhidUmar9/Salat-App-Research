@@ -55,8 +55,11 @@ co-occurrence caveats.
 
 ## 2. Getting the files
 
-None of the working files are in the repo — `.gitignore` excludes
-`src/data/*.csv`, because everything there is reproducible from the pipeline.
+**As of 2026-09-06 all five sheets are already in `src/data/` and committed.**
+Skip to section 3 and start labelling. The rest of this section is how they got
+there, and how to pull them again on another machine.
+
+The sheets are pipeline output, and `.gitignore` excludes `src/data/*.csv`.
 They live on the analysis server, same as the gold sheets:
 
 ```bash
@@ -125,6 +128,17 @@ Rules:
 - If a topic is incoherent, label it `MIXED — unusable` and say so. Do not force
   a name onto noise.
 - Topic `-1` is the outlier bucket. Label it `OUTLIERS` and move on.
+
+### Two things about the 40-topic sheet
+
+**Topic 0 is a 168,054-document catch-all** — 61% of everything assigned, with
+keywords `useful, helpful, ads, amazing, read, bless, easy`. It is generic
+praise and nothing finer. Label it `MIXED — generic praise` and do not build a
+claim on it. The other 39 topics are properly differentiated. This is ordinary
+BERTopic behaviour on a review corpus reduced to 40 topics, not a defect.
+
+**22.7% of documents are outliers** (62,745 of 276,422 assigned). Report that
+share in Methods alongside the ARI figures.
 
 ### Topics you can label quickly
 
@@ -252,6 +266,8 @@ women's tracking and mosque finder.
 |---|---|
 | Corpus | 732,194 reviews, 26 apps |
 | Analysed (has text) | 324,687 |
+| Topic-modelled (C_en) | 276,422 in 40 topics |
+| Outlier bucket (topic −1) | 62,745 (**22.7%**) |
 | Inter-rater agreement (Krippendorff's α) | **0.824** |
 | Aspect precision, corpus-weighted | **84.4%** [79.7, 88.9] |
 | Aspect precision, unweighted | 69.3% |
@@ -283,34 +299,61 @@ women's tracking and mosque finder.
 
 ## 7. Order of work
 
-1. Answer **Q1 and Q2** above — together, ten minutes
-2. Pull the sheets (section 2)
-3. Lead: label `topic_info_rq5_bloat.csv` (10 topics)
-4. Either: label `topic_info_rq4_women_privacy.csv` (10) and
-   `topic_info_rq1_tracker.csv` (3)
-5. On the server: regenerate `topic_info.csv` (see below), re-pull, split the
-   40 topics between you
-6. Lead: code the 50 tracker-negative reviews
-7. Run `06_cross_app_analysis`, then `07_rq1`…`07_rq6`
-8. Write
+~~Pull the sheets~~ and ~~regenerate `topic_info.csv`~~ — both done 2026-09-06.
+All five sheets are in `src/data/` and committed. Start at step 1.
 
-Steps 3–6 can run in parallel between the two of you. Step 7 needs all labels in
-place.
+| # | Task | Who | Rough time |
+|---|---|---|---|
+| 1 | Answer **Q1 and Q2** in section 1 | together | 10 min |
+| 2 | Label `topic_info_rq5_bloat.csv` (10 topics) | **lead** | 45 min |
+| 3 | Label `topic_info_rq4_women_privacy.csv` (10) + `topic_info_rq1_tracker.csv` (3) | partner | 1 hr |
+| 4 | Label `topic_info.csv` — 40 topics, split 20/20 | both | 1½ hr each |
+| 5 | Code the 50 tracker-negative reviews (`theme_code` column) | **lead** | 1 hr |
+| 6 | Commit and push the sheets (section 8) | either | 5 min |
+| 7 | Run `06_cross_app_analysis`, then `07_rq1`…`07_rq6` | either | — |
+| 8 | Write | together | — |
 
-### Regenerating `topic_info.csv`
+Steps 2–5 run in parallel between the two of you. Step 7 needs every label in
+place **and pushed**. Q1 in step 1 must be answered before anyone reads further
+results — that is what makes it a pre-specification.
+
+### Why `topic_info.csv` was regenerated (done — 2026-09-06)
 
 Runs before 2026-09-06 finished with the ecosystem sheet overwritten: every
 sub-model in `04_topic_modeling.py` wrote through the same hardcoded path, so
 `topic_info.csv` ended up holding the last sub-model (`rq5_bloat`) instead of
-the 40 ecosystem topics. The bug is fixed. To recover the sheet from an existing
-run — no refit, a couple of minutes:
+the 40 ecosystem topics. The bug is fixed in `label_topics`, and
+`_regen_topic_info.py` rebuilt the sheet from the saved BERTopic model and
+`topics.parquet` — no refit. The sheet now in the repo is the recovered one:
+40 topics, verified not to be a duplicate of the bloat sheet.
+
+Only that one file was ever affected. The sub-model sheets were always correct,
+and no statistics depend on it.
+
+If it ever needs rebuilding again:
 
 ```bash
-# on the server, after pulling the fix
+# on the server
 .venv/bin/python src/scripts/_regen_topic_info.py
 ```
 
-It rebuilds keywords from the saved BERTopic model and sizes and representative
-documents from `topics.parquet`, and refuses to run if the sheet already has
-labels in it. Nothing else in the pipeline is affected — the overwrite only ever
-touched this one file, and the sub-model sheets were always correct.
+Representative documents in a regenerated sheet are picked by topic probability,
+not BERTopic's own c-TF-IDF ranking — the saved model does not serialize
+`representative_docs_`. Deterministic, and the notebook shows fifteen per topic
+against these two anyway.
+
+---
+
+## 8. When the labelling is done
+
+Commit the sheets. They are tracked now, so the diff shows exactly the labels
+you added and nothing else:
+
+```bash
+git add src/data/topic_info*.csv src/data/quotes/rq1_tracker_negative_50.csv
+git commit -m "Label the topic sheets and code the tracker-negative reviews"
+git push
+```
+
+**Push before running any RQ notebook on the server** — it reads the sheets from
+the repo, so unpushed labels mean the notebooks print empty ones.
