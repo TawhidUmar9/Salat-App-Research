@@ -195,10 +195,56 @@ export_quotes(pole, "rq1", n=15)  # noqa: F405
 # %% [markdown]
 # ## Answer to RQ1
 #
-# Fill in once the numbers above are final:
+# **There is no sentiment difference between tracker tiers.** The M2 mixed model
+# did not converge on this contrast — its tier terms return estimates of 13.66 and
+# 13.87 with standard errors of 2.0e6 and 1.3e6 and intervals spanning ±3.9
+# million — so **the tier null is reported from the cluster-robust OLS**, which
+# did converge: tracker-only β = **−0.087** [−0.332, 0.158], p = 0.488;
+# tracker-plus-score β = **−0.134** [−0.415, 0.147], p = 0.349, clustered on 25
+# apps, n = 6,285. Both intervals sit comfortably across zero. Adding a streak or
+# a score to a prayer tracker does not move how users feel about the app.
 #
-# - Bimodality: dip test D=___, p=___
-# - Guilt:motivation ratio inside tracker reviews vs. baseline: ___ vs ___
-# - Tier effect (M2): β=___ [CI], q=___
+# **Tracker sentiment is bimodal** (Hartigan's dip D = **0.118**, p < 1e-16,
+# n = 6,285). Opinion is split rather than spread: people love the tracker or
+# resent it, with little middle ground. A null on the mean was therefore never
+# going to characterise this feature, which is why the qualitative work carries
+# the answer.
 #
-# → **Verdict**: _______
+# **Guilt language is under-represented, not over-represented.** Inside tracker
+# reviews the guilt-to-motivation ratio is **0.26** against a corpus baseline of
+# **0.86** (Fisher exact OR = **0.283**, p = 3.5e-11, q = 6.7e-11, n = 149).
+# Tracker discourse is *more* motivational than the corpus at large — the
+# opposite of what the streak-anxiety literature predicts.
+#
+# **Two independent coding passes agree.** Guilt or judgment appears in **3 of 77**
+# coded complaints (3.9%): two in the single-app pass (`Tracker framing feels
+# judgmental`, `Imposed goals replace own tracking`) and one across the 22-app
+# pass (`Reminders induce guilt`). A hypothesis this prominent surviving at under
+# 4% in two separately drawn samples, while the Fisher test points the same way,
+# is a robust null rather than an underpowered one.
+#
+# **What dissatisfaction is actually about.** Coding the cross-app sample against
+# the frame gives prompting failure (**46%** — location detection, adhan playback,
+# notifications, calendar drift) and record trustworthiness (**21%** — data lost,
+# counts regressing, the tracker disabling itself) as the dominant themes. Both
+# replicate: record trustworthiness runs 22% in the single-app pass and 21% across
+# 22 apps. Where a normative complaint does appear (~11% in both passes) it
+# concerns the app **mis-modelling religious practice** — menstrual exemption
+# absent, no sunnah support, imposed goals displacing the user's own — rather than
+# pressure to perform.
+#
+# → **Verdict**: Gamifying a prayer tracker neither helps nor harms sentiment, and
+# the streak-anxiety hypothesis is not supported: guilt is rarer inside tracker
+# discourse than in the corpus as a whole, by both a corpus-scale lexical test and
+# two independent coding passes. The finding is a reframing rather than a null.
+# What users resent is not being made to feel guilty but being unable to trust the
+# record — a tracker that loses history, regresses counts or silently stops — and
+# not being prompted reliably in the first place. Where a genuinely normative
+# objection surfaces, it is that the app models worship incorrectly rather than
+# that it applies pressure. Design work on devotional trackers should therefore
+# target reliability and accommodation of practice, not the softening of streak
+# mechanics. **Sampling caveat:** the two passes are reported separately and never
+# pooled; their designs differ (50 reviews from one application, 30 stratified
+# across the remaining 22), and themes A and B from the first pass are absent from
+# all other applications, so they are reported as an application-specific redesign
+# episode rather than a property of prayer tracking.
