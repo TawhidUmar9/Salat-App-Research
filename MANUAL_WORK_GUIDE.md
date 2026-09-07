@@ -35,11 +35,19 @@ describe bloat *as a property of the interface*, not as a count of features.
 Report 7.62× as the conservative bound. This is the sharper HCI claim and the
 `rq5_bloat` topics support it independently.
 
-> **Our answer:**
-> _(write A or B here, with the date)_
+> **Our answer: B — Substantive.** Lead with the fused cases; report 7.62× as
+> the conservative bound. Decided 2026-09-07.
+>
+> **Provenance, stated honestly.** The *hypothesis and test* were pre-specified
+> on 2026-08-26, before the full run — that is the pre-registration, and it
+> stands. This choice of *reporting emphasis* was made on 2026-09-07 with the
+> co-occurrence figures and the labelled `rq5_bloat` topics already visible. Say
+> it that way in the paper. Do not describe the framing itself as pre-specified.
 
-Decide before reading any more results, and write it down. That is what makes it
-a pre-specification rather than a story fitted afterwards.
+The `rq5_bloat` labels support B independently: the sub-model's topics are
+dominated by simplicity as a property people praise and complain about —
+`App praised for simplicity` three times over, `Praise for minimalistic UI`,
+`Ads cause confusion while using app` — not by feature counting.
 
 ### Q2 — Do we want a results digest?
 
@@ -48,8 +56,8 @@ one needs — on a single page, so nobody re-derives them from terminal scrollba
 at 2am. Includes the exact sentences for the precision, stability, and
 co-occurrence caveats.
 
-> **Our answer:**
-> _(yes / no)_
+> **Our answer: yes.** Decided 2026-09-07. Build it once the RQ notebooks have
+> run, so the digest quotes final numbers rather than ones that later move.
 
 ---
 
@@ -193,14 +201,22 @@ what is actually wrong?*
 
 ### Protocol
 
-Add a **`theme_code`** column and give each review a short phrase. Then group
-the phrases into themes. The column must be named `theme_code` — that is what
-`07_rq1_gamification.py` reads.
+Open `rq1_tracker_negative_50.csv`. It has five columns and no coding column —
+add a sixth yourself, named **`theme_code`**, and write a short phrase in it for
+each of the 50 rows. That's the whole mechanic.
+
+Do not start from a fixed list. Let the categories come from the text, then
+consolidate: read all 50 writing whatever phrase fits, then go back and merge
+the phrases that mean the same thing into a smaller set of themes.
+
+**Nothing in the pipeline reads this column.** No script or notebook consumes
+`theme_code` — `07_rq1_gamification.py` and `07_rq4_femtech.py` only *create* it
+empty. You are coding for yourselves, to write the RQ1 paragraph. The name just
+matches what those notebooks would create, so use it and stay consistent.
 
 > ⚠️ **Do not re-run `07_rq1_gamification.py` after you start coding.** Its
-> section 6 rewrites this file with an empty `theme_code` column. Keep a copy
-> outside `src/data/` while you work. Do not start from a fixed list — let the categories come from the
-text, then consolidate.
+> section 6 rewrites this file with an empty `theme_code` column and your
+> coding is gone. Keep a copy outside `src/data/` while you work.
 
 Watch for:
 - **Data loss** — "lost my whole history after the update"
@@ -252,6 +268,14 @@ is not trustworthy, but a sign flip deserves a sentence.
 
 **RQ4 — inclusion.** 2,194 mentions across 24 apps, 272 demand signals, but only
 **3 apps** have the feature. Not estimable — descriptive only. Say so plainly.
+
+> The `rq4_women_privacy` sub-model **did not separate**: after labelling, six of
+> its ten topics carry the same theme (data selling to the US military) and a
+> seventh is a near-duplicate — 63% of the sub-model's documents under one label.
+> The Muslim Pro data-selling story swamps everything else in this subset. Report
+> the themes, not the partition, exactly as with `rq5_bloat`, and say in Methods
+> that the sub-model collapsed onto one dominant theme. Do not present ten topics
+> as ten findings.
 
 **RQ5 — bloat.** Per your answer to Q1 above.
 
