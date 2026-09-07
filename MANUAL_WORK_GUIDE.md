@@ -282,6 +282,10 @@ that guilt is under-represented, from a completely different direction.
 
 ## 5. Run the RQ notebooks
 
+> **Before you write anything, read [`PAPER_DISCLOSURES.md`](PAPER_DISCLOSURES.md).**
+> It collects every claim ceiling and required caveat in one place, with the
+> sentences to adapt and a pre-submission checklist.
+
 Only after topic labels are filled — the notebooks print your labels.
 
 ```bash
