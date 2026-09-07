@@ -15,36 +15,28 @@ Two provenance markers are used throughout:
 
 ## 1. Sampling and qualitative evidence
 
-### 1.1 The 50 tracker codes come from one app ✅
+### 1.1 Two coding passes, and they must be reported separately ✅
 
-All 50 coded reviews are from *Athan: Prayer Times & Al Quran*. This is an
-artefact of the selection rule, not a property of the corpus: `06_models.py`
-takes `nsmallest(50, "sent_num")`, `sent_num` is three-valued (−1/0/+1), so every
-negative review ties at −1 and pandas returns the first fifty in frame order —
-which is app order.
+**Pass 1 — 50 reviews, one app** (*Athan: Prayer Times & Al Quran*). Selection
+artefact, not a corpus property: `06_models.py` takes `nsmallest(50, "sent_num")`,
+`sent_num` is three-valued, so every negative review ties at −1 and pandas
+returns the first fifty in frame order — app order.
 
-**Claim ceiling:** a single-app case study. Not evidence about the ecosystem.
+**Pass 2 — 30 reviews, 22 apps** (`_draw_tracker_extension.py`): a floor of one
+per app with the remainder allocated round-robin, so no app contributes more than
+two. Already-coded reviewIds excluded, seeded. Eligible pool 1,173 — which proves
+pass 1 was single-app through the tie-break alone, not because one app dominates
+tracker complaints.
 
-> The qualitative codes were drawn from the fifty most negative tracker reviews
-> by model sentiment. Because sentiment is discretised, the selection resolved
-> ties in corpus order and returned reviews from a single application; we
-> therefore treat these codes as an illustrative case study of that application
-> rather than a cross-app sample.
+**Do not pool the two passes.** Their designs differ — 50 from one app against 30
+spread across 22 — so a pooled percentage would silently re-weight the ecosystem
+toward Athan. Report them side by side and let the comparison do the work.
 
-**The extension draw is built** — `src/scripts/_draw_tracker_extension.py`. It
-takes 30 tracker-negative reviews across the 22 *other* tracker apps: a
-guaranteed floor of one per app, with the remainder allocated round-robin rather
-than from the pooled leftovers, so no app contributes more than two. It excludes
-every already-coded reviewId and is seeded. The eligible pool is 1,173 reviews,
-which also confirms §1.1 — the original sheet was single-app purely through the
-tie-break, not because one app dominates tracker complaints. Once those are coded
-against the existing frame, replace the sentence above with the stratified
-description, report the app spread, and state both passes:
-
-> Fifty reviews were coded from a single application, and a further thirty drawn
-> stratified across the remaining tracker applications were coded against the
-> same frame. We report theme prevalence for the combined set and note where the
-> two passes diverge.
+> Two coding passes were conducted. The first covered fifty reviews from a single
+> application, selected before we identified a tie-break artefact in the sampling
+> rule. The second drew thirty reviews stratified across the remaining
+> twenty-two tracker applications and was coded against the frame derived from
+> the first. We report the passes separately, since their sampling designs differ.
 
 ### 1.2 "Negative" means sentiment, not stars ✅
 
@@ -54,25 +46,42 @@ specific complaint.
 
 **Write:** "reviews expressing tracker dissatisfaction" — not "negative reviews".
 
-### 1.3 The code frame, as consolidated ✅
+### 1.3 The frame, and what the second pass did to it ✅
 
-33 open codes across 50 reviews, consolidated into **six substantive themes plus
-one exclusion**. Every code maps to exactly one theme — no code is split, which
-is what makes the frame reportable.
+Pass 1 produced 33 open codes over 50 reviews, consolidated into six themes plus
+an exclusion. Pass 2 produced 25 codes over 30 reviews, coded against that frame,
+and needed **two new themes**. In both passes every code maps to exactly one
+theme — no code is split, which is what makes the frame reportable.
 
-| Theme | n | Share |
+Excluded rows are reported, not dropped: 1 in pass 1 (n = 49), 2 in pass 2
+(n = 28).
+
+| Theme | Pass 1 (Athan, n=49) | Pass 2 (22 apps, n=28) |
 |---|---|---|
-| C. The record can't be trusted | 11 | 22% |
-| A. Redesign as regression | 10 | 20% |
-| F. Monetization against religious purpose | 10 | 20% |
-| E. Prompting failures break the loop | 7 | 14% |
-| D. Normative mismatch | 6 | 12% |
-| B. Retroactive logging denied | 5 | 10% |
-| *Excluded (non-complaint)* | 1 | — |
+| C. The record can't be trusted | 11 (22%) | 6 (21%) |
+| D. Normative mismatch | 6 (12%) | 3 (11%) |
+| E. Prompting failures break the loop | 7 (14%) | **13 (46%)** |
+| A. Redesign as regression | 10 (20%) | **0** |
+| B. Retroactive logging denied | 5 (10%) | **0** |
+| F. Monetization against religious purpose | 10 (20%) | 1 (4%) |
+| G. The record is gated, not owned | — | 3 (11%) *new* |
+| H. App overreaches into the device | — | 2 (7%) *new* |
 
-Report the themes and the count of open codes that collapsed into them (33 → 6).
-Give the excluded row its own line rather than dropping it silently; **n = 49**
-for complaint analysis.
+**This table is a result, not bookkeeping.** Read it in the paper as follows.
+
+- **C and D replicate almost exactly** across two independent samples. They are
+  ecosystem-level findings and can be stated as such.
+- **E triples.** Prompting failure — location detection, notifications, adhan
+  playback, calendar drift — is the dominant tracker complaint ecosystem-wide and
+  was under-represented in the single app.
+- **A and B vanish entirely.** They were one application's bad redesign, not a
+  property of prayer tracking. Had pass 1 been published alone, 15 of its 49
+  complaints would have been presented as a general finding about retroactive
+  logging and redesign.
+- **F collapses from 20% to 4%**, so monetization grievance was also largely
+  app-specific.
+- **G and H exist only outside Athan**: access to one's own record gated behind a
+  login or paywall, and apps demanding device-level settings changes.
 
 ---
 
@@ -176,37 +185,56 @@ bimodal (Hartigan's D = 0.118). Guilt language is **under-represented**:
 guilt:motivation 0.26 against a corpus baseline of 0.86, Fisher OR = 0.28,
 p = 3.5e-11 — the *opposite* of the streak-anxiety hypothesis.
 
-✅ **The qualitative frame corroborates this from a second direction, and
-sharpens it.** Do not conflate the two constructs below — the distinction is the
+✅ **The qualitative frame corroborates this across two independent samples,
+and sharpens it.** Do not conflate the constructs below — the distinction is the
 contribution.
 
-- **Guilt or judgment is rare: 2 of 50 (4%).** Only `Tracker framing feels
-  judgmental` and `Imposed goals replace own tracking` express anything like
-  streak anxiety. This matches the Fisher result independently.
-- **Record integrity dominates: 26 of 50 (52%)** — themes A, B and C combined
-  (redesign regression, backfill denied, the record not being trustworthy).
-- **Where a normative problem does exist, it is not guilt.** Theme D (6 of 50) is
-  the tracker *mis-modelling religious practice*: menstrual exemption handled
-  badly (3), no support for sunnah prayers (1), imposed goals displacing the
-  user's own (1). That is a mismatch between the app's model of worship and the
-  user's, not anxiety about a streak.
+**Guilt is rare in both passes: 3 of 77 coded complaints (4%).** Pass 1 gave
+`Tracker framing feels judgmental` and `Imposed goals replace own tracking`;
+pass 2 gave `Reminders induce guilt`. A hypothesis this prominent in the
+literature surviving at 4% across two samples, and contradicted by the Fisher
+test at OR = 0.28, is a robust null.
 
-**The claim to make:** tracker dissatisfaction is overwhelmingly about the
-integrity of the record, not about guilt; and the normative complaints that do
-appear are about the tracker's model of worship failing to fit, not about
-pressure. This *reframes* the streak-anxiety literature rather than merely
-nulling it, and it is the strongest thing in the paper.
+**What dissatisfaction is actually about, ecosystem-wide:**
 
-Subject to the single-app ceiling in §1.1 — which is exactly why the extension
-draw matters for this RQ above all others.
+- **Prompting failure (E) — 46% of the cross-app pass.** The tracker fails
+  because the app never reliably prompts: location detection failing, adhan not
+  playing, notifications lost, calendars drifting. The loop breaks before
+  logging is even at issue.
+- **Record trustworthiness (C) — ~21% in both passes.** Data lost, counts
+  regressing, the tracker silently disabling itself.
+- **Normative mismatch (D) — ~11% in both passes.** The tracker mis-models
+  religious practice: menstrual exemption absent, no sunnah support, imposed
+  goals displacing the user's own. **Not** guilt — a mismatch between the app's
+  model of worship and the user's.
+
+**The claim to make:** tracker dissatisfaction is overwhelmingly about the app
+failing to prompt and failing to keep a trustworthy record. Where a normative
+complaint appears it concerns the app's model of worship rather than pressure to
+perform. This *reframes* the streak-anxiety literature rather than merely nulling
+it, and both the statistics and two independent coding passes point the same way.
+
+**What you must not claim.** An earlier reading of pass 1 alone put "record
+integrity" at 52%. That figure does not survive: 15 of those 26 complaints were
+themes A and B, which are absent from all 22 other apps. Report C at ~21%, and
+report A and B as an application-specific redesign episode.
 
 ### 4.2a RQ1 carries direct RQ4 evidence ✅
 
-Three of the fifty tracker complaints are about **menstrual mode** being
-unreliable — inside an RQ1 sheet, from a single app. RQ4 is otherwise not
-estimable (3 apps have the feature), so this is rare first-hand evidence that
-bio-spiritual inclusion fails in practice and not only in availability. Cite it
-in RQ4 and cross-reference RQ1.
+Menstrual-exemption complaints appear in **both** passes — 3 in pass 1
+(`Menstrual mode unreliable`), 1 in pass 2 (`Menstrual exemption absent`), the
+latter from a different application. RQ4 is otherwise not estimable at 3 apps, so
+this is rare first-hand evidence that bio-spiritual inclusion fails in practice
+and not merely in availability. Cite in RQ4 and cross-reference RQ1.
+
+### 4.2b The two passes are a methods contribution ✅
+
+Themes A, B and F accounted for 51% of the single-app pass and 4% of the
+cross-app pass. That is a concrete demonstration that app-level qualitative
+sampling in app-store research can manufacture themes which look like properties
+of a genre and are properties of one release. Worth a short methods paragraph;
+it costs three sentences and pre-empts the obvious reviewer question about how
+the sample was drawn.
 
 ### 4.3 RQ2 — the two costs are indistinguishable 📋
 
@@ -310,7 +338,8 @@ Two different dates, and conflating them would misrepresent the work.
 - [ ] No sentence describes the RQ5 *framing* as pre-specified
 - [ ] No "not estimable" model is described as a null result
 - [ ] No claim that accuracy costs more than interface
-- [ ] The tracker codes are described at their single-app ceiling (or the
-      extension draw is done and described instead)
+- [ ] Both coding passes are reported, separately, never pooled
+- [ ] Themes A and B are described as application-specific, not general
+- [ ] No "record integrity 52%" figure survives anywhere in the draft
 - [ ] "40 topics" never implies corpus coverage
 - [ ] Reviewer names do not appear in any quote — anonymise before quoting
