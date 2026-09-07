@@ -304,14 +304,14 @@ paragraph of the paper. Write it in full sentences, not notes.
 **RQ1 — gamification.** Null on tier. Bimodal sentiment. Guilt under-represented
 against the hypothesis. Carry the qualitative codes from section 4.
 
-**RQ2 — accuracy vs interface.** ⚠️ **Superseded — see
-[`PAPER_DISCLOSURES.md`](PAPER_DISCLOSURES.md) §4.3.** The 2026-09-07 run gives
-accuracy **−1.112** [−1.142, −1.083] against interface **−0.600**
-[−0.664, −0.537]: non-overlapping intervals, accuracy costing 1.85× interface.
-The −0.647 figure and the "statistically indistinguishable" reading below both
-predate the current lexicon and must not be used. Intrusive ads, at −1.439, are
-the costliest complaint in the corpus. `madhab` still flips sign in the ordinal
-check (β = +0.22, p = 0.65).
+**RQ2 — accuracy vs interface.** Accuracy-family mean −0.647 stars, interface
+−0.601 — **verified against the 2026-09-07 run.** Statistically indistinguishable
+as classes; do not claim accuracy wins. But report the spread: prayer-time
+accuracy alone is −1.112 [−1.142, −1.083], disjoint from interface, while madhab
+(−0.324) and qibla (−0.550) pull the family mean down. Intrusive ads, at −1.439,
+are the costliest complaint in the corpus. `madhab` flips sign in the ordinal
+check (β = +0.22, p = 0.65). See [`PAPER_DISCLOSURES.md`](PAPER_DISCLOSURES.md)
+§4.3.
 
 **RQ3 — competitive edge.** Mosque finder β = −0.137 (p = 0.003) from the
 cluster-robust fit. **Check the direction before writing it up:** apps that have

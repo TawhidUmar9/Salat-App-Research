@@ -264,12 +264,15 @@ of a genre and are properties of one release. Worth a short methods paragraph;
 it costs three sentences and pre-empts the obvious reviewer question about how
 the sample was drawn.
 
-### 4.3 RQ2 — the previous framing does not survive the run ✅
+### 4.3 RQ2 — the family mean holds; one member does not ✅
 
-**This section replaces an earlier instruction to report accuracy and interface
-as indistinguishable. That is wrong for this run and must not reach the paper.**
+**Verified against `model_results.csv`.** The guide's figures are correct:
+accuracy-family mean **−0.647**, interface **−0.600**. RQ2's contrast is the
+*family* — `prayer_times_accuracy`, `qibla`, `madhab`, `calc_method` — against
+`ui_design`, as the notebook header states. At that level the two are close and
+the original instruction stands: **do not claim accuracy wins as a class.**
 
-From `M1` (review-level mixed model, n = 324,687), ranked by cost in stars:
+But the family average conceals a wide spread, and the paper should say so:
 
 | Complaint | β | 95% CI |
 |---|---|---|
@@ -282,21 +285,23 @@ From `M1` (review-level mixed model, n = 324,687), ranked by cost in stars:
 | Qibla | −0.550 | [−0.594, −0.507] |
 | Madhab | −0.324 | [−0.526, −0.122] |
 
-**Accuracy costs 1.85× what interface does, and the confidence intervals do not
-overlap** — [−1.142, −1.083] against [−0.664, −0.537]. The earlier figure of
-−0.647 for accuracy appears nowhere in this run; interface at −0.601 matches
-−0.600 exactly, so only the accuracy number was stale. Whatever produced −0.647
-predates the current lexicon.
+**Prayer-time accuracy alone costs −1.112, with an interval disjoint from
+interface.** The family mean is dragged to −0.647 by `madhab` (−0.324) and
+`qibla` (−0.550), which are rarer and milder. So:
 
-**What to write instead:** accuracy complaints cost substantially more than
-interface complaints, and the difference is not marginal. Do not hedge it as
-indistinguishable.
+> As a class, accuracy complaints cost no more than interface complaints
+> (−0.647 against −0.600). That average conceals a wide spread: prayer-time
+> accuracy alone costs −1.112 [−1.142, −1.083], nearly double the interface
+> penalty and with a non-overlapping interval, while madhab and qibla complaints
+> cost markedly less.
 
-**And the headline the old framing hid: intrusive advertising is the single most
-costly complaint in the corpus**, above accuracy. That is a finding, and it
-connects directly to RQ5 — the bloat sub-model's topics are full of ads, and
-`Monetization against religious purpose` is a theme in the RQ1 coding. Advertising
-is a thread running through three research questions.
+**Do not report the family mean without the spread**, and do not report −1.112
+as "the accuracy coefficient" — it is one member of four.
+
+**One thing the family framing hides entirely: intrusive advertising is the
+costliest complaint in the corpus at −1.439**, above every accuracy term. It ties
+RQ2 to RQ5's ad-heavy bloat topics and to `Monetization against religious
+purpose` in the RQ1 coding. Advertising runs through three research questions.
 
 `madhab` still flips sign in the ordinal check (β = +0.216, p = 0.649 ✅
 confirmed), so keep that caveat.
@@ -400,9 +405,8 @@ Two different dates, and conflating them would misrepresent the work.
 - [ ] Both coding passes are reported, separately, never pooled
 - [ ] Themes A and B are described as application-specific, not general
 - [ ] No "record integrity 52%" figure survives anywhere in the draft
-- [ ] No "accuracy and interface cost about the same" claim survives; accuracy is
-      −1.112 against interface −0.600, intervals disjoint
-- [ ] The accuracy figure reads −1.112, never −0.647
+- [ ] The accuracy-family mean (−0.647) is reported with its spread, never alone
+- [ ] −1.112 is labelled as prayer-time accuracy, not as "the accuracy coefficient"
 - [ ] RQ1's tier null is cited from the cluster-robust OLS, not the M2 mixed model
 - [ ] No non-converged coefficient is described as a null result
 - [ ] The dip test reports p < 1e-16, never p = 0
