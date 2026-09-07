@@ -172,18 +172,46 @@ Krippendorff's α = **0.824**.
 
 ## 4. Statistics
 
-### 4.1 Never report the not-estimable models as null 📋
+### 4.1 Eleven coefficients cannot support inference, not three ✅
 
-Three models fail through separation and are named in the output. "Not
-estimable" and "no effect" are different claims. 20 of 29 coefficients survive
-BH-FDR at q < 0.05; report the full denominator.
+**Verified against `model_results.csv` from the 2026-09-07 run.** "Not estimable"
+and "no effect" are different claims, and the file contains two distinct kinds of
+unusable row:
+
+- **Three with no standard error at all** — M3 (`women_feature_score_diff`), M5
+  (`has_mosque_finder`), M5-demand. These are the ones already known about.
+- **Eight with standard errors that exploded**, all from the primary mixed
+  models: M2's two tracker-tier terms (SE 2.0e6 and 1.3e6) and six M4 terms
+  (SE 4.1e2 to 5.6e3). Every one reports p ≈ 0.99999.
+
+The eight are the dangerous ones, because they **carry q-values and sit inside
+the BH denominator of 29**, so they read as "tested, not significant" when they
+are actually "failed to converge". A random intercept per app over 26 apps with
+app-level predictors is the same structural problem the code comments already
+note for M4.
+
+**Never write "no effect" for any of these eleven.** Where a null is genuinely
+wanted, take it from the cluster-robust OLS (`M4-sens`), which converged.
+
+**20 of 29 coefficients survive BH-FDR at q < 0.05** ✅ — this count is confirmed
+exactly. Report the full denominator, and say that eight of the 29 are
+non-converged terms retained in the correction for transparency.
 
 ### 4.2 RQ1 — the null is the finding 📋
 
-No difference in sentiment by tracker tier (p = 0.49, p = 0.35). Sentiment is
-bimodal (Hartigan's D = 0.118). Guilt language is **under-represented**:
-guilt:motivation 0.26 against a corpus baseline of 0.86, Fisher OR = 0.28,
-p = 3.5e-11 — the *opposite* of the streak-anxiety hypothesis.
+✅ **Corrected against the run.** The tier null must be cited from the
+cluster-robust OLS, **not** from the M2 mixed model. M2's two tier terms are
+degenerate — estimates of 13.66 and 13.87 with standard errors of 2.0e6 and
+1.3e6, p ≈ 0.99999. The familiar p = 0.49 and p = 0.35 are the `M4-sens`
+cluster-robust rows (0.488 and 0.349), which converged. Citing M2 as "no
+difference" is exactly the error §4.1 warns against.
+
+So: no difference in sentiment by tracker tier (p = 0.49, p = 0.35,
+cluster-robust OLS on 25 app clusters; the mixed model did not converge).
+Sentiment is bimodal (Hartigan's D = 0.118 ✅ confirmed; the reported p
+underflows to 0, so write p < 1e-16, never "p = 0"). Guilt language is
+**under-represented**: Fisher OR = 0.28, p = 3.5e-11 ✅ confirmed, n = 149 — the
+*opposite* of the streak-anxiety hypothesis.
 
 ✅ **The qualitative frame corroborates this across two independent samples,
 and sharpens it.** Do not conflate the constructs below — the distinction is the
@@ -236,11 +264,42 @@ of a genre and are properties of one release. Worth a short methods paragraph;
 it costs three sentences and pre-empts the obvious reviewer question about how
 the sample was drawn.
 
-### 4.3 RQ2 — the two costs are indistinguishable 📋
+### 4.3 RQ2 — the previous framing does not survive the run ✅
 
-Accuracy −0.647 stars, interface −0.601. **Do not claim accuracy wins.** The
-honest finding is that they cost about the same. Note that `madhab` flips sign in
-the ordinal check (β = +0.22, p = 0.65).
+**This section replaces an earlier instruction to report accuracy and interface
+as indistinguishable. That is wrong for this run and must not reach the paper.**
+
+From `M1` (review-level mixed model, n = 324,687), ranked by cost in stars:
+
+| Complaint | β | 95% CI |
+|---|---|---|
+| Intrusive ads | **−1.439** | [−1.460, −1.418] |
+| Prayer-time accuracy | **−1.112** | [−1.142, −1.083] |
+| Stability / bugs | −0.938 | [−0.965, −0.910] |
+| Reminders / adhan | −0.845 | [−0.868, −0.823] |
+| UI design | −0.600 | [−0.664, −0.537] |
+| Calculation method | −0.600 | [−0.769, −0.430] |
+| Qibla | −0.550 | [−0.594, −0.507] |
+| Madhab | −0.324 | [−0.526, −0.122] |
+
+**Accuracy costs 1.85× what interface does, and the confidence intervals do not
+overlap** — [−1.142, −1.083] against [−0.664, −0.537]. The earlier figure of
+−0.647 for accuracy appears nowhere in this run; interface at −0.601 matches
+−0.600 exactly, so only the accuracy number was stale. Whatever produced −0.647
+predates the current lexicon.
+
+**What to write instead:** accuracy complaints cost substantially more than
+interface complaints, and the difference is not marginal. Do not hedge it as
+indistinguishable.
+
+**And the headline the old framing hid: intrusive advertising is the single most
+costly complaint in the corpus**, above accuracy. That is a finding, and it
+connects directly to RQ5 — the bloat sub-model's topics are full of ads, and
+`Monetization against religious purpose` is a theme in the RQ1 coding. Advertising
+is a thread running through three research questions.
+
+`madhab` still flips sign in the ordinal check (β = +0.216, p = 0.649 ✅
+confirmed), so keep that caveat.
 
 ### 4.4 RQ3 — check the direction before writing 📋
 
@@ -341,5 +400,11 @@ Two different dates, and conflating them would misrepresent the work.
 - [ ] Both coding passes are reported, separately, never pooled
 - [ ] Themes A and B are described as application-specific, not general
 - [ ] No "record integrity 52%" figure survives anywhere in the draft
+- [ ] No "accuracy and interface cost about the same" claim survives; accuracy is
+      −1.112 against interface −0.600, intervals disjoint
+- [ ] The accuracy figure reads −1.112, never −0.647
+- [ ] RQ1's tier null is cited from the cluster-robust OLS, not the M2 mixed model
+- [ ] No non-converged coefficient is described as a null result
+- [ ] The dip test reports p < 1e-16, never p = 0
 - [ ] "40 topics" never implies corpus coverage
 - [ ] Reviewer names do not appear in any quote — anonymise before quoting
