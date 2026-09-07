@@ -155,8 +155,43 @@ export_quotes(sel, "rq2", n=15)  # noqa: F405
 # %% [markdown]
 # ## Answer to RQ2
 #
-# - Accuracy-family mean β = ___ stars; UI β = ___ stars
-# - Dominant qibla failure mode: ___
-# - High-star reviews hiding accuracy complaints: ___
+# **As a class, accuracy complaints cost no more than interface complaints.** The
+# accuracy family — prayer-time accuracy, qibla, madhab and calculation method —
+# averages **−0.647** stars against **−0.600** for `ui_design`. The difference is
+# less than a twentieth of a star and is not a basis for claiming that accuracy
+# wins. The intuition that users punish a wrong qibla more harshly than an ugly
+# screen is not supported at the level of the complaint class.
 #
-# → **Verdict**: _______
+# **That average conceals a severity gradient.** Prayer-time accuracy alone costs
+# **−1.112** stars [−1.142, −1.083], 1.85× the interface penalty and with a
+# confidence interval disjoint from it. The family mean is pulled down by madhab
+# (−0.324 [−0.526, −0.122]) and qibla (−0.550 [−0.594, −0.507]), which are both
+# rarer and milder. Accuracy is not one thing: getting the prayer time wrong is
+# among the most costly failures in the corpus, while getting the madhab option
+# wrong is among the least. `madhab` additionally reverses sign in the ordinal
+# robustness check (β = +0.216, p = 0.649), so no directional claim rests on it.
+#
+# **The dominant qibla failure is instability, not miscalculation.** The larger of
+# the two qibla topics (1,771 reviews against 698) is labelled as wrong direction,
+# but its representative reviews describe the compass returning different bearings
+# from the same spot as the phone is rotated. The complaint is that the reading
+# will not hold still — a sensor-handling and calibration problem rather than an
+# error in the underlying bearing computation.
+#
+# **Accuracy complaints are systematically hidden inside high ratings.** Of 7,942
+# reviews carrying at least one negative accuracy complaint, **3,306 (41.6%)
+# awarded four or five stars, and 1,830 (23.0%) awarded five**. Users report that
+# the times are wrong and rate the app highly in the same breath. Any
+# prioritisation that reads severity off the star distribution will therefore
+# under-weight accuracy defects by a wide margin: the signal developers optimise
+# against is precisely the one that conceals this class of failure.
+#
+# → **Verdict**: Accuracy and interface complaints are indistinguishable as
+# classes, but that is the wrong comparison to draw. Prayer-time accuracy is a
+# severe and frequent failure whose cost is masked twice over — once by averaging
+# it with milder accuracy complaints, and again by arriving inside four- and
+# five-star reviews. The design implication is to treat prayer-time correctness as
+# a reliability requirement rather than a feature; the methodological implication
+# is that star ratings are an unsafe proxy for defect severity in devotional apps.
+# Note also that intrusive advertising (−1.439 [−1.460, −1.418]) is the costliest
+# complaint in the corpus, above every accuracy term — RQ5 takes that up.

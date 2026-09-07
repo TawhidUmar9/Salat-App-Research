@@ -298,6 +298,19 @@ interface.** The family mean is dragged to −0.647 by `madhab` (−0.324) and
 **Do not report the family mean without the spread**, and do not report −1.112
 as "the accuracy coefficient" — it is one member of four.
 
+**Star ratings hide accuracy complaints** ✅ (computed 2026-09-07). Of 7,942
+reviews carrying at least one negative accuracy-family complaint, **3,306 (41.6%)
+gave four or five stars and 1,830 (23.0%) gave five**. Star distribution:
+1★ 2,319 · 2★ 914 · 3★ 1,403 · 4★ 1,476 · 5★ 1,830. This is a finding, not a
+caveat — it means the rating signal systematically under-represents accuracy
+defects, and it is the strongest thing in RQ2.
+
+**The dominant qibla failure is instability, not miscalculation** ✅. Topic 9
+(`Inaccurate Qibla direction`, 1,771) outweighs topic 17 (`Inaccurate Qibla
+compass pointer`, 698), but topic 9's representative reviews describe the compass
+giving different bearings from one spot as the phone rotates. Report it as a
+sensor/calibration problem; do not write that apps compute the wrong bearing.
+
 **One thing the family framing hides entirely: intrusive advertising is the
 costliest complaint in the corpus at −1.439**, above every accuracy term. It ties
 RQ2 to RQ5's ad-heavy bloat topics and to `Monetization against religious
