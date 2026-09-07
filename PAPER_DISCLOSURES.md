@@ -31,8 +31,16 @@ which is app order.
 > therefore treat these codes as an illustrative case study of that application
 > rather than a cross-app sample.
 
-**If you run the extension draw**, replace the above with the stratified
-description and report the app spread.
+**The extension draw is built** — `src/scripts/_draw_tracker_extension.py`. It
+takes 30 tracker-negative reviews stratified equally across the *other* tracker
+apps, excludes every already-coded reviewId, and is seeded. Once those are coded
+against the existing frame, replace the sentence above with the stratified
+description, report the app spread, and state both passes:
+
+> Fifty reviews were coded from a single application, and a further thirty drawn
+> stratified across the remaining tracker applications were coded against the
+> same frame. We report theme prevalence for the combined set and note where the
+> two passes diverge.
 
 ### 1.2 "Negative" means sentiment, not stars ✅
 
@@ -42,10 +50,25 @@ specific complaint.
 
 **Write:** "reviews expressing tracker dissatisfaction" — not "negative reviews".
 
-### 1.3 Codes must be consolidated before they are reported ✅
+### 1.3 The code frame, as consolidated ✅
 
-There are 33 distinct codes across 50 reviews. The raw 33 are not a result;
-report the consolidated themes and say how many codes collapsed into them.
+33 open codes across 50 reviews, consolidated into **six substantive themes plus
+one exclusion**. Every code maps to exactly one theme — no code is split, which
+is what makes the frame reportable.
+
+| Theme | n | Share |
+|---|---|---|
+| C. The record can't be trusted | 11 | 22% |
+| A. Redesign as regression | 10 | 20% |
+| F. Monetization against religious purpose | 10 | 20% |
+| E. Prompting failures break the loop | 7 | 14% |
+| D. Normative mismatch | 6 | 12% |
+| B. Retroactive logging denied | 5 | 10% |
+| *Excluded (non-complaint)* | 1 | — |
+
+Report the themes and the count of open codes that collapsed into them (33 → 6).
+Give the excluded row its own line rather than dropping it silently; **n = 49**
+for complaint analysis.
 
 ---
 
@@ -149,13 +172,37 @@ bimodal (Hartigan's D = 0.118). Guilt language is **under-represented**:
 guilt:motivation 0.26 against a corpus baseline of 0.86, Fisher OR = 0.28,
 p = 3.5e-11 — the *opposite* of the streak-anxiety hypothesis.
 
-✅ The qualitative codes corroborate this independently: **guilt or judgment
-appears in 2 of 50** coded reviews, while **logging integrity dominates at
-roughly 19 of 50** (redesign breaking the log, backfill windows, lost history,
-counts regressing). Two independent methods, same direction — say so; it is the
-strongest thing in the paper.
+✅ **The qualitative frame corroborates this from a second direction, and
+sharpens it.** Do not conflate the two constructs below — the distinction is the
+contribution.
 
-Subject to the single-app ceiling in §1.1.
+- **Guilt or judgment is rare: 2 of 50 (4%).** Only `Tracker framing feels
+  judgmental` and `Imposed goals replace own tracking` express anything like
+  streak anxiety. This matches the Fisher result independently.
+- **Record integrity dominates: 26 of 50 (52%)** — themes A, B and C combined
+  (redesign regression, backfill denied, the record not being trustworthy).
+- **Where a normative problem does exist, it is not guilt.** Theme D (6 of 50) is
+  the tracker *mis-modelling religious practice*: menstrual exemption handled
+  badly (3), no support for sunnah prayers (1), imposed goals displacing the
+  user's own (1). That is a mismatch between the app's model of worship and the
+  user's, not anxiety about a streak.
+
+**The claim to make:** tracker dissatisfaction is overwhelmingly about the
+integrity of the record, not about guilt; and the normative complaints that do
+appear are about the tracker's model of worship failing to fit, not about
+pressure. This *reframes* the streak-anxiety literature rather than merely
+nulling it, and it is the strongest thing in the paper.
+
+Subject to the single-app ceiling in §1.1 — which is exactly why the extension
+draw matters for this RQ above all others.
+
+### 4.2a RQ1 carries direct RQ4 evidence ✅
+
+Three of the fifty tracker complaints are about **menstrual mode** being
+unreliable — inside an RQ1 sheet, from a single app. RQ4 is otherwise not
+estimable (3 apps have the feature), so this is rare first-hand evidence that
+bio-spiritual inclusion fails in practice and not only in availability. Cite it
+in RQ4 and cross-reference RQ1.
 
 ### 4.3 RQ2 — the two costs are indistinguishable 📋
 
