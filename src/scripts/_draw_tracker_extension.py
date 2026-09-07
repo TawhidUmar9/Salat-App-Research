@@ -90,20 +90,22 @@ def main() -> None:
         raise SystemExit("No other tracker apps have negative tracker reviews.")
     log(f"Eligible pool: {len(pool):,} reviews across {len(apps)} other apps")
 
-    # Equal allocation, so no app can dominate the way the original draw did.
-    # Apps with fewer than their share give up the remainder to the others.
+    # Guarantee a floor per app so no app can dominate the way the original draw
+    # did, then top up to n_total from whatever is left. The top-up is drawn from
+    # the pooled remainder, so it leans toward apps with more eligible reviews —
+    # a supplement to guaranteed coverage, not a replacement for it.
     per = max(1, n_total // len(apps))
-    parts, shortfall = [], 0
+    parts = []
     for app in apps:
         sub = pool[pool["app_name"] == app]
-        take = min(per, len(sub))
-        shortfall += per - take
-        parts.append(sub.sample(n=take, random_state=seed))
-    if shortfall:
-        chosen = pd.concat(parts)
+        parts.append(sub.sample(n=min(per, len(sub)), random_state=seed))
+
+    chosen = pd.concat(parts)
+    if len(chosen) < n_total:
         rest = pool[~pool["reviewId"].isin(set(chosen["reviewId"]))]
         if len(rest):
-            parts.append(rest.sample(n=min(shortfall, len(rest)), random_state=seed))
+            parts.append(rest.sample(n=min(n_total - len(chosen), len(rest)),
+                                     random_state=seed))
 
     out = (pd.concat(parts)
              .sort_values(["app_name", "reviewId"])
