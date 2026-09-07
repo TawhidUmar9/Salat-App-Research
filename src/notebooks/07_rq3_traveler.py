@@ -166,9 +166,66 @@ export_quotes(sel, "rq3", n=15)  # noqa: F405
 # %% [markdown]
 # ## Answer to RQ3
 #
-# - Mosque finder: preference-citation rate with vs. without = ___ / ___
-# - Qasr demand in the ___ apps lacking it: ___ signals
-# - Dominant travel failure mode: ___
+# **Travel features are not what users cite when they explain their choice of
+# app.** Across 4,696 preference citations — *"that's why I use"*, *"only app
+# that"* — the aspects named are **adhan reminders (374), Quran audio (293),
+# prayer-time accuracy (290), qibla (155)** and adhkar (152). Mosque finder does
+# not appear in the top eight, and qasr does not appear at all. Preference-citation
+# rates are near-identical whether an app has a mosque finder or not: **1.38%
+# against 1.24%**, a ratio of 1.11 across 12 and 14 apps. Whatever earns loyalty in
+# this ecosystem, it is not the travel feature set.
 #
-# → **Verdict**: _______ (state explicitly that the qasr half is demand
-#   evidence, not a causal test — §2.1)
+# **The mosque-finder coefficient runs the wrong way, and the reason matters.**
+# The cluster-robust fit gives β = **−0.137** (p = 0.003, 21 app clusters,
+# n = 3,010): apps that *have* a mosque finder attract **more negative** mentions
+# of it — 27.0% negative against 23.0% in apps without it, with positives moving
+# the other way (38.6% against 43.6%). This should not be read as the feature
+# harming apps. The two groups are not saying comparable things. In the 11 apps
+# without a mosque finder, mentions are largely **requests** for one — 243 demand
+# signals across 9 apps — and a request phrased as *"please add nearby mosques"*
+# reads neutral-to-positive. In the 10 apps that have it, mentions are **usage
+# reports**, and usage reports of a feature that fails read negative. You can only
+# complain about something that exists. The 4-point gap measures the difference
+# between wishing and using, not the cost of shipping.
+#
+# **The sign is unstable across specifications and is reported as such.** The
+# mixed model returns +0.05 for the same term but with a NaN standard error, so it
+# cannot arbitrate; the cluster-robust estimate is the trustworthy one. A
+# coefficient that reverses direction between specifications, where one of them
+# failed to produce an error estimate, does not support a directional claim about
+# competitive advantage.
+#
+# **The qasr half is demand evidence and cannot be a causal test — N = 1.** Exactly
+# **one app in twenty-six** implements travel concession (`Muslim Bangla Quran
+# Hadith Dua`), so there is no between-app comparison to make. Demand is real but
+# modest: **21 signals, 20 of them from 5 of the 25 apps lacking the feature** (10
+# requests, 5 preference citations, 3 explicit absences, 3 churn statements). The
+# requests are specific and practical — *"prayer times automatically adjust when
+# I'm traveling because man forgets and my prayers be off"*, *"add namaz qasar for
+# all 5 prayers … while anyone is out of city or in traveling"*, *"I wish it was
+# installed prior my hajj trip"*.
+#
+# **Measurement caveat on the qasr aspect.** Its 636 mentions across 18 apps run
+# **76.7% positive and only 7.1% negative**, which is implausible for a capability
+# 25 of 26 apps lack. Only 3.3% of those mentions are demand signals. The lexicon
+# is evidently catching travel and pilgrimage talk in general — hajj, umrah,
+# journeys — rather than qasr functionality specifically. Treat the 636 as an
+# upper bound on travel-related discourse, not as a measure of qasr discussion,
+# and rest the qasr argument on the 21 demand signals, which were read directly.
+#
+# **Dominant travel failure mode:** prayer times not adjusting when the user
+# changes location — the concession is not applied, and users discover it after
+# the fact.
+#
+# → **Verdict**: Travel support does not confer a competitive edge. Users do not
+# cite it when explaining why they chose an app, preference-citation rates are
+# effectively equal with and without a mosque finder, and the one apparent
+# association — more negative mentions in apps that have the feature — is an
+# artefact of what the two groups are talking about rather than evidence of harm.
+# The qasr half is explicitly **demand evidence, not a causal test**: with a single
+# implementing app no between-app estimate is possible, and none is offered. What
+# users actually cite as reasons for loyalty are adhan reminders, Quran audio and
+# prayer-time accuracy — the core functions, two of which RQ6 identifies among the
+# most frequently broken promises and one of which RQ2 shows to be the costliest
+# accuracy failure. Competitive advantage in this ecosystem is earned by doing the
+# basics reliably, not by adding travel features.

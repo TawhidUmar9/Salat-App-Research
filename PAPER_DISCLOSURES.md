@@ -319,12 +319,32 @@ purpose` in the RQ1 coding. Advertising runs through three research questions.
 `madhab` still flips sign in the ordinal check (β = +0.216, p = 0.649 ✅
 confirmed), so keep that caveat.
 
-### 4.4 RQ3 — check the direction before writing 📋
+### 4.4 RQ3 — the sign flip has an explanation, and a lexicon caveat ✅
 
-Mosque finder β = −0.137 (p = 0.003) from the cluster-robust fit. Apps that have
-the feature get more negative mentions of it, which may simply be because you can
-only complain about something that exists. The mixed model gave +0.05 with a NaN
-standard error, so it is not trustworthy — but a sign flip deserves a sentence.
+Mosque finder β = **−0.137** (p = 0.003, cluster-robust, 21 clusters, n = 3,010)
+✅ confirmed. The mixed model gives +0.05 with a NaN standard error ✅ — it cannot
+arbitrate, and the reversal must be stated.
+
+**Why the sign runs that way** ✅ (computed 2026-09-07): apps *with* the feature
+show 27.0% negative mentions against 23.0% without, positives 38.6% against
+43.6%. The groups are performing different speech acts — the 11 apps without it
+generate 243 demand signals across 9 apps (requests, which read positive), while
+the 10 apps with it generate usage reports. Report the gap as wishing-versus-using,
+never as the feature harming apps.
+
+**Travel is not a differentiator** ✅. Of 4,696 preference citations, the named
+aspects are adhan reminders (374), Quran audio (293), prayer-time accuracy (290),
+qibla (155), adhkar (152). Mosque finder is not in the top eight; qasr is absent.
+Citation rates: 1.38% with a mosque finder against 1.24% without.
+
+⚠️ **The `qasr_travel` aspect over-captures.** Its 636 mentions across 18 apps run
+76.7% positive and 7.1% negative, implausible for a feature 25 of 26 apps lack,
+and only 3.3% of mentions are demand signals. The lexicon is catching travel and
+pilgrimage talk generally. **Do not report 636 as qasr discussion volume.** Rest
+the qasr argument on the 21 demand signals, which were read directly. This belongs
+in the precision discussion alongside §3.6.
+
+**Qasr is N = 1** — one implementing app. No between-app estimate; say so.
 
 ### 4.5 RQ4 — not estimable, descriptive only 📋
 
@@ -436,5 +456,9 @@ Two different dates, and conflating them would misrepresent the work.
 - [ ] RQ1's tier null is cited from the cluster-robust OLS, not the M2 mixed model
 - [ ] No non-converged coefficient is described as a null result
 - [ ] The dip test reports p < 1e-16, never p = 0
+- [ ] RQ3's mosque-finder gap is explained as speech-act difference, not harm
+- [ ] 636 is never reported as qasr discussion volume (lexicon over-captures)
+- [ ] RQ4's Δ = −0.236 is labelled not estimable, with the Habit Tracker confound
+- [ ] `tracker_score` at 1-of-1 broken is not presented as the most-broken feature
 - [ ] "40 topics" never implies corpus coverage
 - [ ] Reviewer names do not appear in any quote — anonymise before quoting
