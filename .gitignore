@@ -29,3 +29,8 @@ src/figures/*.pdf
 # same argument as the gold labels above. Track them so the labelling survives.
 !src/data/topic_info.csv
 !src/data/topic_info_*.csv
+
+# Executed notebooks. jupytext generates these from the .py percent-format files,
+# which are the source of truth; the .ipynb carry megabytes of embedded output
+# and re-render on every run, so they only ever produce noisy diffs.
+src/notebooks/*.ipynb
