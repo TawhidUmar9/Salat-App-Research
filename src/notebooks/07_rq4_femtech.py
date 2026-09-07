@@ -182,9 +182,51 @@ export_quotes(women_reviews.nsmallest(15, "sent_num"), "rq4", n=15)  # noqa: F40
 # %% [markdown]
 # ## Answer to RQ4
 #
-# - women_period mention volume: ___ reviews across ___ apps
-# - Sentiment split: ___% negative
-# - Demand in apps lacking the feature: ___ signals
-# - Between-app Δ star: ___ **(N=3, descriptive only)**
+# **The scarcity is the finding.** Menstrual handling is mentioned in **2,182
+# distinct reviews** (2,194 aspect mentions) across **24 of 26 apps** — 0.672% of
+# the analysed corpus — yet only **three apps ship the feature**: Athan, Islamic
+# Habit Tracker and Pillars. Users raise the subject across nearly the whole
+# ecosystem; almost none of it accommodates them.
 #
-# → **Verdict**: _______
+# **Demand is explicit and concentrated where the feature is absent.** Of 272
+# demand signals, **216 come from the 16 apps that lack it**, and the request
+# types are direct rather than incidental: 161 requests, 51 preference citations,
+# 36 churn statements, 21 explicit-absence mentions.
+#
+# **Having the feature does not improve sentiment on the topic.** Mentions in the
+# three apps that ship it run **26.3% negative** against **26.0%** in the 21 that
+# do not — indistinguishable. The presence of menstrual handling is not
+# associated with users being happier about menstrual handling, which suggests the
+# implementations that exist are not meeting the need. The RQ1 coding supports
+# this directly: `Menstrual mode unreliable` appears three times in the single-app
+# pass and `Menstrual exemption absent` once in the cross-app pass, from different
+# applications — first-hand evidence that the failure is in execution as well as
+# in availability.
+#
+# **The between-app comparison is not estimable and is reported as such.** Apps
+# with the feature average **4.135** stars against **4.371** without, Δ = −0.236.
+# This must not be read as an effect. N = 3 on the treated side, and §9.3 names
+# the confound outright: Islamic Habit Tracker is one of the three and carries the
+# lowest rating in the corpus, so the difference is that application rather than
+# the feature. M3 returns no standard error at all (`women_feature_score_diff`
+# 0.085, flagged *descriptive, N=3 treated apps, underpowered*). Report it as not
+# estimable — never as a null.
+#
+# **The topic model cannot add resolution here.** The `rq4_women_privacy`
+# sub-model did not separate: after labelling, six of its ten topics carry the
+# same theme — data selling to the US military — and a seventh is a near
+# duplicate, putting 63% of the sub-model's documents under one label. The Muslim
+# Pro privacy episode swamps this subset. Report themes, not the partition, and do
+# not present ten topics as ten findings.
+#
+# → **Verdict**: Bio-spiritual inclusion is an unmet need rather than a contested
+# design question. The demand is measurable, distributed across almost the entire
+# ecosystem and voiced in the strongest available register — users leaving, users
+# naming the absence — while the supply is three applications, none of which
+# achieves better sentiment on the subject than the apps with no feature at all.
+# Because only three apps have implemented it, no causal or comparative claim is
+# possible and none is made here; the contribution is the size and shape of the
+# gap, corroborated by qualitative evidence from two independently drawn coding
+# passes. `women_period` is among the four aspects with under 25% ecosystem
+# coverage and ranks second on the unmet-needs index (RQ6b), behind only companion
+# hardware.

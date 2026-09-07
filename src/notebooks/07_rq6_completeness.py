@@ -191,8 +191,52 @@ if len(demand):
 # %% [markdown]
 # ## Answer to RQ6
 #
-# - 6a: ___ broken promises across ___ apps; most-broken feature = ___
-# - 6b: top unmet needs = ___, ___, ___
-# - Needs served well ecosystem-wide: ___
+# **RQ6a — the delivery gap.** Of 272 promised (app, feature) pairs, 136 carry
+# enough mentions to judge (n ≥ 30), and **18 are broken promises across 11 apps**
+# — a feature the app claims, drawing over 40% negative sentiment. Ranked by share
+# of promising apps that break it: **monetization** (5 of 16 apps, 31%),
+# **reminders/adhan** (5 of 20, 25%), mosque finder and forbidden times (1 of 4
+# each), widgets (2 of 13), prayer-time accuracy (2 of 19). The largest by volume
+# are Muslim Pro's reminders/adhan (9,989 mentions, 45.6% negative) and its
+# monetization (9,182 mentions, 54.8%). `tracker_score` shows 1 of 1 broken, but
+# with a single promising app that ratio carries no weight.
 #
-# → **Verdict**: Are current apps enough? _______
+# **The two most-broken features are the two most basic.** Adhan reminders are the
+# core function of a prayer-times app, and monetization is the terms on which it is
+# offered. Failure concentrates not in advanced features but in the promise the
+# app is built around.
+#
+# **RQ6b — the coverage gap.** Ranked by unmet-need score (demand volume ×
+# apps lacking): **companion hardware** (6,725; 25 apps lacking), **menstrual
+# handling** (4,738; 23 lacking), **mosque finder** (3,304; 14 lacking),
+# **forbidden times** (2,805; 15 lacking), **nafl times** (2,445; 15 lacking).
+# Four aspects fall below 25% ecosystem coverage: `calendar_sync`,
+# `companion_hardware`, `qasr_travel` and `women_period`.
+#
+# **Some needs are served well.** `madhab`, `monetization`, `qibla`,
+# `table_format` and `widgets` clear both bars — present in over half the
+# ecosystem and averaging under 30% negative. Monetization appears on both lists,
+# and the tension is informative rather than contradictory: most apps handle
+# payment acceptably while a minority handle it badly enough to poison the
+# feature, which is what a 31% break rate against a 25.8% mean negative rate
+# describes.
+#
+# **Synthesis.** The gaps found here are the same ones the other questions arrive
+# at independently. Companion hardware tops the unmet ranking while RQ5 finds
+# hardware sentiment *better* inside the one app that ships a device (37.7%
+# negative) than across the 23 that do not (49.2%), where mentions are unmet
+# requests rather than complaints — demand, not dissatisfaction. Menstrual
+# handling ranks second here and is RQ4's central finding. Reminders/adhan is the
+# joint most-broken promise here and the dominant tracker failure theme in RQ1's
+# cross-app coding, at 46%.
+#
+# → **Verdict — are current apps enough?** No, and they fall short in two
+# different ways that call for different responses. The coverage gap is a market
+# failure: entire categories of need — companion hardware, menstrual
+# accommodation, travel concession, calendar integration — are served by under a
+# quarter of the ecosystem despite measurable, explicitly voiced demand. The
+# delivery gap is a quality failure, and a more damning one, because it falls on
+# the promises apps have already made: the features most often broken are adhan
+# reminders and monetization, the two things a prayer-times app most fundamentally
+# offers. Building more features is not indicated. Delivering the promised ones
+# reliably, and extending coverage to the populations currently unserved, is.
