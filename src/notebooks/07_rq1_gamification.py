@@ -180,9 +180,8 @@ neg_tracker = (
 print(f"Tracker-negative reviews available for coding: {len(neg_tracker):,}")
 
 coding = neg_tracker.head(50)[["reviewId", "app_name", "score", "at", "content_clean"]].copy()
-coding["theme_code"] = ""      # ACTION: fill during thematic analysis
-coding.to_csv(DATA_DIR / "quotes" / "rq1_tracker_negative_50.csv", index=False)  # noqa: F405
-print("Wrote 50-review coding sheet.")
+# Guarded: refuses to overwrite a sheet that already has theme_code filled in.
+write_coding_sheet(coding, DATA_DIR / "quotes" / "rq1_tracker_negative_50.csv")  # noqa: F405
 
 # Illustrative quotes: pull from both poles so the paper can show the split.
 guilt_ids = set(affect.loc[affect["in_tracker"] & affect["guilt"], "reviewId"])

@@ -24,6 +24,7 @@ sys.path.insert(0, str(_HERE.parent / "scripts"))
 from _common import (  # noqa: E402,F401
     ASPECT_PATH, DATA_DIR, DEMAND_PATH, FEATURE_MATRIX_PATH, FIGURES_DIR,
     GOLD_DIR, QUOTES_DIR, SENTIMENT_PATH, TEMPORAL_PATH, TOPICS_PATH,
+    write_coding_sheet,
     ASPECT_TO_FEATURE, CSV_LINKED_ASPECTS, REVIEW_ONLY_ASPECTS,
 )
 
@@ -101,6 +102,7 @@ __all__ = [
     "np", "pd", "Path",
     "setup_plots", "load_reviews", "load_aspects", "load_features",
     "load_demand", "load_model_results", "export_quotes", "sentiment_split",
+    "write_coding_sheet",
     "ASPECT_PATH", "DATA_DIR", "DEMAND_PATH", "FEATURE_MATRIX_PATH",
     "FIGURES_DIR", "GOLD_DIR", "QUOTES_DIR", "SENTIMENT_PATH",
     "TEMPORAL_PATH", "TOPICS_PATH",

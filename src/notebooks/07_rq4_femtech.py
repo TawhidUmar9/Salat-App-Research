@@ -173,8 +173,8 @@ if len(per_app):
 # %%
 women_reviews = reviews[reviews["reviewId"].isin(set(women["reviewId"]))]
 coding = women_reviews[["reviewId", "app_name", "score", "at", "content_clean"]].copy()
-coding["theme_code"] = ""    # ACTION: fill during thematic analysis
-coding.to_csv(DATA_DIR / "quotes" / "rq4_women_full_set.csv", index=False)  # noqa: F405
+# Guarded: refuses to overwrite a sheet that already has theme_code filled in.
+write_coding_sheet(coding, DATA_DIR / "quotes" / "rq4_women_full_set.csv")  # noqa: F405
 print(f"Wrote full women-aspect set for coding: {len(coding)} reviews")
 
 export_quotes(women_reviews.nsmallest(15, "sent_num"), "rq4", n=15)  # noqa: F405

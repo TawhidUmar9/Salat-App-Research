@@ -36,6 +36,7 @@ from _common import (  # noqa: E402
     ASPECT_PATH, ASPECT_TO_FEATURE, DATA_DIR, DEMAND_PATH, FEATURE_MATRIX_PATH,
     SENTIMENT_PATH,
     base_parser, log, require, section, set_seed,
+    write_coding_sheet,
 )
 
 OUTPUT_COMPARISON = DATA_DIR / "app_comparison.csv"
@@ -620,12 +621,15 @@ def model_m2_rq1_gamification_valence(design: pd.DataFrame, aspect_df: pd.DataFr
         log(f"diptest not installed. Bimodality coefficient={bc:.3f} "
             f"(>0.555 suggests bimodality). `pip install diptest` for Hartigan's test.")
 
+    # NOTE: sent_num is three-valued (-1/0/+1), so nsmallest is a tie among every
+    # negative review and returns them in frame order — which is app order. The
+    # sheet coded for the paper therefore came from a single app; see
+    # MANUAL_WORK_GUIDE.md section 4. Left as-is deliberately: changing the draw
+    # now would no longer match the reviews that were actually coded.
     export = d.nsmallest(50, "sent_num")[
         ["reviewId", "app_name", "score", "at", "content_clean"]
     ]
-    path = DATA_DIR / "quotes" / "rq1_tracker_negative_50.csv"
-    export.to_csv(path, index=False)
-    log(f"Wrote 50 tracker-negative reviews for qualitative coding → {path}")
+    write_coding_sheet(export, DATA_DIR / "quotes" / "rq1_tracker_negative_50.csv")
     return res
 
 

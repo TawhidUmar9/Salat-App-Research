@@ -874,3 +874,35 @@ def set_seed(seed: int) -> None:
             torch.cuda.manual_seed_all(seed)
     except ImportError:
         pass
+
+
+def write_coding_sheet(df: "pd.DataFrame", path: Path, code_col: str = "theme_code") -> Path:
+    """
+    Write a qualitative coding sheet without destroying anyone's coding.
+
+    These sheets are regenerated every time their producing script or notebook
+    runs, but the whole point of them is the column a human fills in by hand.
+    Overwriting a coded sheet silently discards hours of work that cannot be
+    reproduced, so refuse instead and say where the coded file is.
+    """
+    import pandas as pd  # local: _common is imported before pandas elsewhere
+
+    if path.exists():
+        try:
+            existing = pd.read_csv(path)
+        except Exception:  # noqa: BLE001 — unreadable file is not worth protecting
+            existing = None
+        if existing is not None and code_col in existing.columns:
+            filled = existing[code_col].fillna("").astype(str).str.strip()
+            n = int((filled != "").sum())
+            if n:
+                log(f"{path.name} already has {n} coded rows — NOT overwriting. "
+                    f"Delete it first if you really want a fresh sheet.", level="WARN")
+                return path
+
+    out = df.copy()
+    if code_col not in out.columns:
+        out[code_col] = ""
+    out.to_csv(path, index=False)
+    log(f"Wrote coding sheet ({len(out)} rows) → {path}")
+    return path
