@@ -32,8 +32,12 @@ which is app order.
 > rather than a cross-app sample.
 
 **The extension draw is built** — `src/scripts/_draw_tracker_extension.py`. It
-takes 30 tracker-negative reviews stratified equally across the *other* tracker
-apps, excludes every already-coded reviewId, and is seeded. Once those are coded
+takes 30 tracker-negative reviews across the 22 *other* tracker apps: a
+guaranteed floor of one per app, with the remainder allocated round-robin rather
+than from the pooled leftovers, so no app contributes more than two. It excludes
+every already-coded reviewId and is seeded. The eligible pool is 1,173 reviews,
+which also confirms §1.1 — the original sheet was single-app purely through the
+tie-break, not because one app dominates tracker complaints. Once those are coded
 against the existing frame, replace the sentence above with the stratified
 description, report the app spread, and state both passes:
 

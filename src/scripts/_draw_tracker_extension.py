@@ -90,22 +90,35 @@ def main() -> None:
         raise SystemExit("No other tracker apps have negative tracker reviews.")
     log(f"Eligible pool: {len(pool):,} reviews across {len(apps)} other apps")
 
-    # Guarantee a floor per app so no app can dominate the way the original draw
-    # did, then top up to n_total from whatever is left. The top-up is drawn from
-    # the pooled remainder, so it leans toward apps with more eligible reviews —
-    # a supplement to guaranteed coverage, not a replacement for it.
+    # Guarantee a floor per app, then spend the remainder ROUND-ROBIN rather than
+    # from the pooled leftovers. Drawing the remainder from the pool would hand it
+    # all to whichever app has the most eligible reviews — which is how the
+    # original sheet ended up single-app, and here would have pulled nine of
+    # thirty from Muslim Pro, importing its data-selling story into RQ1's themes.
     per = max(1, n_total // len(apps))
-    parts = []
+    taken = {}
     for app in apps:
         sub = pool[pool["app_name"] == app]
-        parts.append(sub.sample(n=min(per, len(sub)), random_state=seed))
+        taken[app] = sub.sample(n=min(per, len(sub)), random_state=seed)
 
-    chosen = pd.concat(parts)
-    if len(chosen) < n_total:
-        rest = pool[~pool["reviewId"].isin(set(chosen["reviewId"]))]
-        if len(rest):
-            parts.append(rest.sample(n=min(n_total - len(chosen), len(rest)),
-                                     random_state=seed))
+    order = list(pd.Series(apps).sample(frac=1, random_state=seed))
+    need = n_total - sum(len(v) for v in taken.values())
+    while need > 0:
+        progressed = False
+        for app in order:
+            if need <= 0:
+                break
+            sub = pool[pool["app_name"] == app]
+            rest = sub[~sub["reviewId"].isin(set(taken[app]["reviewId"]))]
+            if not len(rest):
+                continue
+            taken[app] = pd.concat([taken[app], rest.sample(n=1, random_state=seed)])
+            need -= 1
+            progressed = True
+        if not progressed:      # every app exhausted
+            break
+
+    parts = list(taken.values())
 
     out = (pd.concat(parts)
              .sort_values(["app_name", "reviewId"])
