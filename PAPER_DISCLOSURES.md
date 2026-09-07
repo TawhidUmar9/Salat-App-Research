@@ -346,11 +346,26 @@ in the precision discussion alongside §3.6.
 
 **Qasr is N = 1** — one implementing app. No between-app estimate; say so.
 
-### 4.5 RQ4 — not estimable, descriptive only 📋
+### 4.5 RQ4 — not estimable, and the feature does not help ✅
 
-2,194 mentions across 24 apps, 272 demand signals, but only **3 apps** have the
-feature. Say plainly that no between-app estimate is possible. Combine with the
-sub-model collapse in §2.3.
+**2,182 distinct reviews** (2,194 mentions) across **24 of 26 apps**, 0.672% of the
+analysed corpus. Only **3 apps** ship the feature: Athan, Islamic Habit Tracker,
+Pillars. No between-app estimate is possible — say so plainly. M3 returns no
+standard error (`women_feature_score_diff` 0.085, flagged underpowered).
+
+**Sentiment is identical with and without the feature** ✅ (computed 2026-09-07):
+**26.3% negative** in the three apps that ship it against **26.0%** in the 21 that
+do not. Having menstrual handling is not associated with users being happier about
+menstrual handling. Combined with §4.2a, the claim strengthens from "almost nobody
+builds this" to "almost nobody builds it, and the implementations that exist are
+not meeting the need."
+
+**Demand** ✅: 272 signals, **216 from the 16 apps lacking the feature** — 161
+requests, 51 preference citations, 36 churn statements, 21 explicit absences.
+
+**Δ star = −0.236** (4.135 with, 4.371 without) ✅. **Not estimable.** N = 3, and
+§9.3 names the confound: Islamic Habit Tracker is one of the three and carries the
+corpus's lowest rating. Never report as an effect. Combine with §2.3.
 
 ### 4.6 RQ5 — lead with the fused cases, report the bound ✅
 
@@ -380,10 +395,32 @@ watch support. Shipping hardware is associated with *better* hardware sentiment.
 
 **Claim themes, not the partition** — 6–11 topics across five seeds, ARI 0.452.
 
-### 4.7 RQ6 📋
+### 4.7 RQ6 — two different gaps ✅
 
-18 broken promises; unmet needs led by companion hardware, women's tracking and
-mosque finder.
+**Delivery gap.** 272 promised (app, feature) pairs, 136 judgeable at n ≥ 30,
+**18 broken promises across 11 apps** (>40% negative on a promised feature). By
+share of promising apps that break it: monetization 5/16 (31%), reminders/adhan
+5/20 (25%), mosque finder 1/4, forbidden times 1/4, widgets 2/13, prayer-time
+accuracy 2/19, qibla 1/18. Largest by volume: Muslim Pro reminders/adhan (9,989
+mentions, 45.6% negative) and monetization (9,182, 54.8%).
+
+⚠️ `tracker_score` shows 1 of 1 broken. **Do not report it as the most-broken
+feature** — a single promising app makes the ratio meaningless.
+
+**The two most-broken features are the two most basic**: adhan reminders (the core
+function) and monetization (the terms it is offered on). Failure concentrates in
+the promise the app is built around, not in advanced capability.
+
+**Coverage gap.** Unmet-need score (demand × apps lacking): companion hardware
+6,725 (25 lacking), women_period 4,738 (23), mosque finder 3,304 (14), forbidden
+times 2,805 (15), nafl times 2,445 (15). Four aspects under 25% coverage:
+`calendar_sync`, `companion_hardware`, `qasr_travel`, `women_period`.
+
+**Served well** (>50% coverage, <30% mean negative): madhab, monetization, qibla,
+table_format, widgets. **Monetization appears on both lists** — not a
+contradiction: a 31% break rate against a 25.8% mean negative rate is most apps
+handling payment acceptably and a minority handling it badly. Explain it rather
+than letting a reviewer find it.
 
 ---
 
@@ -438,7 +475,7 @@ Two different dates, and conflating them would misrepresent the work.
 | Krippendorff's α | 0.824 |
 | Aspect precision, weighted | 84.4% [79.7, 88.9] |
 | Coefficients surviving q<0.05 | 20 of 29 |
-| Not estimable | 3 |
+| Cannot support inference | 11 (3 no SE + 8 non-converged) ✅ |
 
 ---
 
