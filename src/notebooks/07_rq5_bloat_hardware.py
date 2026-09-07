@@ -177,9 +177,69 @@ export_quotes(sel, "rq5", n=15)  # noqa: F405
 # %% [markdown]
 # ## Answer to RQ5
 #
-# - feature_count → bloat complaints: β = ___ [CI], q = ___
-# - feature_count vs log(installs): ρ = ___ (confound magnitude)
-# - Leanest well-rated apps: ___
-# - iQIBLA hardware sentiment: ___% negative (n = ___) — **case study, N=1**
+# **Feature count does not predict bloat complaints.** The M4 mixed model did not
+# converge on this term — β = −0.004 with a standard error of 743.8, p ≈ 0.99999 —
+# so the null is reported from the cluster-robust OLS, which did:
+# `complaint_complexity_bloat × feature_count` β = **−0.000487** [−0.00136,
+# 0.00038], p = 0.272, clustered on 26 apps. Adding features to a prayer app does
+# not make users call it bloated.
 #
-# → **Verdict**: _______
+# **The null is not an artefact of popularity.** Feature count correlates only
+# weakly with installs (Spearman ρ = **0.244**, n = 26 apps), so the absence of an
+# effect is not a larger, better-known app absorbing the variance.
+#
+# **If anything the relationship runs backwards.** The five leanest apps
+# (6–9 features) average **3.96 stars** with a bloat-complaint rate of **5.2%**;
+# the five fullest (13–14 features) average **4.71 stars** at **1.6%** — a
+# 3.3× *lower* rate of bloat complaints in the apps with the most features, against
+# a corpus mean of 4.40 stars. The pattern survives dropping the two smallest apps
+# (n = 5 and n = 45): the remaining lean apps still average 4.20 stars at 5.6%.
+# iPray, with 8 features and 2,225 reviews, draws bloat complaints at 8.0% while
+# Athan, with 13 features and 44,954 reviews, draws them at 1.5%.
+#
+# **Bloat complaints are interface complaints.** A review complaining about bloat
+# is **23.98×** more likely to also complain about the interface than the base rate
+# predicts (Fisher exact OR = 29.41, p = 7.4e-137, n = 324,687). Restricting to
+# reviews where the two complaints appear in *different sentences* — removing the
+# 94 reviews that fuse them into one phrase — the lift is **7.62×** (OR = 8.78,
+# p = 9.3e-24). The two lexicons share no keyword and no regex, so a fused sentence
+# contains two distinct terms rather than one phrase counted twice. **7.62× is the
+# conservative bound**; the fused cases are reported as the substantive finding
+# because they are what users actually say: bloat is voiced *as* a property of the
+# interface.
+#
+# **The sub-topic model agrees from a different direction.** Fitted on
+# `complexity_bloat` reviews alone, its labelled topics are dominated by simplicity
+# as something users *praise* — `App praised for simplicity` recurring across
+# three topics, alongside `Praise for minimalistic UI` and `App praised for having
+# no ads` — with `Ads cause confusion while using app` and `Complaint for app being
+# slow` on the negative side. Users are evaluating how much the interface puts in
+# front of them, not how many features the app contains. Report these as **themes,
+# not a partition**: across five fixed seeds the model yields 6–11 topics with mean
+# pairwise ARI 0.452.
+#
+# **Companion hardware — case study, N = 1.** Hardware sentiment inside iQIBLA
+# Life, the one app shipping a companion device, is **37.7% negative** (n = 518
+# aspect mentions, 45.9% positive). In the 23 other apps, `companion_hardware`
+# mentions run **49.2% negative** and only 20.8% positive — these are largely
+# unmet requests for watch support rather than complaints about a device. Shipping
+# hardware is associated with *better* hardware sentiment than not shipping it,
+# and 2,482 mentions across 24 apps indicate real demand. With one treated app this
+# is descriptive only and no between-app estimate is possible.
+#
+# → **Verdict**: The feature-bloat hypothesis is not supported. Feature count is
+# uncorrelated with bloat complaints, and the leanest apps in the corpus attract
+# them at over three times the rate of the fullest. What users call bloat is a
+# property of the interface, not a count of capabilities: bloat and interface
+# complaints co-occur at 23.98× the base rate, 7.62× under the most conservative
+# reading, and the bloat sub-topics resolve into praise for simplicity and
+# complaints about clutter, advertising and slowness. The design implication is
+# that restraint should be exercised over what the interface *surfaces* rather than
+# over what the app *contains* — a distinction the feature-count framing cannot
+# express.
+#
+# **Provenance.** The co-occurrence hypothesis and its test were pre-specified on
+# 2026-08-26, before the full run. The decision to foreground the fused cases was
+# made on 2026-09-07 with the figures and labelled topics visible, and the
+# separate-sentence estimate is reported as a conservative bound. The framing
+# itself is not claimed as pre-specified.

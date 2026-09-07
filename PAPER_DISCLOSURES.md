@@ -332,20 +332,33 @@ standard error, so it is not trustworthy — but a sign flip deserves a sentence
 feature. Say plainly that no between-app estimate is possible. Combine with the
 sub-model collapse in §2.3.
 
-### 4.6 RQ5 — lead with the fused cases, report the bound 📋
+### 4.6 RQ5 — lead with the fused cases, report the bound ✅
 
 Co-occurrence lift **23.98×** (OR 29.41, p = 7.4e-137) across all co-occurring
-reviews; **7.62×** (OR 8.78, p = 9.3e-24) restricted to separate sentences. Of
-134 reviews carrying both complaints, 94 (70%) fuse them in one sentence and 40
-(30%) voice them separately. The two lexicons share no keyword and no regex, so a
-fused sentence contains two distinct terms — it is not one phrase counted twice.
-Report 7.62× as the conservative bound.
+reviews; **7.62×** (OR 8.78, p = 9.3e-24) restricted to separate sentences, with
+the 94 fused reviews removed ✅ all confirmed against `model_results.csv`. The two
+lexicons share no keyword and no regex, so a fused sentence carries two distinct
+terms. Report 7.62× as the conservative bound.
 
-✅ The labelled `rq5_bloat` topics support this from a different direction, and
-note *what* they contain: they are dominated by simplicity as something users
-**praise** (`App praised for simplicity` three times, `Praise for minimalistic
-UI`, `App praised for having no ads`) rather than by feature counting. Bloat talk
-is interface talk.
+**The feature-count null must be cited from the cluster-robust fit** ✅. M4's
+`feature_count` is degenerate (β = −0.004, SE 743.8, p ≈ 0.99999). The converged
+estimate is `complaint_complexity_bloat × feature_count` = −0.000487, p = 0.272.
+
+**The relationship inverts** ✅ (computed 2026-09-07). Five leanest apps (6–9
+features): 3.96 mean stars, 5.2% bloat-complaint rate. Five fullest (13–14): 4.71
+stars, 1.6%. Corpus mean 4.40. Robust to dropping the two smallest apps (n = 5,
+n = 45), which leaves 4.20 stars at 5.6%. iPray (8 features, 2,225 reviews) draws
+bloat complaints at 8.0% against Athan (13 features, 44,954 reviews) at 1.5%.
+Feature count and installs correlate only weakly (Spearman ρ = 0.244, n = 26), so
+popularity does not explain the null.
+
+**Companion hardware is N = 1 and reads counterintuitively** ✅. Inside iQIBLA
+Life: 37.7% negative, 45.9% positive (n = 518 mentions). In the 23 apps without
+hardware: 49.2% negative, 20.8% positive (n = 1,994) — largely unmet requests for
+watch support. Shipping hardware is associated with *better* hardware sentiment.
+2,482 mentions across 24 apps. Descriptive only; no between-app estimate.
+
+**Claim themes, not the partition** — 6–11 topics across five seeds, ARI 0.452.
 
 ### 4.7 RQ6 📋
 
