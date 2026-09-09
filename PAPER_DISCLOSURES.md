@@ -363,9 +363,20 @@ not meeting the need."
 **Demand** ✅: 272 signals, **216 from the 16 apps lacking the feature** — 161
 requests, 51 preference citations, 36 churn statements, 21 explicit absences.
 
-**Δ star = −0.236** (4.135 with, 4.371 without) ✅. **Not estimable.** N = 3, and
-§9.3 names the confound: Islamic Habit Tracker is one of the three and carries the
-corpus's lowest rating. Never report as an effect. Combine with §2.3.
+**Δ star: the sign depends on the aggregation** ✅ — which is itself the argument
+that it is not estimable.
+
+| Aggregation | Δ | Detail |
+|---|---|---|
+| Review-weighted (**M3, the recorded figure**) | **+0.085** [+0.074, +0.096] | 4.476 vs 4.391; 46,741 reviews / 3 apps vs 277,946 / 23 |
+| App-level unweighted | **−0.236** | 4.135 vs 4.371 |
+
+Athan alone is 44,954 of the 46,741 treated reviews, so the weighted figure is
+close to a single application; the unweighted one is pulled down by Islamic Habit
+Tracker, which §9.3 names as carrying the corpus's lowest rating. **Report M3's
++0.085, say it is not estimable, and mention the reversal** — a difference that
+changes sign under reweighting is the cleanest demonstration that N = 3 cannot
+answer this. M3 carries no standard error. Combine with §2.3.
 
 ### 4.6 RQ5 — lead with the fused cases, report the bound ✅
 
@@ -450,6 +461,13 @@ Two different dates, and conflating them would misrepresent the work.
   flattered a result. Say that.
 - **Ship the server's `run_manifest.jsonl`** with the artefact submission — it
   records commit, GPU, batch size and library versions for every reported number.
+- ✅ **Reproducibility confirmed 2026-09-09.** `06_models.py` was re-run from a
+  clean tree at commit **`5da2db7`** and `model_results.csv` came back byte-identical
+  to the 2026-09-03 output except for one note string (`"definitional same-sentence
+  pairs removed"` → `"same-sentence pairs removed"`, from commit `9c5b48b`). Every
+  coefficient, p-value and n reproduced. **Cite `5da2db7` in Methods** — the
+  manifest's earlier `ff103ae` was a server-local commit that was never pushed and
+  resolves nowhere.
 - ⚠️ **Cite the analysis run as 2026-09-03**, not 2026-09-07. `model_results.csv`,
   `gap_matrix.csv` and all fourteen figures carry that timestamp. The pipeline was
   not re-run afterwards; on 2026-09-07 only the notebooks that *read* those outputs
@@ -503,7 +521,8 @@ Two different dates, and conflating them would misrepresent the work.
 - [ ] The dip test reports p < 1e-16, never p = 0
 - [ ] RQ3's mosque-finder gap is explained as speech-act difference, not harm
 - [ ] 636 is never reported as qasr discussion volume (lexicon over-captures)
-- [ ] RQ4's Δ = −0.236 is labelled not estimable, with the Habit Tracker confound
+- [ ] RQ4's Δ is reported as M3's +0.085 (not −0.236), labelled not estimable,
+      with the sign reversal under reweighting noted
 - [ ] `tracker_score` at 1-of-1 broken is not presented as the most-broken feature
 - [ ] "40 topics" never implies corpus coverage
 - [ ] Reviewer names do not appear in any quote — anonymise before quoting

@@ -203,14 +203,22 @@ export_quotes(women_reviews.nsmallest(15, "sent_num"), "rq4", n=15)  # noqa: F40
 # applications — first-hand evidence that the failure is in execution as well as
 # in availability.
 #
-# **The between-app comparison is not estimable and is reported as such.** Apps
-# with the feature average **4.135** stars against **4.371** without, Δ = −0.236.
-# This must not be read as an effect. N = 3 on the treated side, and §9.3 names
-# the confound outright: Islamic Habit Tracker is one of the three and carries the
-# lowest rating in the corpus, so the difference is that application rather than
-# the feature. M3 returns no standard error at all (`women_feature_score_diff`
-# 0.085, flagged *descriptive, N=3 treated apps, underpowered*). Report it as not
-# estimable — never as a null.
+# **The between-app comparison is not estimable, and the sign depends on how you
+# aggregate.** M3 reports a review-weighted difference of **+0.085 stars**
+# [+0.074, +0.096] — apps with the feature average 4.476 against 4.391 (46,741
+# reviews across 3 apps versus 277,946 across 23). Averaging per app instead and
+# then across apps reverses it to **−0.236** (4.135 against 4.371). Both are
+# arithmetically correct; they answer different questions, and with N = 3 on the
+# treated side neither supports inference. Athan alone contributes 44,954 of the
+# 46,741 treated reviews, so the weighted figure is essentially one application,
+# while the unweighted figure is dominated by Islamic Habit Tracker, which §9.3
+# names as carrying the lowest rating in the corpus.
+#
+# **Report the M3 figure (+0.085) as the recorded estimate, state that it is not
+# estimable, and note the reversal.** A difference whose sign flips under a change
+# of weighting is the clearest possible demonstration that three treated apps
+# cannot answer this question. M3 carries no standard error and is flagged
+# *descriptive, N=3 treated apps, underpowered*.
 #
 # **The topic model cannot add resolution here.** The `rq4_women_privacy`
 # sub-model did not separate: after labelling, six of its ten topics carry the

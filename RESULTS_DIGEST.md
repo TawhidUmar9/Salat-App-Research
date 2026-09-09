@@ -110,7 +110,8 @@ over-captures travel/pilgrimage talk. Never report 636 as qasr volume.** ✅
 | Sentiment, apps *without* | 26.0% negative (1,718 mentions, 21 apps) | ✅ |
 | Demand | 272 total; 216 from 16 apps lacking it | ✅ |
 | Demand types | request 161 · preference 51 · churn 36 · absence 21 · tenure 3 | ✅ |
-| Δ star | −0.236 (4.135 vs 4.371) — **NOT ESTIMABLE** | ✅ |
+| Δ star, review-weighted (**M3**) | **+0.085** [+0.074, +0.096] — **NOT ESTIMABLE** | ✅ |
+| Δ star, app-level unweighted | −0.236 — opposite sign, same data | ✅ |
 
 Menstrual complaints appear in **both** coding passes, different apps ✅
 
@@ -174,5 +175,6 @@ Corpus mean star 4.40 ✅ · `rq5_bloat` ARI 0.452, 6–11 topics 📋
 | "p = 0" for the dip test | p < 1e-16 |
 | "636 qasr mentions" | 21 demand signals |
 | "3 models not estimable" | 11 cannot support inference |
+| RQ4 Δ = −0.236 | M3 records +0.085; the sign flips under reweighting |
 | "tracker_score most broken" | 1 of 1 app; report adhan and monetization |
 | pooled coding percentages | two passes, reported separately |
