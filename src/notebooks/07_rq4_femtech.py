@@ -221,11 +221,12 @@ export_quotes(women_reviews.nsmallest(15, "sent_num"), "rq4", n=15)  # noqa: F40
 # *descriptive, N=3 treated apps, underpowered*.
 #
 # **The topic model cannot add resolution here.** The `rq4_women_privacy`
-# sub-model did not separate: after labelling, six of its ten topics carry the
-# same theme — data selling to the US military — and a seventh is a near
-# duplicate, putting 63% of the sub-model's documents under one label. The Muslim
-# Pro privacy episode swamps this subset. Report themes, not the partition, and do
-# not present ten topics as ten findings.
+# sub-model did not separate: after labelling, **five of its ten topics carry the
+# identical label** (data selling to the US military) and a sixth is a near
+# duplicate, so **six of ten sit on one theme, holding 58% of the sub-model's
+# non-outlier documents** (4,788 of 8,285). The Muslim Pro privacy episode swamps
+# this subset. Report themes, not the partition, and do not present ten topics as
+# ten findings.
 #
 # → **Verdict**: Bio-spiritual inclusion is an unmet need rather than a contested
 # design question. The demand is measurable, distributed across almost the entire

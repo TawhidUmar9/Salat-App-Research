@@ -325,7 +325,7 @@ is not trustworthy, but a sign flip deserves a sentence.
 
 > The `rq4_women_privacy` sub-model **did not separate**: after labelling, six of
 > its ten topics carry the same theme (data selling to the US military) and a
-> seventh is a near-duplicate — 63% of the sub-model's documents under one label.
+> sixth is a near-duplicate — 58% of the sub-model's non-outlier documents.
 > The Muslim Pro data-selling story swamps everything else in this subset. Report
 > the themes, not the partition, exactly as with `rq5_bloat`, and say in Methods
 > that the sub-model collapsed onto one dominant theme. Do not present ten topics
@@ -373,7 +373,8 @@ women's tracking and mosque finder.
 6. **The 50 qualitative tracker codes come from one app**, through a tie in the
    selection rule rather than by design. Report them as a single-app case study.
 7. **The `rq4_women_privacy` sub-model collapsed** onto one theme — 6 of 10
-   topics share a label, 63% of its documents. Report themes, not the partition.
+   topics share a theme, 58% of its non-outlier documents. Report themes, not
+   the partition.
 8. **Three models are not estimable** through separation and are named in the
    output. Never report them as null results.
 

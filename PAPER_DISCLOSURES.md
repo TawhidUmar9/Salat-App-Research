@@ -113,10 +113,15 @@ topics". Report the ARI and the 6–11 range in Methods.
 
 ### 2.3 The RQ4 sub-model collapsed ✅
 
-Six of ten topics in `rq4_women_privacy` carry the same theme after labelling
-(data selling to the US military), and a seventh is a near-duplicate — 63% of the
-sub-model's documents under one label. The Muslim Pro data-selling story swamps
-the subset.
+**Five of the ten topics carry the identical label** `Data selling to US military
+complaint`, and a sixth (`Complaint about selling data`) is a near-duplicate — so
+**six of ten topics sit on one theme, holding 58% of the sub-model's non-outlier
+documents** (4,788 of 8,285). The Muslim Pro data-selling story swamps the subset.
+
+> Corrected 2026-09-09. An earlier count said "six of ten plus a seventh, 63%".
+> That treated the outlier bucket as a topic — it had carried a content label
+> before being relabelled `OUTLIERS`, which inflated both the topic count and the
+> document share. Use 6 of 10 and 58%.
 
 **Claim ceiling:** themes only. Do not present ten topics as ten findings.
 
@@ -147,9 +152,12 @@ weighted figure.
 
 **91.5%** overall, with `absence` weakest at **65%**. Report the weak one.
 
-### 3.4 Promise-source agreement is low 📋
+### 3.4 Promise-source agreement is low ✅
 
-Mean κ = **0.272**. This is weak agreement and must be stated as such wherever
+Mean κ = **0.272** ✅ verified against `promise_source_agreement.csv`. Per-feature
+κ ranges from 0.62 (Women tracking) down to 0.36 (Companion hardware); the CSV
+also records where the store description *misses* a feature the CSV records and
+where it *overclaims*. This is weak agreement and must be stated as such wherever
 promise data is used.
 
 ### 3.5 The zero-shot backstop was dropped 📋
