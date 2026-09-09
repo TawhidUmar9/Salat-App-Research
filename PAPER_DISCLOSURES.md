@@ -143,6 +143,72 @@ matches, so the surviving rows are an unbiased subset rather than a re-labelling
 Say this explicitly; a reader who sees "192 of 300" without it will assume
 cherry-picking.
 
+### 3.1a Per-aspect precision — SEVEN aspects fall below 50% ⚠️✅
+
+**Verified 2026-09-09 by running `_aspect_precision.py`.** The headline figures
+reproduce exactly (69.3% unweighted, 84.4% [79.7, 88.9] weighted, 192 of 300 gold
+rows surviving). **But the weighted figure is dominated by high-volume aspects,
+and several low-volume aspects the paper reports directly are near-useless.**
+
+| Aspect | corpus n | gold | precision | 95% CI | implied true |
+|---|---|---|---|---|---|
+| reminders_adhan | 30,069 | 7 | 100% | [65, 100] | 30,069 |
+| quran_audio | 24,964 | 6 | 100% | [61, 100] | 24,964 |
+| prayer_times_accuracy | 21,941 | 11 | 73% | [43, 90] | 16,016 |
+| ads_intrusive | 17,845 | 11 | 100% | [74, 100] | 17,845 |
+| ui_design | 15,720 | 11 | 73% | [43, 90] | 11,475 |
+| monetization | 13,914 | 11 | 82% | [52, 95] | 11,409 |
+| qibla | 8,526 | 11 | 82% | [52, 95] | 6,991 |
+| stability_bugs | 7,665 | 11 | 64% | [35, 85] | 4,905 |
+| privacy_data | 7,471 | 10 | 90% | [60, 98] | 6,723 |
+| prayer_tracker | 6,009 | 9 | 78% | [45, 94] | 4,687 |
+| complexity_bloat | 5,389 | 9 | 67% | [35, 88] | 3,610 |
+| widgets | 4,755 | 11 | 100% | [74, 100] | 4,755 |
+| **mosque_finder** | 3,043 | 11 | **27%** | [10, 57] | **~821** |
+| **companion_hardware** | 2,512 | 5 | **40%** | [12, 77] | **~1,004** |
+| **women_period** | 2,194 | 10 | **20%** | [6, 51] | **~438** |
+| **forbidden_times** | 1,534 | 10 | **10%** | [2, 40] | **~153** |
+| **table_format** | 1,483 | 9 | **44%** | [19, 73] | **~652** |
+| calc_method | 639 | 10 | 90% | [60, 98] | 575 |
+| **qasr_travel** | 637 | 2 | **0%** | [0, 66] | **~0** |
+| madhab | 491 | 5 | 60% | [23, 88] | 294 |
+| **tracker_score** | 101 | 1 | **0%** | [0, 79] | **~0** |
+
+**Which claims this touches, and what to do:**
+
+- **RQ4** — "2,194 mentions across 24 apps" is the headline. At 20% precision the
+  true figure is nearer **438 [124, 1,118]**. **Do not report 2,194 as a count of
+  genuine menstrual-handling mentions.** RQ4's argument survives because it rests
+  on *demand signals* (272, validated separately at 91.5% — §3.3) and on the
+  3-of-26 feature scarcity, neither of which depends on this aspect's precision.
+  Rewrite the volume sentence; keep the argument.
+- **RQ3** — `mosque_finder` at 27% means "3,043 mentions" is nearer **821**. The
+  27.0%-vs-23.0% negative-sentiment comparison is computed over noisy tags on
+  *both* sides, so the direction may survive but the precision must be stated.
+- **RQ5** — `companion_hardware` at 40%: 2,512 mentions is nearer **1,004**, and
+  the 37.7%-vs-49.2% split rests on tags of this quality.
+- **RQ6** — the unmet-needs ranking multiplies demand volume by apps lacking.
+  **Demand signals are separately validated at 91.5%**, so the ranking itself is
+  on firmer ground than the raw mention counts. Say which input is which.
+- **`qasr_travel` at 0 of 2** confirms §4.4 quantitatively. Report the 21 demand
+  signals; **never** report 637 as qasr discussion volume.
+- **`tracker_score` at 0 of 1** — a single gold row. Uninformative either way; do
+  not lean on it, and note the 1-of-1 broken promise in §4.7 rests on the same
+  thin evidence.
+
+⚠️ **Rule for the whole paper: any aspect-level count must carry its precision**,
+and for the seven aspects above 50% is not achieved, so a bare count would
+mislead. Report either the precision-adjusted estimate with its interval, or the
+raw count explicitly labelled as tagger output rather than as verified mentions.
+
+**Gold n per aspect is 1–11**, so these intervals are wide. They are the honest
+uncertainty, not a reason to prefer the point estimate.
+
+**This is a measurement limitation, not a faulty run.** Nothing needs
+re-executing. Raising precision would mean narrowing the lexicon for these
+aspects and re-running `03_absa` and everything downstream — a multi-day cascade,
+and future work rather than a pre-deadline fix.
+
 ### 3.2 Two aspects have no gold rows 📋
 
 `calendar_sync` and `goal_system` (0.2% of corpus volume) are excluded from the
@@ -578,5 +644,8 @@ Two different dates, and conflating them would misrepresent the work.
 - [ ] `tracker_score` at 1-of-1 broken is not presented as the most-broken feature
 - [ ] "40 topics" never implies corpus coverage
 - [ ] Reviewer names do not appear in any quote — anonymise before quoting
+- [ ] No bare aspect count is reported for the seven aspects under 50% precision
+      (§3.1a); each carries its precision or an adjusted interval
+- [ ] RQ4's volume sentence does not present 2,194 as verified mentions
 - [ ] Demand precision (§3.3) is either re-labelled on the current sheet, or
       reported with the stranded-sample caveat stated explicitly
