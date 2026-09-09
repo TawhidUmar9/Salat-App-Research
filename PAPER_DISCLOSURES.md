@@ -7,7 +7,7 @@ before submission.
 
 Two provenance markers are used throughout:
 
-- ✅ **verified** — checked directly against the files in this repo on 2026-09-07
+- ✅ **verified** — checked on 2026-09-07 against the outputs of the analysis run of **2026-09-03** (`model_results.csv`, the figures and the gap matrix all carry that timestamp; the pipeline was not re-run afterwards, only the notebooks that read it)
 - 📋 **from the run** — produced by the pipeline on the analysis server and
   carried over from `MANUAL_WORK_GUIDE.md`; not independently re-derived here
 
@@ -174,7 +174,7 @@ Krippendorff's α = **0.824**.
 
 ### 4.1 Eleven coefficients cannot support inference, not three ✅
 
-**Verified against `model_results.csv` from the 2026-09-07 run.** "Not estimable"
+**Verified 2026-09-07 against `model_results.csv` from the analysis run of 2026-09-03.** "Not estimable"
 and "no effect" are different claims, and the file contains two distinct kinds of
 unusable row:
 
@@ -298,7 +298,7 @@ interface.** The family mean is dragged to −0.647 by `madhab` (−0.324) and
 **Do not report the family mean without the spread**, and do not report −1.112
 as "the accuracy coefficient" — it is one member of four.
 
-**Star ratings hide accuracy complaints** ✅ (computed 2026-09-07). Of 7,942
+**Star ratings hide accuracy complaints** ✅ (derived 2026-09-07 from the 2026-09-03 run). Of 7,942
 reviews carrying at least one negative accuracy-family complaint, **3,306 (41.6%)
 gave four or five stars and 1,830 (23.0%) gave five**. Star distribution:
 1★ 2,319 · 2★ 914 · 3★ 1,403 · 4★ 1,476 · 5★ 1,830. This is a finding, not a
@@ -325,7 +325,7 @@ Mosque finder β = **−0.137** (p = 0.003, cluster-robust, 21 clusters, n = 3,0
 ✅ confirmed. The mixed model gives +0.05 with a NaN standard error ✅ — it cannot
 arbitrate, and the reversal must be stated.
 
-**Why the sign runs that way** ✅ (computed 2026-09-07): apps *with* the feature
+**Why the sign runs that way** ✅ (derived 2026-09-07 from the 2026-09-03 run): apps *with* the feature
 show 27.0% negative mentions against 23.0% without, positives 38.6% against
 43.6%. The groups are performing different speech acts — the 11 apps without it
 generate 243 demand signals across 9 apps (requests, which read positive), while
@@ -353,7 +353,7 @@ analysed corpus. Only **3 apps** ship the feature: Athan, Islamic Habit Tracker,
 Pillars. No between-app estimate is possible — say so plainly. M3 returns no
 standard error (`women_feature_score_diff` 0.085, flagged underpowered).
 
-**Sentiment is identical with and without the feature** ✅ (computed 2026-09-07):
+**Sentiment is identical with and without the feature** ✅ (derived 2026-09-07 from the 2026-09-03 run):
 **26.3% negative** in the three apps that ship it against **26.0%** in the 21 that
 do not. Having menstrual handling is not associated with users being happier about
 menstrual handling. Combined with §4.2a, the claim strengthens from "almost nobody
@@ -379,7 +379,7 @@ terms. Report 7.62× as the conservative bound.
 `feature_count` is degenerate (β = −0.004, SE 743.8, p ≈ 0.99999). The converged
 estimate is `complaint_complexity_bloat × feature_count` = −0.000487, p = 0.272.
 
-**The relationship inverts** ✅ (computed 2026-09-07). Five leanest apps (6–9
+**The relationship inverts** ✅ (derived 2026-09-07 from the 2026-09-03 run). Five leanest apps (6–9
 features): 3.96 mean stars, 5.2% bloat-complaint rate. Five fullest (13–14): 4.71
 stars, 1.6%. Corpus mean 4.40. Robust to dropping the two smallest apps (n = 5,
 n = 45), which leaves 4.20 stars at 5.6%. iPray (8 features, 2,225 reviews) draws
@@ -450,6 +450,14 @@ Two different dates, and conflating them would misrepresent the work.
   flattered a result. Say that.
 - **Ship the server's `run_manifest.jsonl`** with the artefact submission — it
   records commit, GPU, batch size and library versions for every reported number.
+- ⚠️ **Cite the analysis run as 2026-09-03**, not 2026-09-07. `model_results.csv`,
+  `gap_matrix.csv` and all fourteen figures carry that timestamp. The pipeline was
+  not re-run afterwards; on 2026-09-07 only the notebooks that *read* those outputs
+  were executed, plus three ad-hoc query scripts which appear in the manifest and
+  produced no reported figure of their own. Take the commit hash for Methods from
+  the manifest entry for `06_models.py` on 2026-09-03, not from the later entries.
+- ⚠️ **The manifest's later entries show `dirty_working_tree: true`.** Those are the
+  ad-hoc queries, not the analysis. Say which entry the paper's numbers come from.
 - ✅ **A defect was found and fixed during analysis:** sub-topic models shared a
   hardcoded output path and overwrote the ecosystem topic sheet on every run. The
   sheet was rebuilt from the saved model and the assignment record without

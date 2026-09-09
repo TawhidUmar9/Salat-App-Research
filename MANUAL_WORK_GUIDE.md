@@ -305,7 +305,7 @@ paragraph of the paper. Write it in full sentences, not notes.
 against the hypothesis. Carry the qualitative codes from section 4.
 
 **RQ2 — accuracy vs interface.** Accuracy-family mean −0.647 stars, interface
-−0.601 — **verified against the 2026-09-07 run.** Statistically indistinguishable
+−0.601 — **verified against the 2026-09-03 run.** Statistically indistinguishable
 as classes; do not claim accuracy wins. But report the spread: prayer-time
 accuracy alone is −1.112 [−1.142, −1.083], disjoint from interface, while madhab
 (−0.324) and qibla (−0.550) pull the family mean down. Intrusive ads, at −1.439,

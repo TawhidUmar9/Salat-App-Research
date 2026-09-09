@@ -4,7 +4,7 @@ Companion to [`PAPER_DISCLOSURES.md`](PAPER_DISCLOSURES.md). That file says what
 must be disclosed; this one is the lookup table so nobody re-derives a number
 from terminal scrollback at 2am.
 
-**Source of truth:** `src/data/model_results.csv` (2026-09-07 run) for every
+**Source of truth:** `src/data/model_results.csv` (analysis run of **2026-09-03**) for every
 coefficient; the four `topic_info*.csv` sheets and two coding sheets for
 qualitative counts. ✅ = verified in-repo on 2026-09-07. 📋 = from the run, not
 re-derived here.
