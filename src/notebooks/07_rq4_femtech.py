@@ -182,11 +182,14 @@ export_quotes(women_reviews.nsmallest(15, "sent_num"), "rq4", n=15)  # noqa: F40
 # %% [markdown]
 # ## Answer to RQ4
 #
-# **The scarcity is the finding.** Menstrual handling is mentioned in **2,182
-# distinct reviews** (2,194 aspect mentions) across **24 of 26 apps** — 0.672% of
-# the analysed corpus — yet only **three apps ship the feature**: Athan, Islamic
-# Habit Tracker and Pillars. Users raise the subject across nearly the whole
-# ecosystem; almost none of it accommodates them.
+# **The scarcity is the finding.** The `women_period` tagger flags 2,194 aspect
+# mentions across **24 of 26 apps**, but its precision on the gold set is **20%**
+# [6, 51], so the number of genuine menstrual-handling mentions is nearer **440**
+# — still distributed across nearly the whole ecosystem, and still against only
+# **three apps that ship the feature** (Athan, Islamic Habit Tracker, Pillars).
+# We report the adjusted estimate rather than the raw tag count; the argument
+# below rests on demand signals and feature scarcity, neither of which depends on
+# this aspect's precision.
 #
 # **Demand is explicit and concentrated where the feature is absent.** Of 272
 # demand signals, **216 come from the 16 apps that lack it**, and the request

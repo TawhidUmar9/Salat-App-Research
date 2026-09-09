@@ -4,6 +4,11 @@ Companion to [`PAPER_DISCLOSURES.md`](PAPER_DISCLOSURES.md). That file says what
 must be disclosed; this one is the lookup table so nobody re-derives a number
 from terminal scrollback at 2am.
 
+⚠️ **Before quoting any aspect count, check §3.1a of the disclosures.** Seven
+aspects fall below 50% precision — mosque_finder 27%, companion_hardware 40%,
+women_period 20%, forbidden_times 10%, table_format 44%, qasr_travel 0%,
+tracker_score 0%. Model coefficients are unaffected (all use aspects at 64–100%).
+
 **Source of truth:** `src/data/model_results.csv` (analysis run of **2026-09-03**) for every
 coefficient; the four `topic_info*.csv` sheets and two coding sheets for
 qualitative counts. ✅ = verified in-repo on 2026-09-07. 📋 = from the run, not
@@ -84,6 +89,7 @@ re-derived here.
 | Quantity | Value | |
 |---|---|---|
 | Mosque finder, cluster-robust | β = −0.137, p = 0.003, 21 clusters, n = 3,010 | ✅ |
+| mosque_finder tagger precision | **27% [10,57]** → ~820 of 3,043 genuine | ⚠️ |
 | Mosque finder, mixed model | +0.05, **NaN SE — cannot arbitrate** | ✅ |
 | Mentions, apps *with* feature | 1,421 / 10 apps — 27.0% neg, 38.6% pos | ✅ |
 | Mentions, apps *without* | 1,589 / 11 apps — 23.0% neg, 43.6% pos | ✅ |
@@ -103,7 +109,8 @@ over-captures travel/pilgrimage talk. Never report 636 as qasr volume.** ✅
 
 | Quantity | Value | |
 |---|---|---|
-| Mentions | 2,194 across 24 of 26 apps | ✅ |
+| Mentions (tagger) | 2,194 across 24 of 26 apps — **20% precision [6,51]** | ⚠️ |
+| Mentions (adjusted) | **~440 genuine** | ⚠️ |
 | Distinct reviews | 2,182 (0.672% of corpus) | ✅ |
 | Apps with the feature | **3** (Athan, Islamic Habit Tracker, Pillars) | ✅ |
 | Sentiment, apps *with* | 26.3% negative (464 mentions, 3 apps) | ✅ |
@@ -133,7 +140,8 @@ Menstrual complaints appear in **both** coding passes, different apps ✅
 | features ~ installs | Spearman ρ = 0.244, n = 26 | ✅ |
 | Hardware, inside iQIBLA | 37.7% neg, 45.9% pos (n = 518) | ✅ |
 | Hardware, other 23 apps | 49.2% neg, 20.8% pos (n = 1,994) | ✅ |
-| Hardware mentions total | 2,482 across 24 apps | ✅ |
+| Hardware mentions (tagger) | 2,482 across 24 apps — **40% precision [12,77]** | ⚠️ |
+| Hardware mentions (adjusted) | **~1,000 genuine** | ⚠️ |
 
 Corpus mean star 4.40 ✅ · `rq5_bloat` ARI 0.452, 6–11 topics 📋
 
@@ -178,3 +186,4 @@ Corpus mean star 4.40 ✅ · `rq5_bloat` ARI 0.452, 6–11 topics 📋
 | RQ4 Δ = −0.236 | M3 records +0.085; the sign flips under reweighting |
 | "tracker_score most broken" | 1 of 1 app; report adhan and monetization |
 | pooled coding percentages | two passes, reported separately |
+| bare counts for the 7 low-precision aspects | always carry precision (§3.1a) |

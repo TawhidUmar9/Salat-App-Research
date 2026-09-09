@@ -207,7 +207,9 @@ if len(demand):
 # app is built around.
 #
 # **RQ6b — the coverage gap.** Ranked by unmet-need score (demand volume ×
-# apps lacking): **companion hardware** (6,725; 25 apps lacking), **menstrual
+# apps lacking). The ranking is built from **demand signals**, whose precision is
+# 91.5% overall, rather than from raw aspect counts, several of which are far
+# noisier — so it rests on the firmer of the two measures. Ranked: **companion hardware** (6,725; 25 apps lacking), **menstrual
 # handling** (4,738; 23 lacking), **mosque finder** (3,304; 14 lacking),
 # **forbidden times** (2,805; 15 lacking), **nafl times** (2,445; 15 lacking).
 # Four aspects fall below 25% ecosystem coverage: `calendar_sync`,

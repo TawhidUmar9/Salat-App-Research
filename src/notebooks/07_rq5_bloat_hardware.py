@@ -223,9 +223,12 @@ export_quotes(sel, "rq5", n=15)  # noqa: F405
 # aspect mentions, 45.9% positive). In the 23 other apps, `companion_hardware`
 # mentions run **49.2% negative** and only 20.8% positive — these are largely
 # unmet requests for watch support rather than complaints about a device. Shipping
-# hardware is associated with *better* hardware sentiment than not shipping it,
-# and 2,482 mentions across 24 apps indicate real demand. With one treated app this
-# is descriptive only and no between-app estimate is possible.
+# hardware is associated with *better* hardware sentiment than not shipping it.
+# The `companion_hardware` tagger runs at **40%** precision [12, 77], so of 2,482
+# tagged mentions roughly **1,000** are genuine — still substantial demand, but
+# the raw count must not be reported unqualified, and the sentiment split above
+# rests on tags of that quality. With one treated app this is descriptive only and
+# no between-app estimate is possible.
 #
 # → **Verdict**: The feature-bloat hypothesis is not supported. Feature count is
 # uncorrelated with bloat complaints, and the leanest apps in the corpus attract

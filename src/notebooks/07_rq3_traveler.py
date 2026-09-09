@@ -179,7 +179,11 @@ export_quotes(sel, "rq3", n=15)  # noqa: F405
 # The cluster-robust fit gives β = **−0.137** (p = 0.003, 21 app clusters,
 # n = 3,010): apps that *have* a mosque finder attract **more negative** mentions
 # of it — 27.0% negative against 23.0% in apps without it, with positives moving
-# the other way (38.6% against 43.6%). This should not be read as the feature
+# the other way (38.6% against 43.6%). The `mosque_finder` tagger runs at **27%**
+# precision [10, 57], so roughly 820 of those 3,043 tagged mentions are genuine;
+# the noise falls on both arms of the comparison, so the direction is more
+# trustworthy than the volume, and neither should be reported without the
+# precision figure. This should not be read as the feature
 # harming apps. The two groups are not saying comparable things. In the 11 apps
 # without a mosque finder, mentions are largely **requests** for one — 243 demand
 # signals across 9 apps — and a request phrased as *"please add nearby mosques"*
