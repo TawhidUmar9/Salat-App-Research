@@ -148,9 +148,50 @@ cherry-picking.
 `calendar_sync` and `goal_system` (0.2% of corpus volume) are excluded from the
 weighted figure.
 
-### 3.3 Demand-pattern precision is uneven 📋
+### 3.3 Demand-pattern precision — figures verified, but the sample is stranded ⚠️
 
-**91.5%** overall, with `absence` weakest at **65%**. Report the weak one.
+**Verified 2026-09-09** against `demand_precision_sample.backup-20260903-210822.csv`,
+which holds all 200 hand labels:
+
+| request_type | precision | n |
+|---|---|---|
+| preference | 100.0% | 40 |
+| tenure | 100.0% | 40 |
+| churn | 97.5% | 40 |
+| request | 95.0% | 40 |
+| **absence** | **65.0%** | 40 |
+| **overall** | **91.5%** (183/200) | 200 |
+
+Both documented figures reproduce exactly. **But there is a provenance problem
+that must be resolved before submission.**
+
+`03c_demand_mining.py` draws this sheet with `stratified_sample(..., seed=0)` —
+deterministic *given its input*. After the 200 rows were labelled, an upstream
+threshold changed, `03c` was re-run, and the new demand output produced a
+**different** 200-row sample. `write_gold_sheet` did its job: it backed the
+labelled file up and warned that the regenerated sheet is a new sample needing a
+merge on `reviewId`. The merge recovered only what could match — **11 of 200**.
+
+So today: `demand_precision_sample.csv` holds 11 labels, its backup holds 200,
+and only 12 reviewIds are common to both. **The 91.5% figure therefore describes
+a superseded version of the demand extraction, while the demand counts the paper
+reports (272 for `women_period`, 243 for `mosque_finder`, 269 for
+`companion_hardware`, 21 for `qasr_travel`) come from the current one.**
+
+⚠️ This is *not* the same situation as §3.1. There the argument is that lexicon
+changes only ever *remove* matches, so surviving gold rows are an unbiased subset.
+Here the extraction changed in a way that produced a different sample and the
+direction is unknown, so no equivalent argument is available.
+
+**The fix: re-label the current 200-row sheet** (`src/data/gold_labels/demand_precision_sample.csv`),
+which is already stratified 40 per `request_type`. Roughly one to two hours. Then
+precision describes the data actually reported. Keep the backup committed either
+way — it is 200 rows of irreplaceable hand work.
+
+If the deadline forbids re-labelling, the fallback is to report 91.5% while
+stating plainly that it was measured on a sample drawn before the final demand
+run. That is defensible but weaker, and `absence` at 65% is already the figure a
+reviewer will press on.
 
 ### 3.4 Promise-source agreement is low ✅
 
@@ -172,9 +213,12 @@ vocabulary misfires badly on religious register: `goal_system` scored **0%**
 precision because reviewers write "May Allah reward you". Frame this as a finding
 about applying off-the-shelf NLP to devotional text, not as a cleaning step.
 
-### 3.7 Inter-rater agreement 📋
+### 3.7 Inter-rater agreement ✅
 
-Krippendorff's α = **0.824**.
+Krippendorff's α = **0.824** — **recomputed independently 2026-09-09** from
+`doc_500_annotator1.csv` and `doc_500_annotator2.csv`: 100 overlap rows, 89.0%
+raw agreement, nominal α = 0.824 over categories {Positive, Neutral, Negative,
+Mixed}. Reproduces the documented figure exactly.
 
 ---
 
@@ -506,7 +550,7 @@ Two different dates, and conflating them would misrepresent the work.
 | Outlier bucket | 62,745 (22.7%) ✅ |
 | Topic 0, generic praise | 168,054 (61%) ✅ |
 | Topics labelled by hand | 67 across four sheets ✅ |
-| Krippendorff's α | 0.824 |
+| Krippendorff's α | 0.824 ✅ |
 | Aspect precision, weighted | 84.4% [79.7, 88.9] |
 | Coefficients surviving q<0.05 | 20 of 29 |
 | Cannot support inference | 11 (3 no SE + 8 non-converged) ✅ |
@@ -534,3 +578,5 @@ Two different dates, and conflating them would misrepresent the work.
 - [ ] `tracker_score` at 1-of-1 broken is not presented as the most-broken feature
 - [ ] "40 topics" never implies corpus coverage
 - [ ] Reviewer names do not appear in any quote — anonymise before quoting
+- [ ] Demand precision (§3.3) is either re-labelled on the current sheet, or
+      reported with the stranded-sample caveat stated explicitly
