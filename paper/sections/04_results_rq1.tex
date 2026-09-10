@@ -1,0 +1,253 @@
+% results_rq1
+
+\section{RQ1: Gamification}
+\label{sec:rq1}
+
+A recurring claim in the self-tracking literature is that gamified
+mechanics --- streaks, scores, badges --- induce anxiety and guilt in users who
+fail to keep them up. Prayer trackers add a streak or a completion score to the
+five daily prayers, so RQ1 asks whether this tension appears in devotional
+tracking specifically. It does not, in the form the literature predicts.
+Gamifying a prayer tracker neither helps nor harms sentiment, and guilt
+language is \emph{rarer} inside tracker discourse than in the corpus at large.
+What users resent is a record they cannot trust and a prompt that never
+arrives. We present this as a reframing of the streak-anxiety hypothesis, not
+merely a null result on it.
+
+\subsection{Scope}
+
+We define tracker discourse as the union of reviews carrying at least one of
+three aspect tags --- \texttt{prayer\_tracker}, \texttt{tracker\_score},
+\texttt{goal\_system} --- which yields 6,285 reviews across 25 of the 26
+applications. The union is a definition rather than a measurement --- it is
+declared as a three-element list in the released analysis code, and the tags it
+names are keyword-defined in the released lexicon --- so what it needs is not
+validation but a statement of what it contains. That composition is uneven.
+At review level, \texttt{prayer\_tracker}, at 78\% precision, accounts for
+5,907 of the 6,285; 378 reviews (6.0\% of the set) carry only
+\texttt{tracker\_score} or \texttt{goal\_system}, both of which score 0\%
+against their gold rows, the latter being the devotional-formula failure
+described in \S\ref{sec:method-devotional-filtering}. These are review counts,
+not the tagged-sentence counts in Table~\ref{tab:aspect-precision}, which are
+not subtractable from them. The disparity is visible in the
+definitions themselves: \texttt{prayer\_tracker} carries 13 keywords and 4
+regular-expression patterns, against 2 keywords and 4 patterns for
+\texttt{tracker\_score} and 7 keywords and 2 patterns for
+\texttt{goal\_system}, so the two weaker tags rest on markedly less lexical
+evidence. Those two aspects enter after the devotional-formula filter has already removed
+the sentence pattern causing the \texttt{goal\_system} misfire. We report the two analyses that run on the full
+set --- the tier comparison and the dip test --- on that basis, noting that
+noise at this share attenuates a distributional signal rather than
+manufacturing one. The guilt test and both coding passes draw their own
+samples from within the set and do not depend on its outer boundary.
+
+\subsection{No Sentiment Difference by Tracker Tier}
+
+We compared sentiment across three tiers of tracking mechanic: no tracker,
+a plain tracker, and a tracker combined with a numeric completion score. The
+primary mixed-effects specification (M2) did not converge on this contrast ---
+its two tier terms return estimates of 13.66 and 13.87 with standard errors of
+\(2.0\times10^{6}\) and \(1.3\times10^{6}\) and \(p \approx 0.99999\) --- so we
+report the tier comparison from the cluster-robust OLS sensitivity fit, which
+did converge. Against no tracker, a plain tracker gives \(\beta = -0.087\)
+(95\% CI \([-0.332, 0.158]\), \(p = 0.488\)) and a tracker with a numeric score
+gives \(\beta = -0.134\) (\([-0.415, 0.147]\), \(p = 0.349\)), clustered on 25
+apps (\(n = 6{,}285\)). Both intervals sit comfortably across zero. Adding a
+streak or a numeric score to a prayer tracker does not measurably move how
+users feel about the application.
+
+\subsection{Tracker Sentiment Is Bimodal}
+
+A null on the mean, however, was never going to be the right test: the
+love/hate tension the literature predicts is a claim about the \emph{shape} of
+the sentiment distribution, not its centre. Hartigan's dip test on tracker
+valence confirms this shape directly: \(D = 0.118\) (\(n = 6{,}285\)), and the
+reported significance underflows machine precision, so we report \(p <
+10^{-16}\) rather than \(p = 0\). Figure~\ref{fig:rq1-bimodal} shows the
+distribution: tracker sentiment splits toward the two poles rather than
+clustering in the middle, with users loving the tracker or resenting it and
+comparatively little ambivalence between. This is why the qualitative coding
+below, rather than the tier comparison, carries the substantive answer to RQ1.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{fig06_rq1_tracker_sentiment}
+  \caption{Distribution of tracker-aspect sentiment valence, split by application tracker tier. Hartigan's dip on the pooled tracker set gives \(D = 0.118\), \(p < 10^{-16}\).}
+  \label{fig:rq1-bimodal}
+\end{figure}
+
+\subsection{Guilt Is Rarer Inside Tracker Discourse, Not Commoner}
+
+If streak anxiety were driving the negative pole of that split, guilt language
+should be over-represented in tracker discourse relative to the rest of the
+corpus. Two independent lines of evidence say it is not, and we keep them
+apart because they establish different things.
+
+The first is lexical. We match two keyword lists over review text, one of
+guilt- and anxiety-related terms and one of motivation-related terms. Within
+tracker reviews the ratio of guilt to motivation matches is 0.26, against 0.86
+elsewhere in the corpus (Fisher exact OR \(= 0.283\),
+\(p = 3.5\times10^{-11}\), \(q = 6.7\times10^{-11}\), \(n = 149\))
+(Figure~\ref{fig:rq1-guilt}). We state the ceiling on this plainly: unlike the
+aspect tagger and the demand patterns, these two lists were never validated
+against hand-labelled rows, and their vocabulary is not construct-pure ---
+\emph{helpful} and \emph{improve} are ordinary praise terms, and \emph{fail}
+and \emph{stress} are ordinary defect terms. The result is therefore a fact
+about the relative frequency of two lexicons, not a validated measurement of
+guilt, and we release the lists with the code so the reader can judge them.
+
+The second line is the hand coding below, where two independently drawn samples
+were read and labelled by a person rather than matched by pattern. It points
+the same way, and it is the evidence we rest the construct claim on. Where guilt-adjacent language does appear inside
+tracker reviews, it is frequently folded into an otherwise positive,
+motivational account rather than expressing distress:
+
+\begin{quote}
+\itshape ``I love the app. My everyday friend who reminds me to pray, and makes
+sure that I feel guilty if I don't [\normalfont sweat-smile emoji\itshape] I
+recommend to everyone who wants to start praying, or keep the habit in a
+consistent manner!''
+\end{quote}
+\hspace*{1em}--- Athan: Prayer Times \& Al Quran, 5 stars
+
+\noindent We mark the emoji rather than drop it, since it is the clearest
+signal in the review itself that the guilt described here is light-hearted.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{fig07_rq1_guilt_vs_motivation}
+  \caption{Guilt- and motivation-coded affective language per application, as shares of that application's affect-coded reviews.}
+  \label{fig:rq1-guilt}
+\end{figure}
+
+\subsection{Two Independent Coding Passes}
+\label{sec:rq1-coding}
+
+To characterise what tracker dissatisfaction is about, we coded two independent
+samples of reviews expressing it --- this phrase rather than ``negative
+reviews,'' since selection was by sentiment on the text rather than star
+rating: 18 of the first sample's 50 carry 4--5 stars, so the set includes
+otherwise-positive reviews built around one complaint. The first pass covered
+50 reviews from a single application (\emph{Athan: Prayer Times \& Al Quran}),
+selected before we identified that the selection rule's tie-break resolves
+every three-valued sentiment tie in frame order, which here means app order;
+the single-application sample is an artefact of that tie-break, not evidence
+that one application dominates tracker complaints. The second pass drew 30
+reviews stratified across the 22 other applications carrying codable tracker
+dissatisfaction, no app contributing more than two, coded against the frame the
+first pass produced.
+Pass 1 yielded 33 open codes over 50 reviews (1 excluded, \(n = 49\)); pass 2
+yielded 25 codes over 30 (2 excluded, \(n = 28\)) and required two new themes.
+We report the passes side by side and never pool them, since their sampling
+designs differ and a pooled percentage would silently re-weight the ecosystem
+toward Athan (Table~\ref{tab:rq1-themes}).
+
+\begin{table}[t]
+  \centering
+  \small
+  \caption{Theme prevalence, coded independently in each pass. Never pooled.}
+  \label{tab:rq1-themes}
+  \begin{tabular}{lrr}
+    \toprule
+    Theme & Pass 1 (Athan, \(n{=}49\)) & Pass 2 (22 apps, \(n{=}28\)) \\
+    \midrule
+    C. Record can't be trusted        & 11 (22\%) & 6 (21\%) \\
+    D. Normative mismatch             & 6 (12\%)  & 3 (11\%) \\
+    E. Prompting failures             & 7 (14\%)  & \textbf{13 (46\%)} \\
+    A. Redesign as regression         & 10 (20\%) & \textbf{0} \\
+    B. Retroactive logging denied     & 5 (10\%)  & \textbf{0} \\
+    F. Monetisation vs.\ religious purpose & 10 (20\%) & 1 (4\%) \\
+    G. Record gated, not owned        & ---       & 3 (11\%)\(^\ast\) \\
+    H. App overreaches into device    & ---       & 2 (7\%)\(^\ast\) \\
+    \bottomrule
+  \end{tabular}
+  \\[2pt]
+  {\footnotesize \(^\ast\)new theme, not present in the pass-1 frame}
+\end{table}
+
+Guilt or judgment is rare in both passes, and we give the two rates separately
+rather than pooling them: 2 of the 49 coded complaints in the single-app pass
+(4.1\%; \emph{tracker framing feels judgmental} and \emph{imposed goals replace
+own tracking}) and 1 of the 28 in the cross-app pass (3.6\%; \emph{reminders
+induce guilt}). A hypothesis this prominent in the self-tracking literature
+surfacing at four percent or below in each of two independently drawn samples,
+while the Fisher test above points the same way, is a robust null rather than
+an underpowered one.
+
+The two passes also demonstrate a general methodological hazard for app-store
+review mining. Themes A, B, and F together account for 51\% of the single-app
+pass's coded complaints but only 4\% of the cross-app pass's --- a concrete
+case of single-app qualitative sampling manufacturing what looks like a
+genre-level theme from what is, on a wider sample, a property of one
+application's release.
+
+\subsection{What Dissatisfaction Is Actually About}
+
+Coding the cross-app sample against the shared frame surfaces a consistent
+ordering, and it replicates across both independently drawn samples for two of
+the three themes.
+
+\textbf{Prompting failure is the dominant complaint ecosystem-wide (46\% of
+the cross-app pass).} The tracker does not fail because logging is onerous;
+it fails because the app never reliably prompts in the first place ---
+location detection failing, adhan playback not firing, notifications lost,
+calendars drifting out of sync:
+
+\begin{quote}
+\itshape ``the adhan is not working unless I open the app without logging out
+of it till prayer time''
+\end{quote}
+\hspace*{1em}--- Pray Watch, 1 star
+
+\textbf{Record trustworthiness replicates almost exactly across both samples}
+(22\% in pass 1, 21\% in pass 2): users lose logged history, watch counts
+regress, or find the tracker has silently disabled itself, often inside
+reviews that otherwise praise the app:
+
+\begin{quote}
+\itshape ``I would give it a 5 star, but the prayers that I log on the
+previous days or current day would sometimes disappear. Please fix this!''
+\end{quote}
+\hspace*{1em}--- Athan: Prayer Times \& Al Quran, 4 stars
+
+\textbf{Normative mismatch is the smallest of the three replicating themes}
+(\(\sim\)11\% in both passes) and is not the same construct as guilt. Where a
+tracker review raises a genuinely normative objection, it is that the app
+\emph{mis-models} religious practice, not that it makes the user feel
+judged: menstrual exemption from prayer is unsupported, there is no support
+for supererogatory (\emph{sunnah}) practice, and imposed goals displace the
+user's own targets. We treat this distinction as the paper's contribution
+here, not a restatement of the streak-anxiety story:
+
+\begin{quote}
+\itshape ``It's a really good app but I'm taking 1 star away cause I wish
+there was some option for menstruating women cuz my overall score on prayer
+tracker becomes really low when I can't pray for my period.''
+\end{quote}
+\hspace*{1em}--- Deen - Islamic App, 3 stars
+
+\noindent Menstrual-exemption complaints of this kind appear independently in
+\emph{both} coding passes, from different applications, and we return to them
+as direct evidence for RQ4 (\S\ref{sec:rq4}).
+
+\subsection{Themes A and B Are an Application-Specific Episode}
+
+Two of the six original themes --- redesign as regression (20\% of pass 1) and
+retroactive logging denied (10\%) --- vanish entirely in the cross-app pass.
+Both concern a single redesign of the Athan tracker that broke an existing
+logging workflow and removed retroactive logging. Because this pair accounted
+for 30\% of the single-app sample's coded complaints, we report it as an
+application-specific episode rather than folding it into any ecosystem-level
+theme; conflating the two would overstate how much of tracker dissatisfaction
+is about record integrity in general.
+
+\subsection{Summary}
+
+Adding a streak or a score does not move sentiment, and tracker sentiment is
+bimodal, so a mean was never going to characterise it. Guilt language is
+under-represented rather than over-represented inside tracker discourse, and
+appears in 2 of 49 coded complaints in the single-app pass and 1 of 28 in the
+cross-app pass. What tracker dissatisfaction is actually about, ecosystem-wide, is
+the app failing to prompt reliably and failing to keep a trustworthy record;
+where a normative objection surfaces, it concerns the app's model of worship
+rather than pressure to perform.

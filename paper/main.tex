@@ -1,0 +1,256 @@
+%%
+%% This is file `sigconf.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% samples.dtx  (with options: `all,proceedings,sigconf')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from sigconf.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file samples.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%
+%%
+%% Commands for TeXCount
+%TC:macro \cite [option:text,text]
+%TC:macro \citep [option:text,text]
+%TC:macro \citet [option:text,text]
+%TC:envir table 0 1
+%TC:envir table* 0 1
+%TC:envir tabular [ignore] word
+%TC:envir displaymath 0 word
+%TC:envir math 0 word
+%TC:envir comment 0 0
+%%
+%% The first command in your LaTeX source must be the \documentclass
+%% command.
+%%
+%% For submission and review of your manuscript please change the
+%% command to \documentclass[manuscript, screen, review]{acmart}.
+%%
+%% When submitting camera ready or to TAPS, please change the command
+%% to \documentclass[sigconf]{acmart} or whichever template is required
+%% for your publication.
+%%
+%%
+%% CHI reviewing is double-blind. The `anonymous' option suppresses the author
+%% block, affiliations, e-mails and the acks environment automatically, so the
+%% author details below are kept in the source for camera-ready and simply not
+%% typeset while this option is present. Remove `anonymous' on acceptance.
+\documentclass[manuscript,review,anonymous]{acmart}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    Bib\TeX}}}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+% \setcopyright{acmlicensed}
+% \copyrightyear{2018}
+% \acmYear{2018}
+% \acmDOI{XXXXXXX.XXXXXXX}
+% %% These commands are for a PROCEEDINGS abstract or paper.
+% \acmConference[Conference acronym 'XX]{Make sure to enter the correct
+%   conference title from your rights confirmation email}{June 03--05,
+%   2018}{Woodstock, NY}
+% %%
+% %%  Uncomment \acmBooktitle if the title of the proceedings is different
+% %%  from ``Proceedings of ...''!
+% %%
+% %%\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
+% %%  June 03--05, 2018, Woodstock, NY}
+% \acmISBN{978-1-4503-XXXX-X/2018/06}
+
+
+%%
+%% Submission ID.
+%% Use this when submitting an article to a sponsored event. You'll
+%% receive a unique submission ID from the organizers
+%% of the event, and this ID should be used as the parameter to this command.
+%%\acmSubmissionID{123-A56-BU3}
+
+%%
+%% For managing citations, it is recommended to use bibliography
+%% files in BibTeX format.
+%%
+%% You can then either use BibTeX with the ACM-Reference-Format style,
+%% or BibLaTeX with the acmnumeric or acmauthoryear sytles, that include
+%% support for advanced citation of software artefact from the
+%% biblatex-software package, also separately available on CTAN.
+%%
+%% Look at the sample-*-biblatex.tex files for templates showcasing
+%% the biblatex styles.
+%%
+%%
+%% The majority of ACM publications use numbered citations and
+%% references.  The command \citestyle{authoryear} switches to the
+%% "author year" style.
+%%
+%% If you are preparing content for an event
+%% sponsored by ACM SIGGRAPH, you must use the "author year" style of
+%% citations and references.
+%% Uncommenting
+%% the next command will enable that style.
+%%\citestyle{acmauthoryear}
+
+
+%%
+%% end of the preamble, start of the body of the document source.
+\begin{document}
+
+%%
+%% The "title" command has an optional parameter,
+%% allowing the author to define a "short title" to be used in page headers.
+\title{The Record, Not the Streak: An Ecosystem-Scale Study of Satisfaction
+  in Islamic Prayer Applications}
+
+%%
+%% The "author" command and its associated commands are used to define
+%% the authors and their affiliations.
+%% Of note is the shared affiliation of the first two authors, and the
+%% "authornote" and "authornotemark" commands
+%% used to denote shared contribution to the research.
+\author{Fatin Sadab}
+\email{fatinsadab8@gmail.com}
+%\orcid{1234-5678-9012}
+\author{Mirza Tawhid Umar}
+%\correspondingauthor
+%\authornotemark[1]
+\email{tawhidumar.21@protonmail.com}
+\affiliation{%
+  \institution{Bangladesh University of Engineering and Technology}
+  \city{Dhaka}
+  \country{Bangladesh}
+}
+
+\author{Ishrat Jahan}
+\affiliation{%
+  \institution{Bangladesh University of Engineering and Technology}
+  \city{Dhaka}
+  \country{Bangladesh}
+  }
+\email{ishrat@cse.buet.ac.bd}
+
+\author{A.B.M. Alim Al Islam}
+\affiliation{%
+ \institution{Bangladesh University of Engineering and Technology}
+  \city{Dhaka}
+  \country{Bangladesh}
+}
+\email{alim\_razi@cse.buet.ac.bd}
+
+
+%%
+%% By default, the full list of authors will be used in the page
+%% headers. Often, this list is too long, and will overlap
+%% other information printed in the page headers. This command allows
+%% the author to define a more concise list
+%% of authors' names for this purpose.
+\renewcommand{\shortauthors}{Fatin et al.}
+
+%%
+%% The abstract is a short summary of the work to be presented in the
+%% article.
+\begin{abstract}
+Mobile applications now mediate the daily practice of Islamic prayer for a very
+large population, and existing research treats them mainly as instances of
+habit tracking. Drawing on 732,194 reviews across 26 such applications, we find
+that the framings this literature offers mislocate what governs satisfaction.
+Guilt language is rarer, not commoner, inside prayer-tracker discourse,
+appearing in under 5\% of coded complaints across two independently drawn
+samples, against the streak-anxiety hypothesis. Feature count does not predict
+interface-bloat complaints in either direction; bloat instead co-occurs with
+interface complaints far above base rate, so restraint belongs over what an
+interface surfaces rather than what an application contains. And 41.6\% of
+accuracy complaints arrive inside four- or five-star reviews. Across six
+pre-specified research questions, satisfaction is governed by the reliability
+of core functions, a trustworthy record and a prompt that arrives, not by
+feature richness or polish. Three lessons are methodological: star ratings are
+an unsafe proxy for defect severity, single-application sampling can
+manufacture apparently genre-level themes, and devotional register breaks tools
+built for general product review text.
+\end{abstract}
+%%
+%% The code below is generated by the tool at http://dl.acm.org/ccs.cfm.
+%% Please copy and paste the code instead of the example below.
+%%
+%% NOTE: the concept paths below are the ones this paper claims; the numeric
+%% concept_id values were taken from published acmart sources. Before camera
+%% ready, regenerate this whole block from http://dl.acm.org/ccs.cfm and paste
+%% the tool's output over it, so the ids are guaranteed to match ACM's records.
+\begin{CCSXML}
+<ccs2012>
+ <concept>
+  <concept_id>10003120.10003121.10011748</concept_id>
+  <concept_desc>Human-centered computing~Empirical studies in HCI</concept_desc>
+  <concept_significance>500</concept_significance>
+ </concept>
+ <concept>
+  <concept_id>10003120.10003121.10003122</concept_id>
+  <concept_desc>Human-centered computing~HCI design and evaluation methods</concept_desc>
+  <concept_significance>300</concept_significance>
+ </concept>
+ <concept>
+  <concept_id>10003120.10003121</concept_id>
+  <concept_desc>Human-centered computing~Human computer interaction (HCI)</concept_desc>
+  <concept_significance>100</concept_significance>
+ </concept>
+</ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Human-centered computing~Empirical studies in HCI}
+\ccsdesc[300]{Human-centered computing~HCI design and evaluation methods}
+\ccsdesc[100]{Human-centered computing~Human computer interaction (HCI)}
+
+%%
+%% Keywords. The author(s) should pick words that accurately describe
+%% the work being presented. Separate the keywords with commas.
+\keywords{app review mining, aspect-based sentiment analysis, religion and
+  technology, Islamic prayer applications, devotional computing, self-tracking,
+  gamification, feature bloat, mobile app quality}
+%% A "teaser" image appears between the author and affiliation
+%% information and the body of the document, and typically spans the
+%% page.
+
+%% \maketitle must come AFTER \ccsdesc and \keywords, or acmart
+%% silently omits the CCS Concepts and Keywords blocks from the output.
+\maketitle
+
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_method}
+\input{sections/04_results_rq1}
+\input{sections/05_results_rq2}
+\input{sections/06_results_rq3}
+\input{sections/07_results_rq4}
+\input{sections/08_results_rq5}
+\input{sections/09_results_rq6}
+\input{sections/10_discussion}
+\input{sections/11_limitations}
+\input{sections/12_design_implications}
+
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+%%
+%% End of file `sigconf.tex'.
+\end{document}

@@ -1,0 +1,106 @@
+[00:00:00] INFO  Lexicon: 27 aspects, 340 keywords, 106 regex patterns.
+[00:00:00] INFO  
+[00:00:00] INFO  ──────────────────────────────────────────────────────────────────────
+[00:00:00] INFO  §5.3.1  Sentence segmentation
+[00:00:00] INFO  ──────────────────────────────────────────────────────────────────────
+Traceback (most recent call last):
+  File "/home/ubuntu/Tonmoy/Salat-App-Research/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+KeyError: 'content_clean'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/Tonmoy/Salat-App-Research/src/scripts/_review_fixups.py", line 31, in deco
+    fn()
+  File "/home/ubuntu/Tonmoy/Salat-App-Research/src/scripts/_review_fixups.py", line 101, in _devotional
+    sents = absa.segment_sentences(df)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/Tonmoy/Salat-App-Research/src/scripts/03_absa.py", line 174, in segment_sentences
+    texts = df["content_clean"].fillna("").tolist()
+            ~~^^^^^^^^^^^^^^^^^
+KeyError: 'content_clean'
+
+========================================================================
+1. ASPECT PRECISION TABLE  (all aspects, gold n, Wilson CI, corpus n)
+========================================================================
+gold rows labelled 300 -> surviving 192
+unweighted precision over survivors: 69.3%
+aspect                    corpus_n  gold_n   prec   95% CI
+reminders_adhan             30,069       7   100%   [65%, 100%]   adjusted=30,069  interval=[19,414, 30,069]
+quran_audio                 24,964       6   100%   [61%, 100%]   adjusted=24,964  interval=[15,219, 24,964]
+prayer_times_accuracy       21,941      11    73%   [43%, 90%]   adjusted=15,957  interval=[9,530, 19,803]
+ads_intrusive               17,845      11   100%   [74%, 100%]   adjusted=17,845  interval=[13,226, 17,845]
+ui_design                   15,720      11    73%   [43%, 90%]   adjusted=11,433  interval=[6,828, 14,188]
+monetization                13,914      11    82%   [52%, 95%]   adjusted=11,384  interval=[7,277, 13,199]
+adhkar                       9,280       3   100%   [44%, 100%]   adjusted=9,280  interval=[4,069, 9,280]
+qibla                        8,526      11    82%   [52%, 95%]   adjusted=6,976  interval=[4,459, 8,088]
+stability_bugs               7,665      11    64%   [35%, 85%]   adjusted=4,878  interval=[2,712, 6,503]
+privacy_data                 7,471      10    90%   [60%, 98%]   adjusted=6,724  interval=[4,452, 7,337]
+prayer_tracker               6,009       9    78%   [45%, 94%]   adjusted=4,674  interval=[2,720, 5,629]
+complexity_bloat             5,389       9    67%   [35%, 88%]   adjusted=3,593  interval=[1,909, 4,739]
+widgets                      4,755      11   100%   [74%, 100%]   adjusted=4,755  interval=[3,524, 4,755]
+spiritual_affect             3,395       2   100%   [34%, 100%]   adjusted=3,395  interval=[1,162, 3,395]
+mosque_finder                3,043      11    27%   [10%, 57%]   adjusted=830  interval=[297, 1,721]
+companion_hardware           2,512       5    40%   [12%, 77%]   adjusted=1,005  interval=[295, 1,932]
+women_period                 2,194      10    20%   [6%, 51%]   adjusted=439  interval=[124, 1,119]
+forbidden_times              1,534      10    10%   [2%, 40%]   adjusted=153  interval=[27, 620]
+table_format                 1,483       9    44%   [19%, 73%]   adjusted=659  interval=[280, 1,088]
+nafl_times                     963       5   100%   [57%, 100%]   adjusted=963  interval=[545, 963]
+calc_method                    639      10    90%   [60%, 98%]   adjusted=575  interval=[381, 628]
+qasr_travel                    637       2     0%   [0%, 66%]   adjusted=0  interval=[0, 419]
+madhab                         491       5    60%   [23%, 88%]   adjusted=295  interval=[113, 433]
+guides                         202       1   100%   [21%, 100%]   adjusted=202  interval=[42, 202]
+tracker_score                  101       1     0%   [0%, 79%]   adjusted=0  interval=[0, 80]
+
+aspects with corpus volume but NO surviving gold rows: ['calendar_sync', 'goal_system']
+
+========================================================================
+2. DEVOTIONAL FILTER  (denominator, unit, pipeline position)
+========================================================================
+aspect table rows (aspect, sentence pairs): 191,188
+distinct reviewIds in aspect table:         124,714
+distinct triggering sentences:              148,438
+FAILED:
+
+========================================================================
+3. RQ4 women_period UNITS  (2,194 vs 2,182 vs gap-matrix basis)
+========================================================================
+aspect-tagged rows (sentences):  2,194
+distinct reviews:                2,182
+apps with any:                   24
+gap_matrix n_mentions total:     1,981
+gap_matrix demand_signals total: 258
+
+========================================================================
+4. RQ1 TRACKER SET  (review-level composition of the 6,285)
+========================================================================
+union of the three tags (reviews):       6,285
+  reviews carrying prayer_tracker  : 5,907
+  reviews carrying tracker_score   : 100
+  reviews carrying goal_system     : 391
+reviews carrying ONLY the two weak tags:  378 (6.0% of the union)
+
+========================================================================
+5. RQ1 GUILT vs MOTIVATION  (2x2 cells for the Fisher test)
+========================================================================
+regexes found in 06_models.py:
+  guilt: \b(guilt|guilty|anxious|anxiety|pressure|ashamed|shame|stress|depress|fail)
+  motiv: \b(motivat|encourag|discipline|consisten|barakah|closer to allah|helpful|improve)
+
+Report the 2x2 contingency table used for OR = 0.283 (n = 149):
+  rows = tracker / non-tracker, cols = guilt-coded / motivation-coded
+
+========================================================================
+6. RQ5 CO-OCCURRENCE CELLS  (the 134 / 94 / 40 base)
+========================================================================
+reviews with complexity_bloat: 5,368
+reviews with ui_design:        15,649
+reviews with BOTH:             1,244
+reviews where both tags share a sentence (fused): 909
+reviews where they are in different sentences:    335
+
+Done. Send this whole file back.

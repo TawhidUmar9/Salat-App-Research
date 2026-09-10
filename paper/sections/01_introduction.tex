@@ -1,0 +1,87 @@
+% results_introduction
+
+\section{Introduction}
+\label{sec:introduction}
+
+Salah, the ritual prayer performed five times daily, is obligatory for
+practising Muslims and timed astronomically: each of the five windows moves
+with the sun and the observer's location, and a small number of further
+windows (during which prayer is disallowed, or during which a travelling or
+menstruating person is exempt) depend on further computation and on facts
+about the user's body and circumstances. A large and growing population uses
+mobile applications to mediate this obligation --- computing prayer times,
+sounding the call to prayer (adhan), orienting toward Mecca (qibla), and
+increasingly, logging whether a prayer was performed. This mediation makes
+these applications' failures different in kind from a productivity app's. A
+missed prompt is not a missed reminder; for a user relying on it, it can be a
+missed prayer.
+
+The small existing literature on these applications, and the larger
+literature on the design patterns they borrow, offers three framings for
+thinking about what makes them succeed or fail. The self-tracking and
+gamification literature suggests that streaks and completion scores --- the
+mechanics a prayer tracker borrows from fitness apps --- induce guilt and
+anxiety in users who cannot keep them up. Product design more broadly treats
+feature richness and interface minimalism as a trade-off point along a single
+axis, and treats a richer feature set as a differentiator that wins and
+retains users. And accuracy is often opposed to aesthetics, as though a
+user's tolerance for a wrong prayer time and a user's tolerance for a
+cluttered screen were governed by the same underlying preference. Each of
+these framings is plausible, each has real evidence behind it in adjacent
+domains, and each turns out to mis-locate where satisfaction with a
+devotional app actually comes from.
+
+What is missing is evidence at the scale needed to test these framings against
+the whole ecosystem rather than against one application. The closest existing
+work is small in scope or method: a dissertation study of prayer-app design
+\citep{bellar2017ipray}, an expert heuristic comparison of two named Islamic
+applications \citep{azahari2025comparative}, and single-application content
+analyses of review themes \citep{noor2025halaltourism,noor2026halalsuperapps}.
+None mines reviews across the ecosystem with aspect-level sentiment, and none
+tests the gamification-harm hypothesis in a devotional context. We do not claim
+to be the first study of Islamic mobile applications, of app-store reviews, or
+of gamified self-tracking; we claim to be the first, to our knowledge, to bring
+ecosystem-scale review mining to bear on this set of design questions in this
+domain.
+
+We analyse 732,194 reviews across 26 Islamic prayer-time and devotional
+applications on the Google Play Store, addressing six pre-specified research
+questions with a mixed-methods pipeline: aspect-based sentiment analysis
+across 27 functional and experiential aspects, seeded topic modelling,
+regex-based demand-signal extraction, promise-versus-delivery comparison
+against store descriptions, and five statistical models under a shared
+false-discovery-rate correction, corroborated by two independently drawn
+qualitative coding passes over tracker-related complaints.
+
+Three of our six research questions retire a framing from the literature and
+replace it with something the data supports better. Gamifying a prayer tracker
+neither helps nor harms sentiment, and guilt language is \emph{rarer}, not
+commoner, inside tracker discourse; what users resent is a record they cannot
+trust and a prompt that never arrives (RQ1, \S\ref{sec:rq1}). Accuracy and
+interface complaints cost the same \emph{as classes}, but that average conceals
+a severity gradient, and a large share of accuracy complaints arrive inside
+four- and five-star reviews, invisible to a rating-based read of severity (RQ2,
+\S\ref{sec:rq2}). And feature count does not predict interface-bloat complaints
+in either direction; what users mean by bloat turns out to be a property of the
+interface, which bloat and interface complaints co-occurring far above base
+rate inside individual reviews shows directly (RQ5, \S\ref{sec:rq5}). Two further questions test whether
+distinctive features confer competitive advantage (they do not; users cite core
+reliability instead, RQ3, \S\ref{sec:rq3}) and whether bio-spiritual needs such
+as menstrual accommodation are met (they are not, though with only three
+implementing applications we treat this as an unmet-need finding rather than a
+causal one, RQ4, \S\ref{sec:rq4}). A sixth synthesises these into two distinct
+failures, a coverage gap and a delivery gap requiring different remedies (RQ6,
+\S\ref{sec:rq6}).
+
+This paper makes four contributions: an ecosystem-scale account of
+devotional-app quality across six pre-specified research questions, with the
+false-discovery-rate denominator and every non-inferable term reported rather
+than dropped; a reframing of gamification harm in
+religious practice as record integrity, prompting reliability, and the
+application's model of worship rather than guilt; a demonstration that
+devotional register breaks off-the-shelf sentiment and aspect-extraction
+tooling, which we treat as a finding about applying general-purpose NLP to
+religious text rather than a data-cleaning footnote; and two sampling hazards
+in app-store research, each demonstrated with numbers rather than asserted ---
+star ratings are an unsafe proxy for defect severity, and single-application
+qualitative sampling can manufacture what look like genre-level themes.

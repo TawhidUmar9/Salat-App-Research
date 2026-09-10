@@ -1,0 +1,163 @@
+% results_related_work
+
+\section{Related Work}
+\label{sec:related-work}
+
+We draw on four strands: religious and devotional technology in HCI;
+gamification and self-tracking, and specifically the literature on
+tracking-induced guilt and anxiety that RQ1 contradicts; app-store review
+mining as a research method; and the literature on feature bloat and
+interface complexity that RQ5 tests.
+
+\subsection{Religious and Devotional Technology in HCI}
+
+HCI and CSCW have taken up religious practice as a first-class design concern
+across several traditions and platforms. \citet{abokhodair2020holytweets}
+analyse 2.6 million tweets sharing Quran verses on Arabic Twitter, combining
+quantitative topic analysis with a qualitative study of users' devotional
+goals, and demonstrate that large-scale, mixed-methods analysis of Islamic
+digital practice is both feasible and productive --- a precedent our
+ecosystem-scale review corpus follows for a different platform.
+\citet{wolf2023blessing} take a research-through-design approach to a
+Christian blessing ritual, designing for ``uncontrollability'' as a value in
+tension with the on-demand interaction paradigms most software assumes.
+\citet{bhattacharjee2025residual} interview Hindu migrants in Canada about
+how they use social media and videoconferencing to sustain religious practice
+and community across displacement. None of these studies addresses prayer-time
+or devotional utility apps specifically, or reviews at ecosystem scale.
+
+Closer to our object of study, \citet{bellar2017ipray} conducts a dissertation
+study of Catholic and Islamic mobile prayer applications, textually analysing
+65 app descriptions and user-testing one app from each tradition to identify
+design approaches and the centrality of reminder features --- a finding our
+RQ3 and RQ6 corroborate independently, at a different scale and with a
+different method. \citet{azahari2025comparative} compare two named Islamic
+applications, Muslim Pro and Sajda, through expert heuristic evaluation,
+finding intrusive advertising and complex navigation in the feature-rich app
+against interface simplicity and limited functionality in the minimal one ---
+a pattern our RQ5 result revisits with corpus evidence rather than expert
+judgement, and complicates: we do not find that a fuller feature set predicts
+worse sentiment.
+
+The closest methodological precedent to this paper is a pair of studies by
+\citet{noor2025halaltourism} and \citet{noor2026halalsuperapps}, who apply
+Leximancer content analysis to user reviews of a single Muslim-lifestyle
+mobile application, identifying service-quality themes that include prayer
+time accuracy, adhan reliability, and advertising --- themes that recur
+throughout our own results. Both studies analyse one application (279 and
+2,459 reviews respectively); ours analyses 26 applications and 732,194
+reviews with aspect-based sentiment, seeded topic modelling, demand-signal
+extraction, and mixed-effects statistical models rather than content-analysis
+themes alone, which is what lets us distinguish an ecosystem-level finding
+from an artefact of any one application's release history
+(\S\ref{sec:rq1-coding}). We are not aware of a published ecosystem-scale,
+mixed-methods study of devotional-app reviews at our corpus's scale, and we
+position our contribution as filling that specific gap rather than as the
+first study of Islamic mobile applications in HCI.
+
+\subsection{Gamification and Self-Tracking}
+
+A substantial literature documents that gamified self-tracking --- streaks,
+points, badges --- can produce exactly the harm RQ1 tests for. In a CHI study
+of habit-formation apps, \citet{renfree2016dontkick} show that streaks and
+reminders are effective at sustaining new behaviour but create a dependency
+whose loss introduces fragility into a user's change effort.
+\citet{weathers2023activitystreaks} characterise what makes an activity
+streak psychologically sticky, including the effect of framing a streak as a
+daily rather than cumulative task. In interview studies of wearable-tracker
+users, both \citet{humphreys2026toxic} and
+\citet{demetrovics2025lifestylepressures} report internal conflict organised
+around anxiety, guilt, loss of bodily autonomy, and what the latter study
+names ``behavioral conformity and goal obsession.'' Experimentally,
+\citet{bai2024darkside} find that competition-based gamification in fitness
+apps increases stress relative to a self-exploration-oriented design. Against
+this, a meta-analysis by \citet{six2021gamification} finds no significant
+difference in depressive-symptom outcomes between gamified and non-gamified
+mental-health apps, showing the harm is not universal even within
+self-tracking generally.
+
+We engage this literature on its strongest terms: the mechanisms it
+identifies (dependency on an artificial streak, anxiety at a data mismatch
+with lived experience, conformity to an externally imposed goal) are
+well-evidenced in fitness and general habit-tracking contexts. RQ1 asks
+whether the same mechanism operates in a devotional prayer tracker, where the
+tracked behaviour is a religious obligation rather than a personal fitness
+goal. We find that it largely does not: guilt language is under-represented
+rather than over-represented in tracker discourse, and where a genuinely
+normative complaint surfaces, its content is different in kind from anxiety
+about a broken streak (\S\ref{sec:rq1}). We read this as a boundary condition
+on the self-tracking guilt literature rather than as a refutation of it: the
+harm this literature documents may depend on the tracked behaviour being
+one the user set for themselves, which does not describe a prayer obligation.
+
+\subsection{App-Store Review Mining as Method}
+
+Mining app-store reviews for software-engineering and HCI insight is an
+established method with its own maturing literature.
+\citet{dabrowski2022analysing} survey 182 papers on app review analysis
+published between 2012 and 2020, classifying the field by the information
+mined, the techniques applied, and the software-engineering activity
+supported; \citet{alsubaihin2019appstore} study how the app store as a
+channel reshapes developers' own release and requirements practices;
+\citet{ciurumelea2017analyzing} build a review taxonomy validated across 39
+mobile applications; and \citet{memon2023appstoremining} combine topic
+modelling, sentiment analysis, and functional/non-functional classification
+in a pipeline structurally similar to our own, applied to a general
+consumer-app sample.
+
+The closest precedent for our scale and aspect-level design is
+\citet{haggag2022mhealth}, who extract over five million reviews for 278
+mHealth applications, classify them into 14 aspect categories, and validate by
+hand-analysing 1,000 reviews per aspect. We follow their basic move ---
+ecosystem-scale mining resolved to named aspects rather than global sentiment
+--- in a domain their sample does not cover, and depart from them on one point
+that matters for RQ2: several of their headline findings are stated as shares
+of users awarding one star to an aspect, which treats the star rating as a
+readable index of severity. Our corpus does not support that assumption
+(\S\ref{sec:rq2}). We read this as a boundary on rating-indexed severity rather
+than a correction, since the effect may be specific to defects users are
+unwilling to let tank an app they otherwise value. Their gold samples are also
+far larger than ours, which is why we report per-aspect precision with
+intervals (\S\ref{sec:method-measurement}) rather than a single accuracy
+figure.
+
+\citet{guluzade2024eating} pair a functionality audit of 27 mindfulness-eating
+and eating-disorder applications with a content analysis of 1,248 reviews, in a
+domain where the tracked behaviour is personally sensitive. Their two-source
+design, a hand-built functionality matrix read against what reviewers say, is
+structurally our promise-versus-delivery comparison
+(\S\ref{sec:method-promise}), and their concern with tracking that
+misrepresents a user's situation is the nearest analogue we have found to RQ4's
+menstrual-exemption gap outside a religious setting. Our contribution relative
+to theirs is scale and inference, which is what lets us report how weakly the
+two promise sources actually agree rather than treat a functionality matrix as
+ground truth.
+
+Our pipeline sits within this tradition, and this paper
+contributes to it in two specific ways beyond the devotional domain: a
+demonstration that star ratings systematically hide a class of substantive
+complaint (\S\ref{sec:rq2}), and a demonstration that single-app qualitative
+sampling can manufacture themes that read as genre-level findings
+(\S\ref{sec:rq1-coding}). Both are risks inherent to the method that this
+literature has not, to our knowledge, quantified directly.
+
+\subsection{Feature Bloat and Interface Complexity}
+
+That more features degrade user experience is a widely held assumption in
+software and product design, more often asserted than tested.
+\citet{marzi2022overfeaturing} reviews the ``over-featuring'' literature
+across the terms it goes by --- feature creep, feature fatigue, overdesign,
+scope creep, gold-plating --- and finds the phenomenon ranked among the top
+ten risks of new-product-development failure alongside ``a lack of
+theoretical development, and a limited investigation of [its] causes,
+drivers, and performance effects.'' In one of the few empirical
+investigations of the claim, \citet{blackler2016rtfm} find that
+over-featured consumer products do produce negative emotional experiences
+and that most users do not exercise most of a product's features. RQ5 tests
+the specific, commonly assumed causal link --- that a higher feature count
+predicts more bloat-related complaints --- directly against corpus data, and
+finds it fails in both directions: feature count does not predict bloat
+complaints, and the relationship that does hold runs opposite to the
+assumption (\S\ref{sec:rq5}). Read alongside Marzi's observation that the
+phenomenon is asserted more often than investigated, our result suggests the
+assumption has outrun the evidence for it, at least in this domain.

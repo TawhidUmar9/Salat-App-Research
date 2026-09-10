@@ -1,0 +1,115 @@
+% results_limitations
+
+\section{Limitations}
+\label{sec:limitations}
+
+We state these plainly rather than as hedges: each has a claim ceiling the
+results above already respect.
+
+\begin{itemize}
+
+\item \textbf{No users were studied.} Every finding is inferred from public
+app-store reviews, a self-selected sample skewed toward strong positive and
+strong negative experiences and at best an indirect proxy for lived religious
+practice. Every claim about user experience here should be read as a claim
+about what reviewers chose to write down.
+
+\item \textbf{The corpus is an English/US-locale slice, and the applications
+were chosen purposively.} Reviews were requested with \texttt{lang=en} and
+\texttt{country=us} (\S\ref{sec:method-corpus}), so the corpus under-represents
+the regions where most of the world's Muslims live. The aspects most exposed to
+this are the regionally patterned ones --- madhab, calculation method, and
+travel concession --- and RQ2's finding that madhab complaints are mild and
+cheap should be read with that in mind rather than as a global claim. The 26
+applications were also selected by judgement rather than by an exhaustive or
+random procedure, and no target sample size was set in advance. Because every
+application was collected under identical parameters, this limits how far the
+findings generalise rather than threatening the comparisons between them.
+
+\item \textbf{Aspect-tagging precision is uneven.} Seven of the 25 aspects with
+surviving gold rows fall below 50\%, two of them at 0\%
+(\S\ref{sec:method-measurement}). Where we report a count for one of those seven we pair it with a
+precision-adjusted estimate and rest no argument on the raw figure. The five
+statistical models draw on aspects at 64--100\% precision with two exceptions
+flagged at the point of use: \texttt{madhab} at 60\% enters M1, and RQ3's
+mosque-finder contrast is fit on a subset a 27\%-precision tagger selects; measurement noise of this
+kind attenuates effects toward zero rather than manufacturing them, so it works
+against, not for, the paper's claims.
+
+\item \textbf{Eleven model terms cannot support inference.} Eight are
+non-converged rather than precisely estimated nulls; we retain those eight in
+the Benjamini--Hochberg denominator of 29 for transparency, and they are eight
+of the nine terms there that fail to survive correction. The other three return
+neither a standard error nor a \(p\)-value and therefore sit outside that
+denominator altogether (\S\ref{sec:method-models}). Every null reported in this
+paper is cited from a fit that converged.
+
+\item \textbf{The topic model characterises a minority of the corpus.} 22.7\%
+of modelled documents fall in the outlier bucket and 61\% in a single
+undifferentiated praise cluster; the 39 topics we label cover about 16\%.
+Topic-model findings describe the interpretable minority of reviews, not the
+corpus.
+
+\item \textbf{Topic structure is sensitive to seed.} The \texttt{rq5\_bloat}
+sub-model yields between 6 and 11 topics across five fixed seeds (mean pairwise
+ARI 0.452). We claim the recurring themes such a model surfaces, not a specific
+partition.
+
+\item \textbf{The RQ4 sub-model collapsed around one application's privacy
+episode.} Six of ten topics sit on a single theme concerning one application's
+user data being sold to US military-linked buyers, holding 58\% of the
+sub-model's non-outlier documents. That application is Muslim Pro, whose
+November 2020 data-sale reporting we name explicitly because the finding is
+specific to that episode rather than a property of the ecosystem; it precludes
+further resolution of menstrual-handling discourse (\S\ref{sec:rq4}).
+
+\item \textbf{Illustrative quotations skew toward one application.} Seven of the
+13 reviews quoted in this paper come from Athan, the corpus's largest
+tracker-bearing application, because quotation followed the volume of available
+text rather than a sampling rule. This is the same hazard we identify as a
+methodological contribution (\S\ref{sec:rq1-coding}), so we name it here: the
+quotations illustrate claims, and every claim they illustrate rests on the
+corpus-scale or cross-application evidence reported alongside them, never on
+the quoted reviews themselves.
+
+\item \textbf{The affect lexicon is unvalidated.} The guilt and motivation
+keyword lists behind RQ1's lexical comparison have no gold sample and no
+precision figure, and their vocabulary overlaps ordinary praise and defect
+language (\S\ref{sec:method-affect}). We report that comparison as a fact
+about two lexicons and rest RQ1's claim about guilt on the hand-coded passes,
+which point the same way.
+
+\item \textbf{Two qualitative coding passes, never pooled.} The first (50
+reviews) is drawn from a single application through a tie-break artefact in the
+selection rule; the second (30 reviews) corrects this, stratified across the
+remaining 22 tracker applications (\S\ref{sec:rq1-coding}). Together they code
+80 reviews. We treat this as supporting evidence that sharpens the
+corpus-scale results, not as a primary contribution.
+
+\item \textbf{Three small-\(N\) case studies are descriptive only.} Inclusion
+features ship in 3 of 26 applications; companion hardware and qasr travel
+concession each ship in exactly 1. None supports a between-app statistical
+estimate, and we report none.
+
+\item \textbf{Promise-source agreement is weak.} Store descriptions and the
+hand-built feature matrix agree at a mean Cohen's \(\kappa\) of 0.272, against
+73.1\% mean raw agreement; four features return \(\kappa = 0\) as a prevalence
+artefact rather than through disagreement (\S\ref{sec:method-promise}). Any claim depending on what an application
+promises should be read with this ceiling in mind.
+
+\item \textbf{The demand-precision sample predates the final extraction.} The
+200-row gold sample behind the 91.5\% figure was labelled against an earlier
+run; current demand counts come from the regenerated extraction
+(\S\ref{sec:method-demand}).
+
+\item \textbf{Topic modelling covers English-identified text only.} Of 324,687
+reviews carrying text, fastText identified 276,422 as English, and only this
+subset entered topic modelling. Topic-model findings do not characterise
+discourse in the languages this filter excluded.
+
+\item \textbf{Reviews are cross-sectional, not longitudinal.} We treat every
+review as an independent observation. Nothing links a user's reviews across
+time, so we cannot speak to how an individual's relationship with an
+application changes over their tenure, only to aggregate patterns.
+
+\end{itemize}
