@@ -3,61 +3,53 @@
 \section{RQ5: Feature Bloat and Companion Hardware}
 \label{sec:rq5}
 
-A fourth framing holds that adding features drives complaints about clutter
-and complexity --- that a leaner app is a more satisfying one. We tested this
-directly, on a pre-specified hypothesis and test, before running the full
-corpus (\S\ref{sec:rq5-provenance}). It fails in both directions: feature
-count does not predict bloat complaints, and if anything the relationship runs
-backward. What users mean by ``bloat'' is a property of the interface, not a
-count of capabilities.
+A fourth framing holds that adding features drives complaints about clutter and
+complexity --- that a leaner app is a more satisfying one. We tested this on a
+pre-specified hypothesis and test, before running the full corpus
+(\S\ref{sec:rq5-provenance}). It fails in both directions: feature count does
+not predict bloat complaints, and if anything the relationship runs backward.
+What users mean by ``bloat'' is a property of the interface, not a count of
+capabilities.
 
 \subsection{Feature Count Does Not Predict Bloat Complaints}
 
 The primary mixed-effects specification (M4) did not converge on its
 \texttt{feature\_count} term (\(\beta = -0.004\), SE \(743.8\),
 \(p \approx 0.99999\)), so we report this null from the cluster-robust
-sensitivity fit, which did converge: the interaction
+sensitivity fit, which did: the interaction
 \texttt{complaint\_complexity\_bloat} \(\times\) \texttt{feature\_count} gives
 \(\beta = -0.000487\) (95\% CI \([-0.00136, 0.00038]\), \(p = 0.272\)),
-clustered on 26 apps. Adding features to a prayer app does not make users more
-likely to call it bloated.
-
-\subsection{Not a Popularity Artefact}
-
-This null is not an artefact of a few large, well-known apps absorbing the
-variance: feature count correlates only weakly with install count across the
-26 apps (Spearman \(\rho = 0.244\)).
+clustered on 26 apps. Adding features does not make users more likely to call
+an app bloated. Nor is the null an artefact of a few large, well-known apps
+absorbing the variance: feature count correlates only weakly with install count
+across the 26 (Spearman \(\rho = 0.244\)).
 
 \subsection{If Anything, the Relationship Runs Backward}
 
 Figure~\ref{fig:rq5-bloat-curve} shows bloat-complaint rate against feature
-count directly, and the pattern is the opposite of what the bloat hypothesis
-predicts. The five leanest apps (6--9 features) average 3.96 stars with a
-bloat-complaint rate of 5.2\%; the five fullest (13--14 features) average 4.71
-stars at 1.6\% --- a 3.3\(\times\) lower rate of bloat complaints in the apps
-with the \emph{most} features, against a corpus mean of 4.40 stars. That lean
-group is not uniquely defined: six applications tie at nine features, so the
-bottom five can be drawn fifteen ways, and across those the lean group's mean
-rating spans 3.88 to 4.14. We report the set our selection rule returned and
-treat the ratio as indicative rather than exact; the fullest group carries no
-such tie. The
-pattern survives dropping the two smallest apps by review volume (\(n=5\) and
-\(n=45\)): the remaining lean apps still average 4.20 stars at 5.6\%. The
-clearest single pair is iPray, with 8 features and 2,225 reviews, drawing
-bloat complaints at 8.0\%, against Athan, with 13 features and 44,954
-reviews, at 1.5\%. An exploratory app-level correlation, entered into the correction and
-surviving it, points
-the same way: feature count correlates positively with mean sentiment
-(\(\rho = +0.471\), \(p = .015\)) and mean score (\(\rho = +0.422\),
-\(p = .032\)) across the 26 apps.
+count, and the pattern is the opposite of what the bloat hypothesis predicts.
+The five leanest apps (6--9 features) average 3.96 stars at a bloat-complaint
+rate of 5.2\%; the five fullest (13--14 features) average 4.71 stars at 1.6\%
+--- a 3.3\(\times\) lower rate in the apps with the \emph{most} features,
+against a corpus mean of 4.40 stars. The lean group is not uniquely defined:
+six applications tie at nine features, so the bottom five can be drawn fifteen
+ways, across which its mean rating spans 3.88 to 4.14. We report the set our
+selection rule returned and treat the ratio as indicative rather than exact;
+the fullest group carries no such tie. The pattern survives dropping the two
+smallest apps by review volume (\(n=5\) and \(n=45\)): the remaining lean apps
+still average 4.20 stars at 5.6\%. The clearest pair is iPray, 8 features and
+2,225 reviews, at 8.0\%, against Athan, 13 features and 44,954 reviews, at
+1.5\%. An exploratory app-level correlation, entered into the correction and
+surviving it, points the same way: feature count correlates positively with
+mean sentiment (\(\rho = +0.471\), \(p = .015\)) and mean score
+(\(\rho = +0.422\), \(p = .032\)).
 
-The lean and full groups also differ in overall rating, 3.96 against 4.71
-stars, so a reasonable objection is that bloat complaints here track general
-dissatisfaction rather than interface surfacing specifically. Two things speak
-against that reading. The complaint-rate gap survives dropping the two smallest
-apps by volume, and the co-occurrence result below is estimated within reviews
-rather than between apps, so it does not depend on the lean/full split at all.
-We none the less report the app-level comparison as exploratory and rest the
+The lean and full groups also differ in overall rating, so bloat complaints
+here might track general dissatisfaction rather than interface surfacing. Two
+things speak against that: the complaint-rate gap survives dropping the two
+smallest apps by volume, and the co-occurrence result below is estimated within
+reviews rather than between apps, so it does not depend on the lean/full split
+at all. We report the app-level comparison as exploratory and rest the
 interface claim on the within-review evidence.
 
 \begin{figure}[t]
@@ -69,18 +61,17 @@ interface claim on the within-review evidence.
 
 \subsection{Bloat Complaints Are Interface Complaints}
 
-If feature count is not the driver, what is? A review that complains about
-bloat is 23.98 times more likely than base rate to also complain about the
-interface (Fisher exact OR \(= 29.41\), \(p = 7.4\times10^{-137}\),
-\(n = 324{,}687\)). The informative cell is small and we give it rather than let the corpus-wide
-\(n\) stand in for it: 134 reviews carry both complaints, 94 of them fusing the
-two into a single phrase and 40 keeping them in separate sentences. Restricting
-to those 40 --- that is, removing the 94 fused reviews --- the lift is still
-7.62\(\times\) (OR \(= 8.78\), \(p = 9.3\times10^{-24}\)). The two lexicons share no keyword and no regex
-pattern, so a fused sentence genuinely carries two distinct terms rather than
-one phrase counted twice. We report 7.62\(\times\) as the conservative bound,
-but foreground the fused cases as the substantive finding, since they are
-literally what users say: bloat is voiced \emph{as} a property of the
+If feature count is not the driver, what is? A review complaining about bloat
+is 23.98 times more likely than base rate to also complain about the interface
+(Fisher exact OR \(= 29.41\), \(p = 7.4\times10^{-137}\), \(n = 324{,}687\)).
+The informative cell is small, and we give it rather than let the corpus-wide
+\(n\) stand in: 134 reviews carry both complaints, 94 fusing them into a single
+phrase and 40 keeping them in separate sentences. Restricting to those 40, the
+lift is still 7.62\(\times\) (OR \(= 8.78\), \(p = 9.3\times10^{-24}\)). The
+two lexicons share no keyword and no regex pattern, so a fused sentence carries
+two distinct terms rather than one phrase counted twice. We report
+7.62\(\times\) as the conservative bound but foreground the fused cases, since
+they are literally what users say: bloat is voiced \emph{as} a property of the
 interface.
 
 \begin{quote}
@@ -94,49 +85,41 @@ timetables which for me is just unimportant clutter.''
 \subsubsection{Provenance}
 \label{sec:rq5-provenance}
 
-The co-occurrence hypothesis and its test were specified on 2026-08-26,
-before the full corpus was run, and that pre-registration stands. The
-decision to foreground the fused cases specifically, rather than lead with the
-conservative separate-sentence bound, was made afterward, with the
-co-occurrence figures and the labelled sub-topics already visible. We report
-both dates: the hypothesis and test were pre-specified; the choice of
-reporting emphasis was not, and we state that distinction rather than let the
-framing read as pre-registered in full.
+The co-occurrence hypothesis and its test were specified on 2026-08-26, before
+the full corpus was run, and that pre-registration stands. The decision to
+foreground the fused cases, rather than lead with the conservative
+separate-sentence bound, was made afterward with the co-occurrence figures and
+labelled sub-topics already visible. The hypothesis and test were
+pre-specified; the choice of reporting emphasis was not.
 
 \subsection{The Sub-Topic Model Agrees, from a Different Direction}
 
 A topic model fitted on \texttt{complexity\_bloat} reviews alone corroborates
 the interface framing independently. Its labelled topics are dominated by
 simplicity as something users \emph{praise} --- \emph{app praised for
-simplicity} recurs across three separate topics, alongside \emph{praise for
-minimalistic UI} and \emph{app praised for having no ads} --- with clutter,
-advertising, and slowness (\emph{ads cause confusion while using app},
-\emph{complaint for app being slow}) on the negative side. Users are
-evaluating how much the interface puts in front of them, not how many
-features the underlying app contains. As with the other targeted sub-models,
-topic structure here is sensitive to seed (6--11 topics across five fixed
-seeds, mean pairwise ARI 0.452), so we report these as recurring themes rather
-than a fixed partition.
+simplicity} recurs across three topics, alongside \emph{praise for minimalistic
+UI} and \emph{app praised for having no ads} --- with clutter, advertising, and
+slowness (\emph{ads cause confusion while using app}, \emph{complaint for app
+being slow}) on the negative side. Users are evaluating how much the interface
+puts in front of them, not how many features the app contains. Topic structure
+here is seed-sensitive (6--11 topics across five fixed seeds, mean pairwise ARI
+0.452), so we report recurring themes rather than a fixed partition.
 
 \subsection{Companion Hardware: A Case Study, \(N = 1\)}
 
-One application in the corpus, iQIBLA Life, ships a companion hardware
-device; of the 25 applications without one, 23 mention companion hardware, and
-do so only to request it. Inside iQIBLA Life, hardware-aspect sentiment is
-37.7\% negative and 45.9\% positive (518 mentions); across the 23 apps without
-hardware, mentions run 49.2\% negative and only 20.8\% positive (1,994
-mentions), and are largely unmet requests for watch or ring support rather
-than complaints about a device that exists. Shipping companion hardware is
-therefore associated with \emph{better} hardware-topic sentiment than not
-shipping it --- the reverse of a bloat story, and consistent instead with
-\S\ref{sec:rq3}'s finding that unmet requests read more positively than usage
-reports of a feature that can fail. A measurement caveat applies directly:
-the \texttt{companion\_hardware} tagger runs at 40\% precision (95\% CI
-[12, 77]), so of 2,512 tagged mentions, roughly 1,005 are genuine
-(interval [295, 1{,}932]), and the
-sentiment split above rests on tags of that quality. With one treated
-application, this is a descriptive case study; no between-app estimate is
-possible.
+One application, iQIBLA Life, ships a companion hardware device; of the 25
+without one, 23 mention companion hardware only to request it. Inside iQIBLA
+Life, hardware-aspect sentiment is 37.7\% negative and 45.9\% positive (518
+mentions); across the 23 apps without hardware, mentions run 49.2\% negative
+and 20.8\% positive (1,994 mentions), largely unmet requests for watch or ring
+support rather than complaints about a device that exists. Shipping companion
+hardware is therefore associated with \emph{better} hardware-topic sentiment
+--- the reverse of a bloat story, and consistent with \S\ref{sec:rq3}'s finding
+that unmet requests read more positively than usage reports of a feature that
+can fail. The \texttt{companion\_hardware} tagger runs at 40\% precision (95\%
+CI [12, 77]), so of 2,512 tagged mentions roughly 1,005 are genuine (interval
+[295, 1{,}932]). With one treated application this is a descriptive case study;
+no between-app estimate is possible.
 
 \begin{quote}
 \itshape ``app is not user friendly. often face problems of ring connectivity
@@ -145,12 +128,3 @@ unprofessional''
 \end{quote}
 \hspace*{1em}--- iQIBLA Life, 1 star
 
-\subsection{Summary}
-
-The feature-bloat hypothesis is not supported in either direction. Feature
-count is uncorrelated with bloat complaints, and the leanest apps draw them at
-over three times the rate of the fullest. What users call bloat is a property
-of the interface rather than a count of capabilities: the two complaints
-co-occur far above base rate even under the most conservative reading, and the
-independent sub-topic model resolves into praise for simplicity against
-complaints about clutter, advertising, and slowness.

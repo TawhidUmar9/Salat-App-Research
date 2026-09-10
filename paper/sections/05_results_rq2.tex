@@ -6,35 +6,33 @@
 A second common framing in the review-mining and mobile-HCI literature treats
 accuracy and interface polish as a trade-off users weigh against one another.
 RQ2 asks whether devotional-app users punish inaccuracy more harshly than a
-poor interface. As a class, they do not. That comparison, however, is the
-wrong one to draw: the class-level average hides a severity gradient inside
-accuracy itself, and the rating signal developers typically optimise against
-conceals the worst of it.
+poor interface. As a class, they do not --- but that is the wrong comparison:
+the class average hides a severity gradient inside accuracy itself, and the
+rating signal developers optimise against conceals the worst of it.
 
 \subsection{As Classes, Accuracy and Interface Cost the Same}
 
 Using M1, a review-level mixed-effects model of star rating against complaint
-aspect (\(n = 324{,}687\); all coefficients discussed in this section survive
+aspect (\(n = 324{,}687\); all coefficients in this section survive
 Benjamini--Hochberg correction at \(q < 0.05\)), the accuracy family ---
-prayer-time accuracy, qibla, madhab, and calculation method --- averages
-\(-0.647\) stars, against \(-0.600\) for \texttt{ui\_design}. The gap is under
-a twentieth of a star. The intuition that users punish a wrong qibla or prayer
+prayer-time accuracy, qibla, madhab, calculation method --- averages
+\(-0.647\) stars against \(-0.600\) for \texttt{ui\_design}, a gap under a
+twentieth of a star. The intuition that users punish a wrong qibla or prayer
 time more harshly than a cluttered screen is not supported at the level of the
-complaint class, and we do not claim accuracy wins as a class.
+complaint class.
 
 \subsection{The Class Average Conceals a Severity Gradient}
 
 Table~\ref{tab:rq2-coefficients} and Figure~\ref{fig:rq2-coefficients} give the
-full spread underlying that average. Accuracy is not one thing: prayer-time
-accuracy alone costs \(-1.112\) stars (95\% CI \([-1.142, -1.083]\)), 1.85
-times the interface penalty, with a confidence interval disjoint from
-\texttt{ui\_design}'s. The family mean is pulled down by \texttt{madhab}
-(\(-0.324\)) and \texttt{qibla} (\(-0.550\)), which are both rarer and milder
-complaints. Getting the prayer time wrong is among the most costly failures in
-the entire corpus; getting the madhab option wrong is among the least ---
-and \texttt{madhab} additionally reverses sign in an ordinal robustness check
-(\(\beta = +0.216\), \(p = 0.649\)), so no directional claim rests on it
-either way.
+spread underlying that average. Accuracy is not one thing: prayer-time accuracy
+alone costs \(-1.112\) stars (95\% CI \([-1.142, -1.083]\)), 1.85 times the
+interface penalty, with an interval disjoint from \texttt{ui\_design}'s. The
+family mean is pulled down by \texttt{madhab} (\(-0.324\)) and \texttt{qibla}
+(\(-0.550\)), both rarer and milder complaints. Getting the prayer time wrong
+is among the most costly failures in the corpus; getting the madhab option
+wrong is among the least --- and \texttt{madhab} reverses sign in an ordinal
+robustness check (\(\beta = +0.216\), \(p = 0.649\)), so no directional claim
+rests on it either way.
 
 \begin{quote}
 \itshape ``this app is not accurate, prayers time are 1 hour ahead, please fix
@@ -72,43 +70,31 @@ it''
 
 \subsection{Qibla Failure Is Instability, Not Miscalculation}
 
-The larger of the two qibla-related topics in our topic model (1,771 reviews)
-is labelled around wrong direction, outweighing a second, smaller topic
-(698) labelled around an inaccurate compass pointer. Reading the representative
-reviews in the larger topic, the complaint is not that the app computes the
-wrong bearing: users describe the compass returning a different bearing from
-the same physical spot as the phone is rotated. We report this as a sensor and
-calibration-handling problem rather than an error in the underlying qibla
-computation, since the two failure modes call for different fixes.
+The larger of the two qibla-related topics (1,771 reviews) is labelled around
+wrong direction, outweighing a smaller one (698) labelled around an inaccurate
+compass pointer. In the larger topic's representative reviews the complaint is
+not that the app computes the wrong bearing: users describe the compass
+returning a different bearing from the same physical spot as the phone is
+rotated. This is a sensor and calibration-handling problem rather than an error
+in the qibla computation, and the two call for different fixes.
 
 \subsection{Star Ratings Hide Accuracy Defects}
 
-The strongest result in RQ2 is methodological rather than substantive. Of
-7,942 reviews carrying at least one negative accuracy-family complaint, 3,306
-(41.6\%) awarded four or five stars, and 1,830 (23.0\%) awarded the maximum of
-five; the full distribution runs 2,319 one-star, 914 two-star, 1,403
-three-star, 1,476 four-star, and 1,830 five-star. Users report that the prayer
-time or qibla direction is wrong and rate the application highly in the same
-review.
-Any prioritisation process that reads defect severity off the star
-distribution --- which is to say, the signal most developers and app-store
+The strongest result in RQ2 is methodological. Of 7,942 reviews carrying at
+least one negative accuracy-family complaint, 3,306 (41.6\%) awarded four or
+five stars and 1,830 (23.0\%) the maximum; the distribution runs 2,319
+one-star, 914 two-star, 1,403 three-star, 1,476 four-star, 1,830 five-star.
+Users report that the prayer time or qibla direction is wrong and rate the
+application highly in the same review. Any prioritisation process reading
+defect severity off the star distribution --- the signal most developers and
 ranking systems optimise against --- will under-weight accuracy defects by a
-wide margin, because a substantial share of the reviews that name them never
+wide margin, because a substantial share of the reviews naming them never
 produce a low rating.
 
 \subsection{Advertising Costs More Than Any Accuracy Complaint}
 
-One coefficient in Table~\ref{tab:rq2-coefficients} falls outside the
-accuracy/interface contrast entirely and is worth flagging here: intrusive
-advertising costs \(-1.439\) stars, above every accuracy-family term,
-including prayer-time accuracy. We return to advertising as a recurring cost
-across the bloat and gap analyses in \S\ref{sec:rq5} and \S\ref{sec:rq6}.
+One coefficient falls outside the accuracy/interface contrast entirely:
+intrusive advertising costs \(-1.439\) stars, above every accuracy-family term
+including prayer-time accuracy. We return to advertising as a recurring cost in
+\S\ref{sec:rq5} and \S\ref{sec:rq6}.
 
-\subsection{Summary}
-
-Accuracy and interface complaints are indistinguishable as classes, but that
-comparison obscures more than it reveals. Prayer-time accuracy alone is a
-severe, frequent failure whose cost is masked twice: once by averaging it with
-milder accuracy complaints such as madhab and qibla, and again by arriving
-inside four- and five-star reviews at a rate of 41.6\%. Star ratings are an
-unsafe proxy for defect severity in this domain.

@@ -6,68 +6,61 @@
 A third framing common in mobile-app HCI research is that differentiating
 features win and retain users --- that a distinctive capability such as a
 mosque finder or a travel prayer-shortening (\emph{qasr}) mode confers a
-competitive edge. RQ3 tests this against what users actually cite as reasons
-for loyalty, and against the sentiment record of apps that ship these two
+competitive edge. RQ3 tests this against what users cite as reasons for
+loyalty, and against the sentiment record of apps shipping these two
 travel-oriented features. Neither supports the differentiation story: what
-earns loyalty in this ecosystem is the reliability of core functions, not
-travel support specifically.
+earns loyalty here is the reliability of core functions.
 
 \subsection{What Users Cite Is Not Travel Support}
 
-Across 4,696 preference citations in the corpus --- reviews explicitly stating
-why the user chose or kept an app, in the register of ``that's why I use
-this'' or ``only app that'' --- the aspects named most are adhan reminders
-(374), Quran audio (293), prayer-time accuracy (290), qibla (155), and adhkar
-(152). Mosque finder does not appear in the top eight cited aspects, and qasr
-does not appear at all. Preference-citation rates are close to identical
-whether an app ships a mosque finder or not: 1.38\% of reviews for the 12 apps
-that have one, against 1.24\% for the 14 that do not. Whatever earns loyalty
-in this ecosystem, it is not the travel feature set.
+Across 4,696 preference citations --- reviews explicitly stating why the user
+chose or kept an app, in the register of ``that's why I use this'' or ``only
+app that'' --- the aspects named most are adhan reminders (374), Quran audio
+(293), prayer-time accuracy (290), qibla (155), and adhkar (152). Mosque finder
+does not appear in the top eight cited aspects, and qasr does not appear at
+all. Preference-citation rates are near-identical whether an app ships a mosque
+finder or not: 1.38\% of reviews for the 12 apps that have one, against 1.24\%
+for the 14 that do not.
 
 \subsection{The Mosque-Finder Coefficient Runs the Wrong Way, and the Reason Matters}
 
 A cluster-robust fit on reviews mentioning mosque finder gives
 \(\beta = -0.137\) (\(p = 0.003\), 21 app clusters, \(n = 3{,}010\)): apps that
-\emph{have} a mosque finder attract more negative mentions of it, not fewer
---- 27.0\% negative against 23.0\% in apps without the feature, with positive
-mentions moving the other way (38.6\% against 43.6\%). Before reading anything
-into that direction, we note that the \texttt{mosque\_finder} tagger runs at
-27\% precision (95\% CI [10, 57]), so of the 3,010 mentions entering
-this comparison, drawn from 3,043 tagged corpus-wide, roughly 830 are genuine
-(interval [297, 1{,}721]);
-we do not report either figure unqualified anywhere in this paper. The noise falls on both arms of the
-comparison rather than one, so the \emph{direction} of the gap is more
-trustworthy than its exact \emph{size}.
+\emph{have} a mosque finder attract more negative mentions of it, not fewer ---
+27.0\% negative against 23.0\% in apps without it, positive mentions moving the
+other way (38.6\% against 43.6\%). The \texttt{mosque\_finder} tagger runs at
+27\% precision (95\% CI [10, 57]), so of the 3,010 mentions entering this
+comparison, drawn from 3,043 tagged corpus-wide, roughly 830 are genuine
+(interval [297, 1{,}721]); we report neither figure unqualified. The noise
+falls on both arms, so the \emph{direction} of the gap is more trustworthy than
+its \emph{size}.
 
-The direction should not be read as the feature harming apps that ship it. The
-two groups of mentions are not comparable speech acts. Of the 14 applications
-without a mosque finder, 11 draw any mention of one, and there mentions are
-overwhelmingly \emph{requests} --- 243 demand signals across 9 apps --- which
-phrased as ``please add nearby mosques'' read neutral-to-positive. Of the 12
-that have the feature, 10 draw mentions, and there they are \emph{usage
-reports}; a usage report of a feature that fails to work reads negative. The
-21 applications drawing mentions at all are the clusters in the model above. A user can only complain about a feature
-that exists to complain about. The gap therefore measures the difference
-between wishing for a feature and using one, not the cost of having shipped
-it.
+That direction is not the feature harming apps that ship it, because the two
+groups of mentions are not comparable speech acts. Of the 14 applications
+without a mosque finder, 11 draw any mention of one, overwhelmingly as
+\emph{requests} --- 243 demand signals across 9 apps --- which phrased as
+``please add nearby mosques'' read neutral-to-positive. Of the 12 that have the
+feature, 10 draw mentions, and there they are \emph{usage reports}; a usage
+report of a feature that fails to work reads negative. Those 21 applications
+are the clusters in the model. A user can only complain about a feature that
+exists, so the gap measures the difference between wishing for a feature and
+using one, not the cost of shipping it.
 
-This coefficient is also unstable across specifications, which we take as
-further reason not to over-read its direction: the mixed-effects fit on the
-same contrast returns \(+0.05\) with an undefined (NaN) standard error, and
-so cannot arbitrate between the two estimates. We treat the cluster-robust
-estimate as the more trustworthy of the two, but rest no directional claim
-about competitive advantage on a coefficient that reverses sign between
-specifications, one of which failed to produce an error estimate at all.
+The coefficient is also unstable across specifications: the mixed-effects fit
+on the same contrast returns \(+0.05\) with an undefined (NaN) standard error
+and so cannot arbitrate. We treat the cluster-robust estimate as the more
+trustworthy, but rest no claim about competitive advantage on a coefficient
+that reverses sign between specifications, one of which produced no error
+estimate at all.
 
 \subsection{Qasr Travel Concession: Demand Evidence, Not a Causal Test}
 
 Exactly one application of the 26, \emph{Muslim Bangla Quran Hadith Dua},
-implements qasr (the Islamic travel concession shortening obligatory
-prayers). With \(N = 1\), there is no between-app comparison available for
-this feature, and we treat the qasr result as demand evidence rather than as
-a test of any causal claim. Demand is real, if modest: 21 signals in total
---- 10 requests, 5 preference citations, 3 explicit statements of absence,
-and 3 churn statements --- of which 20 come from 5 of the 25 apps that lack
+implements qasr (the Islamic travel concession shortening obligatory prayers).
+With \(N = 1\) no between-app comparison is available, so we treat qasr as
+demand evidence rather than a test of any causal claim. Demand is real if
+modest: 21 signals --- 10 requests, 5 preference citations, 3 statements of
+absence, 3 churn statements --- of which 20 come from 5 of the 25 apps lacking
 the feature. The requests are specific and practical:
 
 \begin{quote}
@@ -87,22 +80,20 @@ of city or in traveling''
 \end{quote}
 \hspace*{1em}--- Athan: Prayer Times \& Al Quran, 5 stars
 
-A measurement caveat applies to the broader \texttt{qasr\_travel} aspect tag,
-distinct from these 21 hand-read demand signals. That tag matches 637
-mentions across 18 apps and runs 76.7\% positive against only 7.1\% negative
---- implausible for a capability 25 of the 26 apps lack --- and scored 0 of 2
-on its gold-standard rows. Only 3.3\% of its matches are demand signals. The
-lexicon is evidently catching travel and pilgrimage discourse in general
-(hajj, umrah, journeys) rather than qasr functionality specifically. We
-therefore never report 637 as a measure of qasr discussion volume, and rest
-the qasr argument entirely on the 21 demand signals, which were read directly
-rather than inferred from the lexicon match.
+A caveat applies to the broader \texttt{qasr\_travel} tag, distinct from those
+21 hand-read signals. It matches 637 mentions across 18 apps and runs 76.7\%
+positive against 7.1\% negative --- implausible for a capability 25 of 26 apps
+lack --- and scored 0 of 2 on its gold rows, with only 3.3\% of matches being
+demand signals. The lexicon is catching travel and pilgrimage discourse (hajj,
+umrah, journeys) rather than qasr functionality. We therefore never report 637
+as qasr discussion volume, and rest the argument on the 21 demand signals, read
+directly rather than inferred from lexicon matches.
 
 \subsection{Dominant Travel Failure Mode}
 
-Where travel-related failures do appear, the recurring pattern is that prayer
-times fail to adjust automatically when a user's location changes, and the
-user discovers this only after acting on a stale time:
+Where travel-related failures appear, the recurring pattern is prayer times
+failing to adjust automatically when location changes, discovered only after
+the user acts on a stale time:
 
 \begin{quote}
 \itshape ``The only thing that I don't like about this app is it doesn't seem
@@ -113,13 +104,3 @@ away, pls fix this inshaAllah.''
 \end{quote}
 \hspace*{1em}--- Athan: Prayer Times \& Al Quran, 4 stars
 
-\subsection{Summary}
-
-Neither travel-oriented feature confers a competitive edge. Mosque finder is
-not among the top eight aspects users cite for loyalty, and its sentiment gap
-reflects the difference between requesting and using a feature, not a cost of
-shipping it. Qasr has essentially no market presence and rests on demand
-evidence alone. What users do cite --- adhan reminders, Quran audio,
-prayer-time accuracy --- points back to core functions, and those are
-themselves among RQ6's most-broken promises (\S\ref{sec:rq6}). Competitive
-advantage here looks like doing the basics reliably.

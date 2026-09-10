@@ -3,29 +3,28 @@
 \section{Design Implications}
 \label{sec:design-implications}
 
-We state these at the level of the ecosystem, and we do not recommend adding
-features generically: the paper's central finding is that feature count is not
-the lever satisfaction runs on. Each recommendation is driven by RQ6b's
-unmet-need ranking or by a specific reported result, and every coverage
-recommendation is paired with its delivery point, since the two gaps require
-different remedies.
+We state these at ecosystem level, and do not recommend adding features
+generically: the paper's central finding is that feature count is not the lever
+satisfaction runs on. Each recommendation is driven by RQ6b's unmet-need
+ranking or a specific reported result, and every coverage recommendation is
+paired with its delivery point, since the two gaps require different
+remedies.
 
 \subsection{Deliver What Is Already Promised, Before Adding Anything}
 
-The two most-broken promises are also the two most basic: adhan reminders
-(broken in 5 of 20 promising applications) and monetisation terms (5 of 16)
-(\S\ref{sec:rq6}). Prompting failure is independently the dominant tracker
-complaint, at 46\% of the cross-app coding pass (\S\ref{sec:rq1}). These are
-not independent problems: an application that cannot reliably fire a
-notification cannot support a prayer-tracking practice built on top of it,
-whatever else it ships. Reliable delivery of the core promise is the
-precondition for everything else on this list, not one item alongside them.
+The two most-broken promises are also the two most basic, adhan reminders and
+monetisation terms (\S\ref{sec:rq6}), and prompting failure is independently
+the dominant tracker complaint (\S\ref{sec:rq1}). These are not independent
+problems: an application that cannot reliably fire a notification cannot
+support a prayer-tracking practice built on top of it, whatever else it ships.
+Reliable delivery of the core promise is the precondition for everything else
+on this list, not one item alongside them.
 
 \subsection{Treat Prayer-Time Correctness as a Reliability Requirement}
 
-Prayer-time accuracy costs \(-1.112\) stars, the second-costliest of the complaint
-aspects we model, and 41.6\% of accuracy complaints arrive inside four- or five-star
-reviews (\S\ref{sec:rq2}). A team prioritising defects from its own rating
+Prayer-time accuracy is the second-costliest complaint aspect we model, and
+41.6\% of accuracy complaints arrive inside four- or five-star reviews
+(\S\ref{sec:rq2}), so a team prioritising defects from its own rating
 distribution will systematically under-prioritise this class of failure. We
 recommend instrumenting for accuracy defects directly, comparing computed times
 against an authoritative reference and logging location and calculation-method
@@ -38,30 +37,29 @@ Where tracker dissatisfaction carries a normative complaint, it is that the app
 mis-models worship, not that its mechanics apply too much pressure
 (\S\ref{sec:rq1}). Menstrual handling makes this concrete: it ranks second on
 the unmet-need index, is absent from 23 of 26 applications, and in the three
-that do ship it, sentiment on the topic is no better than in applications
-without it (\S\ref{sec:rq4}). This is simultaneously a coverage problem and a
-quality problem, and closing the coverage gap without fixing reliability would
-not resolve it.
+that ship it sentiment is no better than in applications without it
+(\S\ref{sec:rq4}). This is a coverage problem and a quality problem at once,
+and closing the coverage gap without fixing reliability would not resolve it.
 
 \subsection{Surface Less; Do Not Necessarily Contain Less}
 
 The lever available to a design team is what the interface surfaces in a given
-moment, not how many capabilities the application contains
-(\S\ref{sec:rq5}). A full-featured application with a disciplined interface is
-not the problem the bloat framing warns against; a lean application that
-surfaces its few features poorly can still earn the complaint.
+moment, not how many capabilities the application contains (\S\ref{sec:rq5}). A
+full-featured application with a disciplined interface is not the problem the
+bloat framing warns against; a lean application that surfaces its few features
+poorly still earns the complaint.
 
 \subsection{The Unserved Categories}
 
 Four categories fall below a quarter of ecosystem coverage against demonstrated
 demand (\S\ref{sec:rq6}). \textbf{Companion hardware} tops the ranking, absent
-from 25 of 26 applications; sentiment toward hardware is in fact \emph{better}
+from 25 of 26 applications, and sentiment toward hardware is \emph{better}
 inside the one application shipping a device than in the request-driven
 mentions elsewhere (\S\ref{sec:rq5}), so this is demand rather than
 dissatisfaction with an existing product. \textbf{Menstrual accommodation}
-ranks second, per \S\ref{sec:design-accommodate}. \textbf{Travel concession}
-(\emph{qasr}) has essentially no market presence, one application in 26,
-against a small but specific stream of requests (\S\ref{sec:rq3}).
-\textbf{Calendar integration} rounds out the four. None of these is a call to
-add features indiscriminately; each is a demand-evidenced gap in an ecosystem
-whose more pressing problem remains delivering what it has already promised.
+ranks second (\S\ref{sec:design-accommodate}). \textbf{Travel concession}
+(\emph{qasr}) has essentially no market presence against a small but specific
+stream of requests (\S\ref{sec:rq3}), and \textbf{calendar integration} rounds
+out the four. None is a call to add features indiscriminately; each is a
+demand-evidenced gap in an ecosystem whose more pressing problem remains
+delivering what it has already promised.

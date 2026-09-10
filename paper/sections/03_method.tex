@@ -6,37 +6,29 @@
 \subsection{Corpus and Data Collection}
 \label{sec:method-corpus}
 
-We compiled a corpus of user reviews for 26 Islamic prayer-time and devotional
+We compiled a corpus of reviews for 26 Islamic prayer-time and devotional
 applications on the Google Play Store, collected on 2026-08-19 and spanning
 each application's review history available at that date. Reviews and app-level
-metadata (store description, install count, rating) were scraped
-programmatically. The resulting corpus comprises 732,194 reviews.
-Figure~\ref{fig:corpus} summarises its composition.
+metadata (store description, install count, rating) were scraped, yielding
+732,194 reviews (Figure~\ref{fig:corpus}).
 
-Applications were selected purposively rather than by exhaustive enumeration of
-the category. We prioritised high install and review counts, so that per-app
-volume would support app-level comparison, and preferred applications whose
-primary purpose is salat --- prayer times, adhan, qibla, tracking --- over
-general Islamic-lifestyle or educational applications, retaining a
-salat-specific application even where it offered fewer features overall. A
-small number of lower-volume applications were kept where they were the only
-instance of a functional category. The resulting set is neither a census of the
-category nor a random sample, and no target size was fixed in advance; the
-ecosystem-level claims in this paper are claims about these 26 applications,
-which we take to cover the high-traffic core of the category rather than its
-long tail.
+Applications were selected purposively. We prioritised high install and review
+counts, so per-app volume would support app-level comparison, and preferred
+applications whose primary purpose is salat --- prayer times, adhan, qibla,
+tracking --- over general Islamic-lifestyle or educational ones, keeping a few
+lower-volume ones where they were the only instance of a functional category. The set is neither a census nor a random sample and no target size
+was fixed in advance; the ecosystem-level claims here are claims about these 26
+applications, which we take to cover the high-traffic core of the category
+rather than its long tail.
 
-One scoping decision deserves stating rather than leaving in the collection
-script. Reviews were requested with the store locale set to English and the
-United States (\texttt{lang=en}, \texttt{country=us}), sorted newest-first. This
-does not yield a purely English corpus --- 48,265 of the 324,687 reviews
-carrying text were subsequently identified as non-English
-(\S\ref{sec:method-language}) --- but it does mean the corpus is the
-English/US-locale slice of each application's reviews rather than its global
-review population. Because every application was collected under identical
-parameters, the cross-application comparisons throughout this paper remain
-like-for-like; what the decision constrains is generalisation, and we return to
-it in \S\ref{sec:limitations}.
+Reviews were requested with the store locale set to English and the United
+States (\texttt{lang=en}, \texttt{country=us}), sorted newest-first. This does
+not yield a purely English corpus --- 48,265 of the 324,687 texted reviews were
+later identified as non-English (\S\ref{sec:method-language}) --- but it does
+mean the corpus is the English/US-locale slice of each application's reviews
+rather than its global review population. Every application was collected under
+identical parameters, so cross-application comparisons remain like-for-like;
+what the decision constrains is generalisation (\S\ref{sec:limitations}).
 
 \begin{figure}[t]
   \centering
@@ -48,38 +40,31 @@ it in \S\ref{sec:limitations}.
 \subsection{Language Filtering and Analysis Sub-corpora}
 \label{sec:method-language}
 
-Reviews were filtered to those carrying review text, yielding an analysed
-sub-corpus of 324,687 reviews (\(C_{\mathrm{text}}\)). Language identification
-was then applied using fastText; the English-language subset used for topic
-modelling comprises 276,422 reviews (\(C_{\mathrm{en}}\)).
+Reviews carrying review text form an analysed sub-corpus of 324,687
+(\(C_{\mathrm{text}}\)). Language identification with fastText gives the
+English subset used for topic modelling, 276,422 reviews
+(\(C_{\mathrm{en}}\)).
 
 \subsection{Sentiment Classification}
 \label{sec:method-sentiment}
 
-Reviews were scored in two passes: a lexicon-based pass with VADER and a
-transformer-based pass with a RoBERTa sentiment classifier. The RoBERTa label is
-the one reported throughout the paper, and VADER is retained as a comparison
-point rather than as a source of any reported result.
+Reviews were scored with VADER and with a RoBERTa sentiment classifier. The
+RoBERTa label is reported throughout; VADER is retained only as a comparison
+point. Across all 324,687 texted reviews
+(Figure~\ref{fig:sentiment-agreement}), RoBERTa agrees with the star-derived
+label at Cohen's \(\kappa = 0.466\) against 0.210 for VADER, the two
+classifiers agreeing at 0.385. Star ratings are not ground truth --- RQ2 is in
+part an argument that they are not --- but RoBERTa tracking them more than
+twice as closely is why we report it.
 
-Two separate checks bear on that choice, and we keep them apart because they
-establish different things. First, agreement between methods across all 324,687
-texted reviews (Figure~\ref{fig:sentiment-agreement}): RoBERTa agrees with the
-star-derived label at Cohen's \(\kappa = 0.466\), against 0.210 for VADER, and
-the two classifiers agree with each other at 0.385. Star ratings are not ground
-truth --- RQ2 is in part an argument that they are not
-(\S\ref{sec:rq2}) --- but RoBERTa tracking them more than twice as closely as
-VADER does is the empirical reason we report the transformer label.
-
-Second, we hand-labelled a 500-document gold set into four categories
-(Positive, Neutral, Negative, Mixed); on the 100 rows coded by both annotators,
-raw agreement was 89.0\% and Krippendorff's \(\alpha = 0.824\). We state plainly
-what this does and does not establish: it is an inter-annotator reliability
-figure showing that people apply the scheme consistently, not a measurement of
-classifier accuracy against those labels, which we did not compute. Sentiment
-therefore enters this paper as a comparatively, rather than absolutely,
-validated variable, and the claims resting most heavily on it --- the
-bimodality of tracker sentiment (\S\ref{sec:rq1}) and the feature-level
-negative-sentiment rates behind RQ6a --- should be read with that gap in mind.
+We also hand-labelled a 500-document gold set into four categories (Positive,
+Neutral, Negative, Mixed); on the 100 rows coded by both annotators, raw
+agreement was 89.0\% and Krippendorff's \(\alpha = 0.824\). This is an
+inter-annotator reliability figure, not a measurement of classifier accuracy,
+which we did not compute. Sentiment therefore enters as a comparatively, rather
+than absolutely, validated variable, and the claims resting most heavily on it
+--- tracker-sentiment bimodality (\S\ref{sec:rq1}) and the feature-level
+negative rates behind RQ6a --- should be read with that gap in mind.
 
 \begin{figure}[t]
   \centering
@@ -93,28 +78,24 @@ negative-sentiment rates behind RQ6a --- should be read with that gap in mind.
 
 We built a lexicon of 27 aspects covering the functional and experiential
 surface of devotional apps (prayer-time accuracy, adhan reminders, Quran audio,
-qibla direction, prayer tracking, advertising, monetisation, and others),
-comprising 340 keywords and 106 regular-expression patterns applied at the
-sentence level. Each sentence can carry zero, one, or multiple aspect tags.
-Keyword and pattern counts vary widely across the 27 aspects, and since several
-results below turn on how thinly a given aspect is defined, we release the
-lexicon in full rather than summarising it: every aspect's exact keyword list
-and patterns are in the artefact (\S\ref{sec:method-repro}), as are the aspect
-groupings each research question composes from them.
+qibla, prayer tracking, advertising, monetisation, and others), comprising 340
+keywords and 106 regular-expression patterns applied at the sentence level.
+Each sentence can carry zero, one, or multiple tags. Keyword and pattern counts
+vary widely across aspects, and since several results turn on how thinly an
+aspect is defined, we release the lexicon in full with the aspect groupings
+each research question composes from it (\S\ref{sec:method-repro}).
 
 \subsection{Affect Lexicon}
 \label{sec:method-affect}
 
 RQ1 additionally uses two small keyword lists, one guilt- and anxiety-related
 and one motivation-related, to compare affective register inside and outside
-tracker discourse. These differ from every other measurement in this paper in
-one respect we state rather than leave to be found: they carry no gold sample
-and no precision figure, because the 300-row aspect draw and the 500-document
-sentiment set label aspects and valence, neither of which is the guilt/motivation
-distinction. We release both lists with the analysis code, report the result
-they produce as a lexical-frequency comparison rather than as a validated
-measurement of guilt (\S\ref{sec:rq1}), and rest the construct claim on the
-hand-coded passes instead.
+tracker discourse. Alone among our measurements these carry no gold sample and
+no precision figure: the 300-row aspect draw and the 500-document sentiment set
+label aspects and valence, not the guilt/motivation distinction. We release
+both lists, report what they produce as a lexical-frequency comparison rather
+than a validated measurement of guilt (\S\ref{sec:rq1}), and rest the construct
+claim on the hand-coded passes.
 
 \subsection{Devotional-Formula Filtering}
 \label{sec:method-devotional-filtering}
@@ -122,66 +103,58 @@ hand-coded passes instead.
 After lexicon tagging, we removed aspect assignments whose triggering sentence
 consists of devotional formulae rather than substantive feedback: 1,686 of the
 192,874 aspect-tagged sentence pairs the lexicon produced (0.9\%), leaving
-191,188. The unit is the (aspect, sentence) pair rather than the sentence, so a
-sentence carrying two tags is counted twice. This step is necessary because general-purpose English feature
-vocabulary misfires badly on devotional register. The clearest case is
-\texttt{goal\_system}, which scored 0\% precision against its gold rows because
-reviewers routinely close a review with phrases such as ``May Allah reward
-you,'' which the lexicon's goal-related keywords match as if they described a
-tracking feature. We treat this as a substantive finding rather than a cleaning
-footnote: off-the-shelf sentiment and aspect tooling, built and validated on
-general product review text, does not transfer cleanly to religious register,
-and a devotional-formula filtering pass is necessary before aspect-level
-analysis is trustworthy in this domain.
+191,188. The unit is the (aspect, sentence) pair, so a sentence carrying two
+tags counts twice. The step is necessary because general-purpose English
+feature vocabulary misfires badly on devotional register. The clearest case is
+\texttt{goal\_system}, at 0\% precision against its gold rows because reviewers
+routinely close a review with phrases such as ``May Allah reward you,'' which
+goal-related keywords match as if they described a tracking feature. This is a
+substantive finding rather than a cleaning footnote: aspect tooling validated
+on general product review text does not transfer cleanly to religious register,
+and a devotional-formula pass is necessary before aspect-level analysis is
+trustworthy here.
 
 \subsection{Demand Mining}
 \label{sec:method-demand}
 
-We extracted five types of demand signal from review text via pattern
-matching, each attached to the aspect(s) it co-occurs with: \emph{request}
-(explicit asks for a feature), \emph{absence} (noting a feature is missing),
-\emph{churn} (citing a missing feature as a reason for leaving or switching
-apps), \emph{preference} (citing a feature as the reason for choosing an app),
-and \emph{tenure} (citing a feature in the context of long-term use). Against a
-200-row gold sample stratified 40 rows per type, overall precision was 91.5\%
-(183/200): preference 100\%, tenure 100\%, churn 97.5\%, request 95\%, and
-absence 65\%.
+We extracted five types of demand signal by pattern matching, each attached to
+the aspect(s) it co-occurs with: \emph{request} (explicit asks),
+\emph{absence} (noting a feature is missing), \emph{churn} (a missing feature
+as a reason for leaving), \emph{preference} (a feature as the reason for
+choosing an app), and \emph{tenure} (a feature cited in long-term use). Against
+a 200-row gold sample stratified 40 rows per type, overall precision was 91.5\%
+(183/200): preference 100\%, tenure 100\%, churn 97.5\%, request 95\%, absence
+65\%.
 
-This figure carries a provenance caveat that we state plainly rather than
-suppress. The gold sample was drawn and labelled from one run of the demand
-extractor; an upstream threshold subsequently changed, the extractor was
-re-run, and the regenerated output no longer matches the labelled sample
-row-for-row (only 11 of the 200 labelled reviewIds recur in the current
-extraction). The demand counts reported elsewhere in this paper come from the
-current extraction, while the 91.5\% precision figure was measured on its
-immediate predecessor. We report it as the best available estimate of demand-pattern
-precision, with this provenance gap disclosed, rather than as a measurement of
-the exact rows underlying every reported count.
+A provenance caveat applies. The gold sample was labelled from one run of the
+extractor; an upstream threshold then changed, the extractor was re-run, and
+the regenerated output no longer matches it row-for-row (only 11 of the 200
+labelled reviewIds recur). Demand counts reported elsewhere come from the
+current extraction, while 91.5\% was measured on its predecessor. We report it
+as the best available estimate of demand-pattern precision, not as a
+measurement of the exact rows underlying every count.
 
 \subsection{Promise Extraction}
 \label{sec:method-promise}
 
 To compare what an application promises against what it delivers, we extracted
-claimed features from each app's Google Play store description and compared
-them against a hand-built feature matrix (one row per app, one column per
-aspect). Agreement between the two sources is weak: mean Cohen's
-\(\kappa = 0.272\) across 20 features, with a maximum of 0.62 for women's
-tracking and four features at \(\kappa = 0.00\) --- travel concession,
-calendar integration, prayer times by location, and timely reminders. We
-report this plainly rather than treat the two sources as interchangeable;
+claimed features from each store description and compared them against a
+hand-built feature matrix (one row per app, one column per aspect). Agreement
+is weak: mean Cohen's \(\kappa = 0.272\) across 20 features, maximum 0.62 for
+women's tracking, and four features at \(\kappa = 0.00\) --- travel
+concession, calendar integration, prayer times by location, timely reminders.
 Figure~\ref{fig:promise-agreement} gives the per-feature breakdown, including
-cases where the description misses a feature the matrix records and cases where
-it overclaims one the matrix does not.
+where the description misses a feature the matrix records and where it
+overclaims one it does not.
 
-Those four zeros need reading carefully rather than at face value. In each
-case one source records the feature in almost every application or in almost
-none, so there is too little variance for \(\kappa\) to correct against, and
-the coefficient collapses to zero despite high raw agreement: 96.2\% for timely
-reminders (26 of 26 against 25 of 26) and 96.2\% for travel concession. Mean
-raw agreement across the 20 features is 73.1\%. We report both summaries
-because \(\kappa\) alone would understate how far the two sources actually
-coincide on the features RQ6a and RQ3 depend on, while raw agreement alone
-would flatter the features where the sources genuinely diverge.
+Those four zeros are prevalence artefacts: one source records the feature in
+almost every application or almost none, leaving too little variance for
+\(\kappa\) to correct against, so it collapses despite high raw agreement,
+96.2\% for timely reminders (26 of 26 against 25 of 26) and 96.2\% for travel
+concession. Mean raw agreement across the 20 features is 73.1\%. We report
+both, since \(\kappa\) alone understates how far the sources coincide on the
+features RQ6a and RQ3 depend on, while raw agreement alone flatters those where
+they diverge.
 
 \begin{figure}[t]
   \centering
@@ -195,115 +168,91 @@ would flatter the features where the sources genuinely diverge.
 
 We fit a BERTopic model over \(C_{\mathrm{en}}\) (276,422 documents) using a
 seeded UMAP reduction and a stopword list extended with Islamic-domain terms
-and application-name tokens, to prevent generic devotional vocabulary and
-app-name mentions from dominating topic keywords. The ecosystem-level model
-produced 40 topics plus an outlier bucket. Topic 0 is an undifferentiated
-generic-praise cluster (168,054 documents, 61\% of modelled documents) and the
-outlier bucket holds a further 62,745 (22.7\%); the remaining 39 topics, which
-we label and report, cover approximately 45,600 documents (about 16\% of
-\(C_{\mathrm{en}}\)). All 63 topics across the ecosystem model and three
-targeted sub-models (described below) were labelled by hand across four
-sheets, alongside each model's outlier bucket. We treat the topic model as characterising the interpretable minority
-of the corpus, not the corpus as a whole, throughout the paper.
+and application-name tokens, to keep generic devotional vocabulary and app
+names from dominating topic keywords. The model produced 40 topics plus an
+outlier bucket. Topic 0 is an undifferentiated generic-praise cluster (168,054
+documents, 61\% of modelled documents) and the outlier bucket holds 62,745
+(22.7\%); the remaining 39 topics, which we label and report, cover about
+45,600 documents (16\% of \(C_{\mathrm{en}}\)). All 63 topics across this model
+and three targeted sub-models were labelled by hand across four sheets,
+alongside each model's outlier bucket. The topic model therefore characterises
+the interpretable minority of the corpus, not the corpus as a whole.
 
-In addition to the ecosystem-level model, we fit three targeted sub-models on
-aspect-restricted subsets to support RQ1 (tracker discourse), RQ4 (menstrual
-and inclusion discourse), and RQ5 (feature-bloat discourse). Topic structure
-under BERTopic is sensitive to the UMAP seed; we assessed this by refitting
-each sub-model across five seeds fixed in advance (42--46), before inspecting
-any result. The \texttt{rq1\_tracker} sub-model is stable (mean pairwise
-Adjusted Rand Index 0.837); \texttt{rq5\_bloat} is not (6--11 topics across the
-five seeds, mean pairwise ARI 0.452). Where we draw on \texttt{rq5\_bloat}, we
-therefore claim the recurring themes rather than a specific partition into a
-fixed number of topics.
+The three sub-models are fit on aspect-restricted subsets for RQ1 (tracker
+discourse), RQ4 (menstrual and inclusion discourse), and RQ5 (bloat discourse).
+Topic structure under BERTopic is seed-sensitive; we refit each across five
+seeds fixed in advance (42--46), before inspecting any result.
+\texttt{rq1\_tracker} is stable (mean pairwise Adjusted Rand Index 0.837);
+\texttt{rq5\_bloat} is not (6--11 topics, mean pairwise ARI 0.452), so where we
+draw on it we claim recurring themes rather than a fixed partition.
 
 \subsection{Statistical Models}
 \label{sec:method-models}
 
 We fit five models (M1--M5), one primary per research question for RQ1--RQ5:
-M1 (RQ2, the competing costs of accuracy and interface complaints), M2 (RQ1,
-sentiment by tracker tier), M3 (RQ4, inclusion), M4 (RQ5, feature bloat and
-hardware), and M5 (RQ3, competitive edge features). RQ6 is answered
-descriptively, by comparing promised features against the sentiment their
-mentions record, and enters no inferential model. The primary specification for
-each of the five is a review-level mixed-effects
-model with a random intercept per application, which accounts for the fact
-that reviews cluster within 26 apps of very different size and character. Where
-a mixed model did not converge, we report a cluster-robust OLS fit on the same
-data and specification as a sensitivity estimate, clustering standard errors on
-application.
+M1 (RQ2, competing costs of accuracy and interface complaints), M2 (RQ1,
+sentiment by tracker tier), M3 (RQ4, inclusion), M4 (RQ5, bloat and hardware),
+M5 (RQ3, competitive edge features). RQ6 is answered descriptively, comparing
+promised features against the sentiment their mentions record, and enters no
+inferential model. Each primary specification is a review-level mixed-effects
+model with a random intercept per application, accounting for reviews
+clustering within 26 apps of very different size. Where a mixed model did not
+converge we report a cluster-robust OLS fit on the same data and specification,
+clustering standard errors on application.
 
 Coefficients from the primary specifications enter a single Benjamini--Hochberg
 false-discovery-rate correction: 29 in total, of which 20 survive at
-\(q < 0.05\). The family's composition needs stating precisely, because it
-treats two kinds of refit differently. Cluster-robust refits are reported
-alongside their primary counterparts and are not entered, since correcting a
-robustness check against the test it checks would double-count the contrast.
-The eight ordinal refits of M1's complaint terms \emph{are} entered, because
-they change the outcome variable rather than only the error structure and so
-constitute separate tests. We flag the asymmetry rather than leave it to be
-inferred: it is a defensible line but not the only defensible one, and a reader
-who would draw it elsewhere can recompute from the released coefficient
-table.
+\(q < 0.05\). Cluster-robust refits are not entered, since correcting a
+robustness check against the test it checks would double-count the contrast;
+the eight ordinal refits of M1's complaint terms \emph{are}, because they
+change the outcome variable rather than only the error structure. The asymmetry
+is a defensible line but not the only one, and a reader who would draw it
+elsewhere can recompute from the released coefficient table.
 
-Eleven terms cannot support inference, and we report all eleven rather than
-silently dropping them; they divide into two kinds that sit differently with
-respect to that denominator. Eight are mixed-model terms whose standard errors
-are degenerate rather than merely large --- M2's two tracker-tier terms and six
-from M4, with standard errors from \(4.1\times10^{2}\) to \(2.0\times10^{6}\)
-and every one reporting \(p \approx 0.99999\). These eight do carry
-\(q\)-values and are inside the 29, so read in isolation they resemble
-``tested, not significant'' rather than ``failed to converge''; they account
-for eight of the nine terms in the 29 that fail to survive correction, the
-ninth being \texttt{madhab} in the ordinal specification, which we enter as a
-primary term rather than a sensitivity refit and which returns a small,
-imprecise estimate that reverses sign against M1 (\S\ref{sec:rq2}); we rest no
-directional claim on it. The other three ---
-M3's \texttt{women\_feature\_score\_diff}, M5's \texttt{has\_mosque\_finder},
-and one M5 demand term --- return neither a standard error nor a \(p\)-value,
-so they are outside the 29 rather than inside it, and no correction applies to
-them at all. We
-attribute the non-convergence to a structural cause: a random intercept per app,
-fitted over only 26 apps, cannot be identified separately from an app-level
-predictor in the same model. Throughout, we cite null results only from a model
-that converged, and never describe one of these eleven as evidence of no effect.
+Eleven terms cannot support inference, and we report all eleven. Eight are
+mixed-model terms whose standard errors are degenerate rather than merely large
+--- M2's two tracker-tier terms and six from M4, with standard errors from
+\(4.1\times10^{2}\) to \(2.0\times10^{6}\) and every one reporting
+\(p \approx 0.99999\). These carry \(q\)-values and sit inside the 29, so in
+isolation they resemble ``tested, not significant'' rather than ``failed to
+converge''; they are eight of the nine terms failing correction. The ninth is
+\texttt{madhab} in the ordinal specification, which returns a small, imprecise
+estimate reversing sign against M1 (\S\ref{sec:rq2}). The other three --- M3's
+\texttt{women\_feature\_score\_diff}, M5's \texttt{has\_mosque\_finder}, and
+one M5 demand term --- return neither a standard error nor a \(p\)-value, so
+they fall outside the 29 and no correction applies. The cause is structural: a
+random intercept per app, fitted over 26 apps, cannot be identified separately
+from an app-level predictor in the same model. We cite null results only from
+models that converged, and never describe one of these eleven as evidence of no
+effect.
 
 \subsection{Measurement Quality}
 \label{sec:method-measurement}
 
-Because several of the paper's claims rest on aspect tags, we report their
-precision directly rather than assuming lexicon output equals ground truth.
+Because several claims rest on aspect tags, we report their precision directly.
 Against a 300-row gold sample, of which 192 rows still match under the current
 lexicon configuration, unweighted aspect precision is 69.3\% and
 corpus-volume-weighted precision is 84.4\% (95\% CI [79.7, 88.9]). The gold set
 was originally labelled against an earlier, broader configuration including a
 zero-shot backstop; every subsequent lexicon change has only removed matches,
-never added them, so the 192 surviving rows are an unbiased subset of the
-original 300 rather than a re-labelling exercise. Two aspects,
-\texttt{calendar\_sync} and \texttt{goal\_system}, have no surviving gold rows
-(together 0.2\% of aspect-tagged volume) and are excluded from the weighted
-figure.
+so the 192 surviving rows are an unbiased subset of the original 300 rather
+than a re-labelling exercise. Two aspects, \texttt{calendar\_sync} and \texttt{goal\_system}, lost all their
+gold rows to that narrowing (together 0.2\% of aspect-tagged volume) and are
+excluded from the weighted figure.
 
-The weighted figure is driven by high-volume aspects and conceals substantial
-variation. The 300-row gold draw sampled all 27 aspects at 11 rows each.
-Table~\ref{tab:aspect-precision} reports precision for the 25 whose rows
-survive the current lexicon configuration; \texttt{calendar\_sync} and
-\texttt{goal\_system} lost all of theirs to lexicon narrowing. The 25 account
-for all 192 surviving rows and for the weighted figure above. Seven of them
-fall below 50\%, with gold samples as small as one or two rows. We report this
-in full because several of these are load-bearing for individual research
-questions: every aspect-level count drawn from one of the seven is reported
-elsewhere as a precision-adjusted estimate with its interval, never as a bare
-tagger count. Seventeen aspects sit at or above 64\% precision, and these
-supply almost all model input, with two exceptions we flag rather than bury.
-\texttt{madhab}, at 60\%, enters M1, and its coefficient is also the one M1
-term that reverses sign under the ordinal robustness check, so we rest no
-directional claim on it (\S\ref{sec:rq2}). And the mosque-finder contrast in
-RQ3 is fit on the subset of reviews the \texttt{mosque\_finder} tagger selects,
-which runs at 27\%; because the resulting noise falls on both arms of that
-comparison rather than one, we read the direction of the gap and not its
-magnitude, and say so at the point of use (\S\ref{sec:rq3}). No other model
-term is drawn from an aspect below 50\% precision.
+That figure is driven by high-volume aspects and conceals substantial
+variation. The gold draw sampled all 27 aspects at 11 rows each;
+Table~\ref{tab:aspect-precision} reports the 25 whose rows survive. Seven fall
+below 50\%, with gold samples as small as one or two rows, and several are
+load-bearing: every count drawn from one of the seven is reported elsewhere as
+a precision-adjusted estimate with its interval. Seventeen sit at or above 64\%
+and supply almost all model input, with two exceptions. \texttt{madhab}, at
+60\%, enters M1 and is also the one M1 term reversing sign under the ordinal
+check, so we rest no directional claim on it (\S\ref{sec:rq2}). RQ3's
+mosque-finder contrast is fit on the subset the \texttt{mosque\_finder} tagger
+selects, at 27\%; that noise falls on both arms, so we read the direction of
+the gap and not its magnitude (\S\ref{sec:rq3}). No other model term is drawn
+from an aspect below 50\%.
 
 \begin{table*}[t]
   \centering
@@ -346,94 +295,80 @@ term is drawn from an aspect below 50\% precision.
 \end{table*}
 
 Gold-sample size per aspect ranges from one to eleven rows, so these intervals
-are wide; we treat the width as honest uncertainty rather than a reason to
-report the point estimate alone. We also measured a zero-shot classification
-backstop intended to supplement the lexicon, and dropped it after it scored
-11.5\% precision on 300 hand-labelled sentences; we report this discarded
-component as evidence of calibration during development rather than omit it.
+are wide and we treat the width as honest uncertainty. We also measured a
+zero-shot classification backstop intended to supplement the lexicon, and
+dropped it after it scored 11.5\% precision on 300 hand-labelled sentences,
+reporting the discarded component as evidence of calibration.
 
 \subsection{Research Ethics and Data Handling}
 \label{sec:method-ethics}
 
 The corpus is public store review text. No user was recruited, contacted, or
 observed, and no account-linked or private data was accessed, so the study
-involved no human participants and was not submitted for human-subjects
-review. We none the less treat it as
-data about people: the reviews concern religious observance, and some disclose
-menstruation, illness, or lapses in practice, which a reviewer complaining about
-a notification may not have understood themselves to be publishing. We
-therefore report no reviewer names or identifiers, attribute quotations only to
-an application and a star rating, and choose quotations carrying no incidental
-personal detail. We quote verbatim rather than paraphrase, since altering
-wording in a study whose claim concerns devotional register would misrepresent
-the evidence, and we accept the residual risk that a short quoted string can be
-matched back through store search. Two of our quotations disclose menstruation, the category we name above as
-most sensitive. We judged the disclosure necessary: RQ4's claim is that users
-voice this need explicitly, and paraphrase would convert direct evidence into
-our own assertion of it. We chose the shortest instances that carry the point,
-neither names an author, and both are already public and searchable. The
-artefact releases derived data rather than redistributable raw review text
-(\S\ref{sec:method-repro}). We name
-applications throughout, including in criticism: they are public commercial
-products, and the argument cannot be made without saying which application did
-what. Where we name one in connection with a specific controversy rather than
-an ecosystem pattern, we confine the claim to that episode
-(\S\ref{sec:limitations}).
+involved no human participants and was not submitted for human-subjects review.
+We none the less treat it as data about people: the reviews concern religious
+observance, and some disclose menstruation, illness, or lapses in practice,
+which a reviewer complaining about a notification may not have understood
+themselves to be publishing. We therefore report no reviewer names or
+identifiers, attribute quotations only to an application and a star rating, and
+choose quotations carrying no incidental personal detail. We quote verbatim,
+since altering wording in a study whose claim concerns devotional register
+would misrepresent the evidence, and accept the residual risk that a short
+quoted string can be matched back through store search. Two quotations disclose
+menstruation, the most sensitive category above; we judged this necessary, since
+RQ4's claim is that users voice the need explicitly and paraphrase would convert
+direct evidence into our own assertion of it. We name applications throughout,
+including in criticism: they are public commercial products, and the argument
+cannot be made without saying which did what. Where we name one in connection
+with a specific controversy rather than an ecosystem pattern, we confine the
+claim to that episode (\S\ref{sec:limitations}).
 
 \subsection{Use of AI Assistance}
 \label{sec:method-ai}
 
-All analysis software for this study was written with the assistance of Claude
-Code, Anthropic's command-line coding agent, driven interactively by the
-authors. We disclose this because the assistance was substantive in the conduct
-of the research rather than confined to preparing the manuscript. Three
-boundaries bound what it can threaten. First, no generative model produced,
-imputed, translated, or altered any review text, any label used as data, or any
-reported statistic; every number here is the output of code executed over the
-scraped corpus. Second, the design is the authors' own: the six research
-questions were specified in a written analysis plan committed to version
-control before the analysis was run, the aspect lexicon and the coding frame
-were hand-built, and every gold-standard label was assigned by a human
-annotator without model assistance. Third, the authors read, executed, and are
-responsible for all code.
+All analysis software was written with the assistance of Claude Code,
+Anthropic's command-line coding agent, driven interactively by the authors. We
+disclose this because the assistance was substantive in the conduct of the
+research, not confined to preparing the manuscript. Three boundaries bound what
+it can threaten. First, no generative model produced, imputed, translated, or
+altered any review text, any label used as data, or any reported statistic.
+Second, the design is the authors' own: the six research questions were
+specified in a written analysis plan committed to version control before the
+analysis was run, the aspect lexicon and coding frame were hand-built, and every
+gold-standard label was assigned by a human annotator without model assistance.
+Third, the authors read, executed, and are responsible for all code.
 
-Assistant-written code can carry defects a human author would not introduce,
-and we do not claim otherwise; our safeguards are the ones already reported ---
-per-stage precision measured against hand-labelled gold sets, a component those
-checks rejected at 11.5\% precision, the seed-stability pass, and the
-byte-identical re-run below. One such defect was found and fixed during
-analysis: the three sub-models shared a hardcoded output path and overwrote the
-ecosystem topic sheet on each run. The sheet was rebuilt from the saved model
-and stored assignments without refitting, and no reported statistic depended on
-it. Confidence in the pipeline should rest on the checks that catch such
-faults, not on an assumption that none occurred.
+Assistant-written code can carry defects a human author would not introduce.
+Our safeguards are those already reported: per-stage precision against
+hand-labelled gold sets, a component those checks rejected at 11.5\% precision,
+the seed-stability pass, and the byte-identical re-run below. One defect was
+found and fixed: the three sub-models shared a hardcoded output path and
+overwrote the ecosystem topic sheet on each run. The sheet was rebuilt from the
+saved model and stored assignments without refitting, and no reported statistic
+depended on it.
 
 \subsection{Reproducibility}
 \label{sec:method-repro}
 
-The analysis reported in this paper was run on 2026-09-03 at commit
-\texttt{5da2db7}. We subsequently re-ran the modelling stage from a clean tree
-at the same commit and obtained byte-identical output, confirming
-reproducibility of the reported coefficients. All stochastic components are
-seeded: the UMAP reduction underlying topic modelling is seeded, and the five
-seeds used for the topic-stability check (42--46) were fixed in advance of
-inspecting any result, so the seed set could not be adjusted after the fact to
-favour a particular outcome. A run manifest recording commit, hardware, batch
-size, and library versions for every reported figure accompanies the research
-artefact.
+The analysis was run on 2026-09-03 at commit \texttt{5da2db7}; re-running the
+modelling stage from a clean tree at the same commit gave byte-identical
+output. All stochastic components are seeded, and the five seeds used for the
+topic-stability check (42--46) were fixed in advance of inspecting any result,
+so the seed set could not be adjusted after the fact. A run manifest recording
+commit, hardware, batch size, and library versions for every reported figure
+accompanies the artefact.
 
 \paragraph{Data and code availability.} We release the full pipeline, the
 aspect lexicon, the feature matrix, every hand-labelled gold and topic sheet,
 the model output, and the run manifest, at a URL supplied on acceptance and
-withheld here for anonymous review. Derived data sufficient to recompute every
-table and figure is included. Two things are not: the raw review corpus, which
-the store's terms do not permit us to redistribute and which carries the
-re-identification risk noted in \S\ref{sec:method-ethics}, and the fitted model
-binaries, which are large and reproducible from the seeded pipeline. The gold
-sheets we do release carry the review text their labels apply to, since a
+withheld here for anonymous review, together with derived data sufficient to
+recompute every table and figure. Two things are excluded: the raw review
+corpus, which the store's terms do not permit us to redistribute and which
+carries the re-identification risk noted in \S\ref{sec:method-ethics}, and the
+fitted model binaries, which are large and reproducible from the seeded
+pipeline. The gold sheets carry the review text their labels apply to, since a
 precision figure cannot be checked without it; that is a few hundred rows drawn
 for verification rather than the corpus, and we judge the disclosure
-proportionate on the same reasoning that governs quotation above. The
-collection script and application list are included, so the corpus can be
-re-gathered, though store histories change and an exact reconstruction of our
-snapshot is not possible.
+proportionate on the reasoning governing quotation above. The collection script
+and application list are included, so the corpus can be re-gathered, though
+store histories change and exact reconstruction is not possible.
