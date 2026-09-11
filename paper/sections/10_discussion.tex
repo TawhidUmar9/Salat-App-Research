@@ -3,94 +3,75 @@
 \section{Discussion}
 \label{sec:discussion}
 
-Across six research questions one pattern recurs: satisfaction with a
-devotional app is governed by the reliability of its core functions, not by how
-many features it offers, and three framings borrowed from the broader HCI and
-self-tracking literatures mis-locate the problem. Prescriptive consequences are
-collected in \S\ref{sec:design-implications}.
+One pattern recurs across all six research questions: satisfaction with a
+devotional app is governed by the reliability of its core functions, not by
+feature count or polish. Three framings borrowed from the broader HCI and
+self-tracking literatures mislocate where the problem sits.
 
 \subsection{Three Reframings}
 
-\textbf{Gamification.} The harm the self-tracking literature predicts is guilt
-induced by streaks and scores. That is not what we find (\S\ref{sec:rq1}). The
-harm is a record users cannot trust and a prompt that does not arrive: an app
-losing logged history, regressing a count, or silently ceasing to prompt,
-before logging is even at issue. Where a genuinely normative objection surfaces
-it is not that the app makes the user feel judged, but that it \emph{models
-worship incorrectly}. Softening a streak mechanic does not address a tracker
-that does not know a user is exempt from prayer that day.
+\textbf{Gamification.} The self-tracking literature predicts guilt induced by
+streaks and scores. That is not what we find (\S\ref{sec:rq1}). The real harm
+is a record users cannot trust and a prompt that does not arrive. Where a
+genuine normative objection does surface, it is that the app \emph{models
+worship incorrectly} --- no menstrual exemption, no supererogatory
+(\emph{sunnah}) prayer support. Softening a streak mechanic does not fix a
+tracker that does not know a user is exempt from prayer that day.
 
-\textbf{Accuracy versus aesthetics.} The trade-off is mis-specified
-(\S\ref{sec:rq2}). Accuracy is not one thing to be weighed against interface
-polish: prayer-time correctness behaves like a reliability requirement,
-disjoint in cost from every interface complaint and carrying the corpus's
-second-highest penalty, while madhab configuration behaves like an ordinary
-preference, cheap to get wrong and reversing sign under a robustness check.
-Treating ``accuracy'' as a single design dimension obscures the distinction
-that matters for prioritisation.
+\textbf{Accuracy versus aesthetics.} This trade-off is mis-specified
+(\S\ref{sec:rq2}). Prayer-time correctness behaves like a reliability
+requirement, disjoint in cost from every interface complaint and carrying the
+corpus's second-highest penalty, while madhab configuration behaves like an
+ordinary preference, cheap to get wrong. Treating ``accuracy'' as a single
+design dimension hides exactly the distinction that matters for
+prioritisation.
 
 \textbf{Feature bloat.} What users call bloat is a property of what the
 interface \emph{surfaces} in the moment, not of how many capabilities the
 application \emph{contains} (\S\ref{sec:rq5}). The feature-count framing
 cannot express that distinction, which is why it fails in both directions at
-once: no relationship where one is predicted, and an inverse one where none
-is.
+once.
 
 \subsection{The Two Gaps}
 
-RQ6 (\S\ref{sec:rq6}) names two failures the other five research questions
-arrive at independently. Coverage is a \emph{market failure}: whole categories
-of need are served by under a quarter of the ecosystem despite explicit demand.
-Delivery is a \emph{quality failure}, and the more consequential, because it
-falls on promises already made rather than capabilities never claimed. The two
-most-broken promises are adhan reminders and monetisation terms: the core
-function of a prayer-times app, and the terms it is offered on.
+RQ6 (\S\ref{sec:rq6}) names two failures that the other five research
+questions independently arrive at from different directions. Coverage is a
+market failure: whole categories of need are served by under a quarter of the
+ecosystem despite demand that is explicit and easy to find in review text.
+Delivery is a quality failure, and the more consequential, because it falls
+on promises applications have already made. The two most-broken promises ---
+adhan reminders and monetisation terms --- are the core function of a
+prayer-times app and the terms it is offered on.
 
-\subsection{Methods Implications}
+\subsection{Methods Lessons}
 
-Two of this paper's four contributions are methodological, carrying three
-lessons for app-store review research beyond this domain.
+Two of this paper's four contributions are methodological.
 
 \textbf{Star ratings are an unsafe proxy for defect severity.} 41.6\% of
 reviews carrying a negative accuracy complaint award four or five stars
-(\S\ref{sec:rq2}). A prioritisation process reading severity off the star
-distribution --- the signal most ranking and triage systems are built around
---- will systematically under-weight exactly the class of defect users are
-least willing to let tank their rating. Text, not stars, is where it is
+(\S\ref{sec:rq2}). Text, not stars, is where this class of complaint is
 visible.
 
 \textbf{Single-app qualitative sampling can manufacture genre-level themes.}
 Themes that looked like general properties of gamified prayer tracking
 accounted for 51\% of a single-application coding pass and only 4\% of an
 independently drawn, stratified cross-application pass on the same phenomenon
-(\S\ref{sec:rq1-coding}). Both were coded in good faith; the difference is
-entirely in what a selection rule's tie-break returned. Any qualitative
-app-review study sampling from one application, even inadvertently, should
-treat its themes as a hypothesis about that application until checked against
-others.
+(\S\ref{sec:rq1-coding}).
 
 \textbf{Devotional register breaks off-the-shelf NLP.} A feature-vocabulary
-match scored 0\% precision on its own gold rows because reviewers routinely
-close devotional app reviews with formulae such as ``May Allah reward you,''
-which generic goal-related keywords mistake for feedback about a tracking
-feature (\S\ref{sec:method-devotional-filtering}). Anyone applying
-general-purpose sentiment or aspect tooling to religious or otherwise
-register-heavy text should expect this and budget for a filtering pass before
-trusting aspect-level output.
+match scored 0\% precision because reviewers routinely close reviews with
+formulae such as ``May Allah reward you,'' which generic keywords mistake for
+feedback about a tracking feature (\S\ref{sec:method-devotional-filtering}).
 
-\subsection{Three Threads}
+\subsection{Threads That Recur}
 
-Three concerns recur across research questions rather than belonging to any
-one, and naming them is part of what makes six questions a single argument.
-\emph{Advertising and monetisation} run together without being the same thing:
-intrusive advertising is the costliest complaint by coefficient
-(\S\ref{sec:rq2}) and a dominant theme in bloat discourse (\S\ref{sec:rq5}),
-while monetisation, tracked separately, is an RQ1 coding theme and one of RQ6's
-two most-broken promises. \emph{Adhan reminders} are the most-cited reason for
-choosing an app (\S\ref{sec:rq3}), one of the two most-broken promises
-(\S\ref{sec:rq6}), and the dominant tracker-dissatisfaction theme
-(\S\ref{sec:rq1}). Beneath both sits \emph{the record rather than the streak}:
-RQ1's reframing of gamification harm, RQ4's menstrual exemption as a record the
-app gets wrong rather than a feature it lacks, and RQ6's coverage gap are three
-instances of one want --- an accurate, owned, accommodating record of one's own
-worship.
+Advertising and monetisation run together through the results without being
+the same thing: intrusive advertising is the costliest complaint in the
+corpus by coefficient (\S\ref{sec:rq2}) and a dominant theme in bloat
+discourse (\S\ref{sec:rq5}), while monetisation, tracked separately, is an
+RQ1 coding theme and one of RQ6's two most-broken promises. Adhan reminders
+are the most-cited reason users give for choosing an app (\S\ref{sec:rq3}),
+one of the two most-broken promises (\S\ref{sec:rq6}), and the dominant
+tracker-dissatisfaction theme at 46\% (\S\ref{sec:rq1}). Beneath both sits one
+want: an accurate, owned, accommodating record of one's own worship --- the
+record, not the streak.

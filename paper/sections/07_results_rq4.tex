@@ -3,27 +3,20 @@
 \section{RQ4: Bio-Spiritual Inclusion}
 \label{sec:rq4}
 
-Islamic law exempts menstruating women from the obligation to pray, and a
-prayer tracker that does not represent this exemption misrepresents the
-practice it claims to track. RQ4 asks how well the ecosystem serves that need.
-Designers do not disagree about how to handle it: almost no one has built it,
-the few implementations that exist are not trusted by their own users, and
-demand is voiced explicitly and repeatedly across nearly the whole ecosystem.
-Inclusion here is an unmet need, not a contested design question.
+Islamic law exempts menstruating women from prayer; a tracker that does not
+represent this exemption misrepresents the practice it claims to track. RQ4
+asks how well this ecosystem serves that need. Almost no one has built it, the
+few implementations are not trusted, and demand is voiced explicitly across
+nearly the whole ecosystem. This is an unmet need, not a contested design
+choice.
 
-\subsection{Scarcity Is the Finding}
+\subsection{Almost No One Has Built It}
 
-The \texttt{women\_period} tagger produces 2,194 aspect-tagged sentences,
-resolving to 2,182 distinct reviews across the 24 of 26 applications carrying
-any (Figure~\ref{fig:rq4-women-aspect}). Its precision is only 20\% (95\% CI
-[6, 51]), so we report an adjusted estimate of roughly 439 genuine mentions
-(interval [124, 1{,}119]), still spread across nearly the entire ecosystem.
-RQ6's promise-and-delivery analysis works from a narrower basis of 1,981
-reviews, which is where the sentiment rates below come from; we name all three
-units rather than let one stand in for another. Only three applications ---
-Athan, Islamic Habit Tracker, and Pillars --- ship any menstrual handling at
-all. The rest of this section rests on demand signals and this three-app
-scarcity, neither of which depends on the tagger's precision.
+The \texttt{women\_period} tagger flags 2,194 sentences across 2,182 reviews in
+24 of 26 apps (Figure~\ref{fig:rq4-women-aspect}), but its precision is only
+20\% (95\% CI [6, 51]), so the adjusted estimate is closer to 439 genuine
+mentions. Only three apps --- Athan, Islamic Habit Tracker, and Pillars ---
+ship any menstrual handling at all.
 
 \begin{figure}[t]
   \centering
@@ -32,17 +25,13 @@ scarcity, neither of which depends on the tagger's precision.
   \label{fig:rq4-women-aspect}
 \end{figure}
 
-\subsection{Demand Is Explicit, and Concentrated Where the Feature Is Absent}
+\subsection{Demand Is Explicit}
 
 Demand-pattern extraction, validated at 91.5\% precision
-(\S\ref{sec:method-demand}), is the firm ground here. The 272 demand signals
-tagged to \texttt{women\_period} break down into 161 explicit requests, 51
-preference citations, 36 churn statements, 21 statements of absence, and 3
-tenure citations; 216 come from the 16 applications that both lack the feature
-and draw any demand, out of the 23 lacking it. These are signal counts, and one
-review can carry several: the same demand resolves to 206 distinct reviews,
-the unit RQ6b's unmet-need index uses (\S\ref{sec:rq6}). The register is
-direct rather than incidental:
+(\S\ref{sec:method-demand}), is firmer ground. The 272 demand signals tagged
+to \texttt{women\_period} break down into 161 requests, 51 preference
+citations, 36 churn statements, 21 statements of absence, and 3 tenure
+citations, mostly from apps lacking the feature:
 
 \begin{quote}
 \itshape ``a feature for sisters who are on their monthlies would be nice so
@@ -50,14 +39,12 @@ they can keep track''
 \end{quote}
 \hspace*{1em}--- Muslim Pro: Quran Athan Prayer, 4 stars
 
-\subsection{Having the Feature Does Not Improve Sentiment}
+\subsection{Having It Does Not Help}
 
-If the gap were purely one of coverage, the three applications shipping
-menstrual handling should show better sentiment on the topic. They do not:
-mentions run 26.3\% negative in those three against 26.0\% in the 21 lacking it
-that draw any mention. Shipping the feature is not associated with users being
-happier about it, which points at the quality of existing implementations
-rather than availability alone:
+If this were purely a coverage gap, apps that ship menstrual handling should
+show better sentiment on the topic. They do not: 26.3\% negative in the three
+apps that have it, against 26.0\% in apps that lack it --- indistinguishable.
+This points to execution problems, not just availability:
 
 \begin{quote}
 \itshape ``The only complaint I have is: when I turn on menstrual mode it
@@ -65,40 +52,28 @@ doesn't turn off the prayers as it promises to do. Please fix it''
 \end{quote}
 \hspace*{1em}--- Athan: Prayer Times \& Al Quran, 4 stars
 
-\noindent The RQ1 coding corroborates this independently: \emph{menstrual mode
-unreliable} appears three times in the single-app pass, and \emph{menstrual
-exemption absent} once in the cross-app pass, from a different application
-(\S\ref{sec:rq1-coding}). Across two independently drawn samples, this is rare
-first-hand evidence that the failure is one of execution as well as coverage.
+The RQ1 coding passes independently corroborate this: ``menstrual mode
+unreliable'' appears three times in the single-app pass, and ``menstrual
+exemption absent'' once in the cross-app pass, from a different app
+(\S\ref{sec:rq1-coding}).
 
-\subsection{The Between-App Comparison Is Not Estimable}
+\subsection{Why This Cannot Be Tested Causally}
 
-With three applications on the treated side, no causal or comparative claim
-about star rating is possible, and the data show why. The review-weighted
-difference in mean star rating is \(+0.085\) (95\% CI \([+0.074, +0.096]\),
-computed from the two review pools rather than from M3, whose
-\texttt{women\_feature\_score\_diff} term returns neither a standard error nor a
-\(p\)-value): apps with the feature average 4.476 stars against 4.391 without
-(46,741 reviews across 3 treated apps, 277,946 across 23 untreated).
-Averaging first by app and then across apps reverses the sign to \(-0.236\)
-(4.135 against 4.371). Both are arithmetically correct and answer different
-questions: Athan alone contributes 44,954 of the treated reviews, so the
-review-weighted figure is close to one application's rating, while the
-unweighted one is pulled down by Islamic Habit Tracker, the corpus's
-lowest-rated application. We report \(+0.085\) and label it not estimable
-rather than null. A difference reversing direction under a change of
-aggregation, on three treated applications, is the clearest demonstration that
-\(N = 3\) cannot answer this question.
+With only three apps on the treated side, no causal claim about star rating is
+possible, and the numbers show why. Review-weighted, apps with the feature
+average 4.476 stars against 4.391 without (\(+0.085\)); averaged first by app
+and then across apps, the sign flips to \(-0.236\) (4.135 against 4.371). Both
+are arithmetically correct and answer different questions, since one app
+(Athan) contributes nearly all the treated reviews. A result that reverses sign
+depending on how it is averaged, on three treated apps, is the clearest
+demonstration that \(N=3\) cannot answer this question.
 
-\subsection{The Topic Model Cannot Add Resolution}
+A topic sub-model fit on women's-health discourse also cannot help: six of its
+ten topics collapse onto a single unrelated controversy, one app's data-sale
+episode, leaving no room to further resolve menstrual-handling discourse
+specifically (\S\ref{sec:limitations}).
 
-A sub-model fit on women's-health and privacy discourse does not separate
-cleanly: after hand-labelling, five of its ten topics carry an identical label
-describing one application's data being sold to the US military and a sixth is
-a near-duplicate, so six of ten topics sit on a single theme holding 58\% of
-the sub-model's non-outlier documents (4,788 of 8,285). One application's
-data-handling controversy dominates the subset to the point that the sub-model
-cannot further resolve menstrual-handling discourse. We report recurring themes
-rather than treat the partition as ten findings, and return to the episode in
-\S\ref{sec:limitations}.
-
+Bio-spiritual inclusion is an unmet need rather than a contested design
+question. \texttt{women\_period} is among the four aspects under 25\%
+ecosystem coverage and ranks second on RQ6's unmet-need index
+(\S\ref{sec:rq6}).

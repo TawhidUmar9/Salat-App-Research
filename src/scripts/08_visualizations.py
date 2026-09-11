@@ -160,7 +160,7 @@ def fig02_sentiment_agreement():
         for i in range(3):
             for j in range(3):
                 ax.text(j, i, f"{cm[i, j]:.2f}", ha="center", va="center",
-                        color="white" if cm[i, j] > 0.5 else "black", fontsize=9)
+                        color="black", fontsize=9)
         ax.set_xticks(range(3)); ax.set_xticklabels(labels, rotation=45)
         ax.set_yticks(range(3)); ax.set_yticklabels(labels)
         ax.set_xlabel(b.replace("_label", "")); ax.set_ylabel(a.replace("_label", ""))

@@ -3,135 +3,90 @@
 \section{Related Work}
 \label{sec:related-work}
 
-We draw on four strands: religious and devotional technology in HCI;
-gamification and self-tracking, specifically the tracking-induced guilt
-literature RQ1 contradicts; app-store review mining as a method; and the
-feature-bloat literature RQ5 tests.
+We draw on four strands: religious technology in HCI, gamification and
+self-tracking, app-store review mining as a method, and the literature on
+feature bloat.
 
-\subsection{Religious and Devotional Technology in HCI}
+\subsection{Religious and Devotional Technology}
 
-HCI and CSCW have taken up religious practice as a first-class design concern
-across several traditions and platforms. \citet{abokhodair2020holytweets}
-analyse 2.6 million tweets sharing Quran verses on Arabic Twitter, combining
-topic analysis with a qualitative study of devotional goals and demonstrating
-that large-scale mixed-methods analysis of Islamic digital practice is feasible
---- a precedent our review corpus follows on a different platform.
+HCI and CSCW have studied religious practice across several traditions.
+\citet{abokhodair2020holytweets} analyse 2.6 million tweets sharing Quran
+verses, combining topic analysis with a qualitative study of devotional goals.
 \citet{wolf2023blessing} design for ``uncontrollability'' in a Christian
-blessing ritual, a value in tension with the on-demand paradigms most software
-assumes, and \citet{bhattacharjee2025residual} interview Hindu migrants in
-Canada sustaining practice across displacement. None addresses prayer-time or
-devotional utility apps specifically, or reviews at ecosystem scale.
+blessing ritual, and \citet{bhattacharjee2025residual} interview Hindu
+migrants sustaining practice across displacement. None addresses prayer-time
+apps specifically or reviews at ecosystem scale.
 
-Closer to our object, \citet{bellar2017ipray} textually analyses 65 Catholic
-and Islamic prayer-app descriptions and user-tests one app from each tradition,
-identifying the centrality of reminder features --- which our RQ3 and RQ6
-corroborate independently at a different scale.
-\citet{azahari2025comparative} compare Muslim Pro and Sajda by expert
-heuristic evaluation, finding intrusive advertising and complex navigation in
-the feature-rich app against simplicity and limited functionality in the
-minimal one. RQ5 revisits that pattern with corpus evidence rather than expert
-judgement, and complicates it: we do not find that a fuller feature set
-predicts worse sentiment.
+Closer to our topic, \citet{bellar2017ipray} analyses 65 Catholic and Islamic
+prayer-app descriptions and finds reminder features central to design ---
+which our RQ3 and RQ6 corroborate independently at a much larger scale.
+\citet{azahari2025comparative} compare two named apps by expert evaluation,
+finding intrusive ads in the feature-rich one against simplicity in the
+minimal one. Our RQ5 revisits that pattern with corpus evidence and
+complicates it: we do not find that a fuller feature set predicts worse
+sentiment.
 
 The closest methodological precedent is a pair of studies by
-\citet{noor2025halaltourism} and \citet{noor2026halalsuperapps}, applying
-Leximancer content analysis to reviews of a single Muslim-lifestyle
-application and identifying service-quality themes --- prayer time accuracy,
-adhan reliability, advertising --- that recur throughout our own results. Both
-analyse one application (279 and 2,459 reviews); ours analyses 26 applications
-and 732,194 reviews with aspect-based sentiment, seeded topic modelling,
-demand-signal extraction, and mixed-effects models rather than content-analysis
-themes alone, which is what lets us distinguish an ecosystem-level finding from
-an artefact of one application's release history (\S\ref{sec:rq1-coding}). We
-position our contribution as filling that gap, not as the first study of
-Islamic mobile applications in HCI.
+\citet{noor2025halaltourism} and \citet{noor2026halalsuperapps}, who apply
+content analysis to reviews of one Muslim-lifestyle app and find themes ---
+prayer-time accuracy, adhan reliability, advertising --- that recur throughout
+our own results. Both studies analyse a single app (279 and 2,459 reviews);
+ours analyses 26 apps and 732,194 reviews with aspect-based sentiment and
+mixed-effects models, which is what lets us tell an ecosystem-level finding
+apart from an artefact of one app's release history (\S\ref{sec:rq1-coding}).
 
 \subsection{Gamification and Self-Tracking}
 
 A substantial literature documents that gamified self-tracking --- streaks,
-points, badges --- can produce exactly the harm RQ1 tests for.
-\citet{renfree2016dontkick} show that streaks and reminders sustain new
-behaviour but create a dependency whose loss introduces fragility into a user's
-change effort, and \citet{weathers2023activitystreaks} characterise what makes
-a streak psychologically sticky, including framing it as a daily rather than
-cumulative task. In interview studies of wearable-tracker users, both
+points, badges --- can produce real harm. \citet{renfree2016dontkick} show that
+streaks sustain new behaviour but create a dependency whose loss introduces
+fragility. In interview studies of wearable-tracker users,
 \citet{humphreys2026toxic} and \citet{demetrovics2025lifestylepressures}
-report internal conflict organised around anxiety, guilt, loss of bodily
-autonomy, and what the latter names ``behavioral conformity and goal
-obsession.'' Experimentally, \citet{bai2024darkside} find competition-based
-gamification in fitness apps increases stress relative to a
-self-exploration-oriented design. Against this, a meta-analysis by
-\citet{six2021gamification} finds no significant difference in
-depressive-symptom outcomes between gamified and non-gamified mental-health
-apps, so the harm is not universal even within self-tracking.
+report anxiety, guilt, and loss of autonomy, and \citet{bai2024darkside} find
+competition-based gamification increases stress. Against this, a meta-analysis
+by \citet{six2021gamification} finds no difference in outcomes between
+gamified and non-gamified mental-health apps, so the harm is not universal.
 
-We engage this literature on its strongest terms: the mechanisms it identifies
---- dependency on an artificial streak, anxiety at a data mismatch with lived
-experience, conformity to an externally imposed goal --- are well-evidenced in
-fitness and habit-tracking contexts. RQ1 asks whether the same mechanism
-operates where the tracked behaviour is a religious obligation rather than a
-personal fitness goal, and finds that it largely does not (\S\ref{sec:rq1}). We
-read this as a boundary condition rather than a refutation: the harm this
-literature documents may depend on the tracked behaviour being one the user set
-for themselves, which does not describe a prayer obligation.
+RQ1 asks whether the same mechanism operates when the tracked behaviour is a
+religious obligation rather than a personal fitness goal, and finds that it
+largely does not (\S\ref{sec:rq1}). We read this as a boundary condition rather
+than a refutation: the harm this literature documents may depend on the
+tracked behaviour being one the user set for themselves, which a prayer
+obligation is not.
 
 \subsection{App-Store Review Mining as Method}
 
-Mining app-store reviews is an established method with a maturing literature.
-\citet{dabrowski2022analysing} survey 182 papers published between 2012 and
-2020, classifying the field by information mined, techniques applied, and
-activity supported; \citet{alsubaihin2019appstore} study how the store reshapes
-developers' release and requirements practices;
-\citet{ciurumelea2017analyzing} build a review taxonomy validated across 39
-applications; and \citet{memon2023appstoremining} combine topic modelling,
-sentiment analysis, and functional/non-functional classification in a pipeline
-structurally similar to ours, on a general consumer-app sample.
+Mining app-store reviews is an established method.
+\citet{dabrowski2022analysing} survey 182 papers on the field, and
+\citet{ciurumelea2017analyzing} build a review taxonomy across 39 apps.
 
-The closest precedent for our scale and aspect-level design is
-\citet{haggag2022mhealth}, who extract over five million reviews for 278
-mHealth applications, classify them into 14 aspect categories, and validate by
-hand-analysing 1,000 reviews per aspect. We follow their basic move ---
-ecosystem-scale mining resolved to named aspects rather than global sentiment
---- in a domain their sample does not cover, and depart on one point that
-matters for RQ2: several of their headline findings are stated as shares of
-users awarding one star to an aspect, treating the star rating as a readable
-index of severity. Our corpus does not support that assumption
-(\S\ref{sec:rq2}), though the effect may be specific to defects users are
-unwilling to let tank an app they otherwise value. Their gold samples are also
-far larger than ours, which is why we report per-aspect precision with
-intervals (\S\ref{sec:method-measurement}) rather than a single figure.
+The closest precedent for our scale is \citet{haggag2022mhealth}, who extract
+over five million reviews for 278 mHealth apps and classify them into 14
+aspect categories. We follow their basic move --- ecosystem-scale mining
+resolved to named aspects --- but depart on one point that matters for RQ2:
+several of their findings are stated as shares of users awarding one star to an
+aspect, treating the star rating as a readable index of severity. Our corpus
+does not support that assumption (\S\ref{sec:rq2}).
+\citet{guluzade2024eating} pair a functionality audit of 27 eating-disorder
+apps with a content analysis of reviews; their two-source design, a matrix read
+against what reviewers say, is structurally our promise-versus-delivery
+comparison (\S\ref{sec:method-promise}), and the nearest analogue we have found
+to RQ4's menstrual-exemption gap outside a religious setting.
 
-\citet{guluzade2024eating} pair a functionality audit of 27 mindfulness-eating
-and eating-disorder applications with a content analysis of 1,248 reviews,
-where the tracked behaviour is personally sensitive. Their two-source design, a
-hand-built functionality matrix read against what reviewers say, is structurally
-our promise-versus-delivery comparison (\S\ref{sec:method-promise}), and their
-concern with tracking that misrepresents a user's situation is the nearest
-analogue we have found to RQ4's menstrual-exemption gap outside a religious
-setting. Our contribution relative to theirs is scale and inference, letting us
-report how weakly the two promise sources agree rather than treat a
-functionality matrix as ground truth.
-
-Beyond the devotional domain, this paper adds two risks inherent to the method
-that the literature has not, to our knowledge, quantified directly: star
-ratings systematically hide a class of substantive complaint
-(\S\ref{sec:rq2}), and single-app qualitative sampling can manufacture themes
-reading as genre-level findings (\S\ref{sec:rq1-coding}).
+Beyond the devotional domain, this paper contributes two risks that this
+literature has not, to our knowledge, quantified directly: star ratings
+systematically hide a class of substantive complaint (\S\ref{sec:rq2}), and
+single-app qualitative sampling can manufacture themes that read as
+genre-level findings (\S\ref{sec:rq1-coding}).
 
 \subsection{Feature Bloat and Interface Complexity}
 
-That more features degrade user experience is a widely held assumption in
-software and product design, more often asserted than tested.
-\citet{marzi2022overfeaturing} reviews the ``over-featuring'' literature
-across the terms it goes by --- feature creep, feature fatigue, overdesign,
-scope creep, gold-plating --- and finds the phenomenon ranked among the top ten
-risks of new-product-development failure alongside ``a lack of theoretical
-development, and a limited investigation of [its] causes, drivers, and
-performance effects.'' In one of the few empirical investigations,
-\citet{blackler2016rtfm} find over-featured consumer products do produce
-negative emotional experiences and that most users do not exercise most
+That more features degrade user experience is widely assumed and rarely
+tested. \citet{marzi2022overfeaturing} reviews the ``over-featuring''
+literature and finds the phenomenon ranked among the top risks of
+new-product-development failure, alongside a lack of investigation of its
+causes. \citet{blackler2016rtfm} find over-featured products do produce
+negative emotional experiences, and that most users do not exercise most
 features. RQ5 tests the commonly assumed causal link --- that a higher feature
-count predicts more bloat complaints --- against corpus data, and finds it
-fails in both directions (\S\ref{sec:rq5}). Read alongside Marzi's observation
-that the phenomenon is asserted more often than investigated, our result
-suggests the assumption has outrun its evidence, at least in this domain.
+count predicts more bloat complaints --- directly against corpus data, and
+finds it fails in both directions (\S\ref{sec:rq5}).

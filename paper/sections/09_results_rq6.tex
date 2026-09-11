@@ -3,31 +3,32 @@
 \section{RQ6: Completeness and the Two Gaps}
 \label{sec:rq6}
 
-The final research question asks whether current devotional apps are enough, in
-the sense the ``apps under-serve niche needs'' framing implies. The answer is
-no, but that word conceals two structurally different failures calling for
-different remedies. A \emph{coverage gap} is a market failure: entire
-categories of need are served by a minority of the ecosystem despite measurable
-demand. A \emph{delivery gap} is a quality failure, and the more damning,
-because it falls on promises apps have already made --- including the most
-basic ones.
+The final research question asks directly whether current apps are ``enough.''
+The answer is no, but that single word hides two different failures that call
+for different remedies. A \emph{coverage gap} is a market failure: whole
+categories of need are served by only a minority of apps despite measurable
+demand. A \emph{delivery gap} is a quality failure, and the more damning of the
+two, because it falls on promises apps have already made.
 
-\subsection{RQ6a: The Delivery Gap}
+\subsection{The Delivery Gap}
 
-We compared each application's store-description promises against the sentiment
-its reviews record. Of 272 promised (application, feature) pairs, 136 carry
-enough mentions to judge reliably (\(n \geq 30\)); of those, 18 are broken
-promises across 11 applications --- a claimed feature drawing over 40\%
-negative sentiment. Table~\ref{tab:rq6-broken} ranks the break rate by share of
-promising applications and Figure~\ref{fig:rq6a-delivery-gap} shows the full
-gap. The two largest by mention volume are both Muslim Pro's: reminders/adhan
-(9,989 mentions, 45.6\% negative) and monetisation terms (9,182 mentions,
-54.8\% negative).
+We compared each app's store-description promises against the sentiment its
+reviews record for that feature. Of 272 promised (application, feature)
+pairs, 136 carry enough mentions to judge reliably (\(n \geq 30\)); of those,
+18 are broken promises across 11 applications --- a feature the app claims to
+offer that draws over 40\% negative sentiment. Table~\ref{tab:rq6-broken} ranks
+the break rate by share of promising applications, and
+Figure~\ref{fig:rq6a-delivery-gap} shows the full delivery gap. The
+eighteenth is \texttt{tracker\_score}, broken in the one application that
+promises it; a 1-of-1 ratio carries no weight, so we leave it out of the
+table. The two largest broken promises by mention volume are both from Muslim
+Pro: its reminders/adhan feature (9,989 mentions, 45.6\% negative) and its
+monetisation terms (9,182 mentions, 54.8\% negative).
 
 \begin{table}[t]
   \centering
   \small
-  \caption{Features with at least one broken promise among those with \(n \geq 30\) judgeable mentions and more than one promising application. \texttt{tracker\_score}, with a single promising application, is discussed below rather than listed.}
+  \caption{Features with at least one broken promise among those with \(n \geq 30\) judgeable mentions and more than one promising application. \texttt{tracker\_score}, with a single promising application, is discussed in the text rather than listed.}
   \label{tab:rq6-broken}
   \begin{tabular}{lr}
     \toprule
@@ -44,10 +45,6 @@ gap. The two largest by mention volume are both Muslim Pro's: reminders/adhan
   \end{tabular}
 \end{table}
 
-Two rows carry a caveat: forbidden times is tagged at 10\% precision and mosque
-finder at 27\% (\S\ref{sec:method-measurement}), so their 1-of-4 ratios rest on
-few and noisy mentions, and we rest no argument on either.
-
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{fig10_rq6a_delivery_gap}
@@ -55,29 +52,21 @@ few and noisy mentions, and we rest no argument on either.
   \label{fig:rq6a-delivery-gap}
 \end{figure}
 
-One further aspect, \texttt{tracker\_score}, shows 1 of 1 promising
-applications broken; with a single promising application the ratio carries no
-statistical weight, so we do not present it as the most-broken feature.
-
 The two features broken in the most applications, five each, are also the two
-most basic. Adhan reminders are the core function of a prayer-times
-application, and monetisation the terms on which it is offered. Failure here
-concentrates in the promise the app is built around, not in peripheral
-functionality.
+most basic: adhan reminders are the core function of a prayer-times app, not an
+advanced capability, and monetisation is simply the terms on which the app is
+offered. Failure here concentrates in the promise the app is built around, not
+in peripheral functionality.
 
-\subsection{RQ6b: The Coverage Gap}
+\subsection{The Coverage Gap}
 
-We separately ranked aspects by an unmet-need score --- demand-signal volume
-multiplied by applications lacking the feature --- built from the
-demand-extraction pipeline validated at 91.5\% precision
-(\S\ref{sec:method-demand}) rather than from the noisier raw aspect counts
-several low-precision aspects would otherwise force on us
-(Table~\ref{tab:rq6-unmet}, Figure~\ref{fig:rq6b-unmet-needs}). Companion
-hardware tops the ranking, followed by menstrual handling, mosque finder,
-forbidden-times awareness, and \emph{nafl} (supererogatory) prayer-time
-support. Four aspects fall below 25\% ecosystem coverage:
-\texttt{calendar\_sync}, \texttt{companion\_hardware}, \texttt{qasr\_travel},
-and \texttt{women\_period}.
+We ranked aspects by an unmet-need score, demand-signal volume multiplied by
+the number of applications lacking the feature (Table~\ref{tab:rq6-unmet},
+Figure~\ref{fig:rq6b-unmet-needs}). Companion hardware tops the ranking,
+followed by menstrual handling, mosque finder, forbidden-times awareness, and
+\emph{nafl} (supererogatory) prayer-time support. Four aspects fall below 25\%
+ecosystem coverage altogether: calendar sync, companion hardware, qasr travel,
+and menstrual handling.
 
 \begin{table}[t]
   \centering
@@ -104,47 +93,32 @@ and \texttt{women\_period}.
   \label{fig:rq6b-unmet-needs}
 \end{figure}
 
-\subsection{Some Needs Are Served Well}
+Five aspects clear both bars for adequate service, present in over half the
+ecosystem and averaging under 30\% negative sentiment: madhab, monetisation,
+qibla, table format, and widgets. Monetisation appears on both this list and
+the broken-promises list --- most applications handle payment acceptably,
+while a minority handle it badly enough to poison the feature ecosystem-wide.
 
-Five aspects clear both bars we set for adequate service --- present in over
-half the ecosystem, averaging under 30\% negative sentiment across the
-applications where mentioned: madhab, monetisation, qibla, table format,
-widgets. Table format is tagged at 44\% precision, so its place is the least
-secure. The average is taken over applications rather than reviews, which
-matters: under review-weighted pooling, monetisation, widgets, and qibla all
-exceed 30\%, because a few high-volume applications handle them badly. We
-report the app-level figure because the question is how many applications serve
-a need adequately, not how many reviews are unhappy, but the choice should not
-pass unnoticed.
+\subsection{The Same Gaps, Reached Independently}
 
-Monetisation appears on both this list and the broken-promises list in
-Table~\ref{tab:rq6-broken}, which is informative rather than contradictory.
-Across the same 16 applications promising it with \(n \geq 30\) mentions, the
-break rate is 5 of 16 (31\%) against a mean negative rate of 25.8\%: most
-handle payment acceptably while a minority handle it badly enough to poison the
-feature ecosystem-wide.
-
-\subsection{Synthesis: The Same Gaps, Reached Independently}
-
-Both gaps are also reached independently by an earlier research question, which
+Each gap is also reached independently by an earlier research question, which
 we read as corroboration rather than repetition. Companion hardware tops the
-unmet-need ranking, and RQ5 finds hardware sentiment \emph{better} inside the
-one application shipping a device than across the 23 that do not
-(\S\ref{sec:rq5}) --- demand rather than dissatisfaction with an existing
-product. Menstrual handling ranks second and is RQ4's central finding in its
-own right (\S\ref{sec:rq4}). Reminders/adhan, tied with monetisation at five
-broken applications each, is independently the dominant
-tracker-dissatisfaction theme in RQ1's cross-app coding (\S\ref{sec:rq1}).
+unmet-need ranking, and RQ5 finds hardware sentiment is actually
+\emph{better} where it is shipped (\S\ref{sec:rq5}) --- consistent with demand
+rather than dissatisfaction with an existing product. Menstrual handling ranks
+second and is RQ4's central finding in its own right (\S\ref{sec:rq4}).
+Reminders/adhan, tied with monetisation as the most-broken promise, is
+independently the dominant tracker-dissatisfaction theme in RQ1's cross-app
+coding, at 46\% (\S\ref{sec:rq1}).
 
 \subsection{Verdict}
 
-Current applications are not enough, and fall short in two ways calling for
-different responses. The coverage gap is a market failure: entire categories of
-need --- companion hardware, menstrual accommodation, travel concession,
-calendar integration --- are served by under a quarter of the ecosystem despite
-measurable, explicitly voiced demand. The delivery gap is a quality failure and
-the more damning, because it falls on promises already made: the features most
-often broken are adhan reminders and monetisation, the two things a
-prayer-times application most fundamentally offers. Building more features is
-not indicated. Delivering the promised ones reliably, and extending coverage to
-the populations currently unserved, is.
+Current applications are not enough, and they fall short in two different
+ways. The coverage gap: entire categories of need --- companion hardware,
+menstrual accommodation, travel concession, calendar integration --- are
+served by under a quarter of the ecosystem despite measurable, explicitly
+voiced demand. The delivery gap: the two most-broken promises are adhan
+reminders and monetisation terms, the two things a prayer-times application
+most fundamentally offers. Building more features is not indicated. Delivering
+the promised ones reliably, and extending coverage to the populations
+currently unserved, is.
